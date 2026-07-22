@@ -1,10 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Phone, MessageCircle, ShieldCheck, BadgeCheck } from 'lucide-react';
+import { Instagram, Phone, MessageCircle, ShieldCheck } from 'lucide-react';
 import Logo from './Logo';
 import { useStoreSettings } from '@/lib/SettingsContext';
 
-const PAYMENT_METHODS = ['Mastercard', 'Visa', 'Mada', 'Apple Pay', 'STC Pay', 'Tabby'];
+const PAYMENT_LOGOS = [
+  { name: 'Visa', url: '/images/brand/visa.jpg' },
+  { name: 'Mastercard', url: '/images/brand/mastercard.jpg' },
+  { name: 'Apple Pay', url: '/images/brand/applepay.jpg' },
+  { name: 'STC Pay', url: '/images/brand/stcpay.jpg' },
+];
+const PAYMENT_TEXT_ONLY = ['Mada', 'Tabby'];
 
 export default function Footer() {
   const { settings } = useStoreSettings();
@@ -73,14 +79,16 @@ export default function Footer() {
             <div>
               <h4 className="font-heading font-bold mb-4 text-background">الموثوقية</h4>
               <div className="flex flex-wrap gap-3 mb-4">
-                <div className="bg-white/10 rounded-2xl p-3 flex flex-col items-center justify-center gap-1.5" style={{ width: 100, minHeight: 88 }}>
-                  <ShieldCheck className="w-8 h-8 text-background/80" />
-                  <span className="text-[10px] text-background/60 text-center font-medium">سجل تجاري موثّق</span>
-                </div>
-                <div className="bg-white/10 rounded-2xl p-3 flex flex-col items-center justify-center gap-1.5" style={{ width: 100, minHeight: 88 }}>
-                  <BadgeCheck className="w-8 h-8 text-background/80" />
-                  <span className="text-[10px] text-background/60 text-center font-medium">متجر معروف</span>
-                </div>
+                <a href="/documents/commercial-registry.pdf" target="_blank" rel="noreferrer" title="شهادة السجل التجاري"
+                  className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center hover:scale-105 transition-all shadow-lg" style={{ width: 100, minHeight: 100 }}>
+                  <ShieldCheck className="w-8 h-8 text-primary" />
+                  <span className="text-[10px] text-foreground/60 mt-1.5 text-center font-medium">السجل التجاري</span>
+                </a>
+                <a href="/documents/maroof-certificate.pdf" target="_blank" rel="noreferrer" title="شهادة معروف"
+                  className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center hover:scale-105 transition-all shadow-lg" style={{ width: 100, minHeight: 100 }}>
+                  <img src="/images/brand/maroof-badge.jpg" alt="معروف" className="w-10 h-10 object-contain" />
+                  <span className="text-[10px] text-foreground/60 mt-1.5 text-center font-medium">معروف</span>
+                </a>
               </div>
               {settings.cr_number && (
                 <div className="p-3 rounded-2xl bg-white/10 border border-white/10">
@@ -98,7 +106,12 @@ export default function Footer() {
           <div className="text-center">
             <p className="text-xs text-background/40 mb-4">وسائل الدفع المتاحة</p>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              {PAYMENT_METHODS.map(name => (
+              {PAYMENT_LOGOS.map(p => (
+                <div key={p.name} className="h-9 px-3 rounded-lg bg-white flex items-center justify-center" style={{ minWidth: 56 }}>
+                  <img src={p.url} alt={p.name} className="h-6 w-auto object-contain" />
+                </div>
+              ))}
+              {PAYMENT_TEXT_ONLY.map(name => (
                 <div key={name} className="h-9 px-3.5 rounded-lg bg-white flex items-center justify-center" style={{ minWidth: 56 }}>
                   <span className="text-[11px] font-bold text-foreground/70">{name}</span>
                 </div>

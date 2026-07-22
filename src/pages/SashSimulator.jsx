@@ -1,0 +1,23 @@
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import CartDrawer from '@/components/CartDrawer';
+import SashSimulatorWidget from '@/components/SashSimulatorWidget';
+
+export default function SashSimulator() {
+  return (
+    <div className="min-h-screen">
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="text-center mb-8">
+          <span className="chip bg-accent/40 text-primary mb-3">أداة تصميم تفاعلية</span>
+          <h1 className="font-heading text-2xl sm:text-4xl font-extrabold">صمّم <span className="text-grad-violet">وشاح تخرجك</span></h1>
+          <p className="text-foreground/60 text-sm mt-2 max-w-lg mx-auto">اكتب اسمك، اختر الخط العربي والألوان، وشاهد معاينة حقيقية لوشاحك كما سيُلبس.</p>
+        </div>
+        <SashSimulatorWidget productName="وشاح تخرج مخصص" productPrice={150} />
+      </main>
+      <Footer />
+      <CartDrawer />
+    </div>
+  );
+}

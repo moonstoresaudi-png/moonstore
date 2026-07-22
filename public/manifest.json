@@ -1,0 +1,14 @@
+{
+  "name": "Moon Store | متجر التخرج الفاخر",
+  "short_name": "Moon Store",
+  "description": "أرواب وملحقات تخرج فاخرة بتطريز ذهبي يدوي",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6B4D6C",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

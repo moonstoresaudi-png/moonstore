@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;600&family=Lateef&family=El+Messiri:wght@400;600&family=Scheherazade+New:wght@400;700&family=Harmattan:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 352 26% 73%;
+    --foreground: 288 31% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 288 31% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 288 31% 15%;
+    --primary: 298 17% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 290 20% 95%;
+    --secondary-foreground: 288 31% 15%;
+    --muted: 290 15% 94%;
+    --muted-foreground: 290 10% 42%;
+    --accent: 350 35% 82%;
+    --accent-foreground: 298 30% 22%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 290 20% 90%;
+    --input: 290 20% 90%;
+    --ring: 298 17% 36%;
+    --pink: 350 35% 82%;
+    --pink-deep: 345 30% 60%;
+    --violet: 298 17% 36%;
+    --violet-light: 290 18% 52%;
+    --radius: 0.875rem;
+    --font-heading: 'Cairo', 'Tajawal', sans-serif;
+    --font-body: 'Tajawal', 'Cairo', sans-serif;
+    --font-display: 'El Messiri', 'Tajawal', serif;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body {
+    @apply text-foreground font-body bg-background;
+  }
+  ::selection { background: hsl(var(--accent)); color: hsl(var(--violet)); }
+}
+
+@layer components {
+  .card-soft {
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow: 0 1px 3px hsla(288, 30%, 20%, 0.04), 0 8px 24px -12px hsla(288, 30%, 20%, 0.08);
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-foreground rounded-full font-semibold transition-all hover:opacity-90 active:scale-[.98];
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
+  }
+  .text-grad-violet {
+    background: linear-gradient(120deg, hsl(298 17% 36%), hsl(290 18% 52%), hsl(345 30% 60%));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .embroidery-text {
+    text-shadow:
+      1px 1px 0 hsla(0,0%,0%,0.18),
+      -0.5px -0.5px 0 hsla(45,60%,75%,0.35),
+      0 0 2px hsla(0,0%,0%,0.12);
+  }
+}
+
+@layer utilities {
+  .marquee-track {
+    display: flex; width: max-content;
+    animation: marquee 40s linear infinite;
+  }
+  .marquee-track:hover { animation-play-state: paused; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes truck-drive {
+  0% { left: -140px; }
+  100% { left: 100%; }
+}
+@keyframes wheel-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes coin-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(8deg); }
+}
+@keyframes card-flip {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
+}
+.truck-drive { animation: truck-drive 9s linear infinite; }
+.wheel-spin { animation: wheel-spin 0.5s linear infinite; }
+.coin-bounce { animation: coin-bounce 2s ease-in-out infinite; }
+.card-3d { perspective: 1000px; transform-style: preserve-3d; transition: transform 0.6s; }
+.card-flipped { transform: rotateY(180deg); }

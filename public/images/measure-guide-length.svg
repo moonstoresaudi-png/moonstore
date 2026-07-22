@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#F7F1F0"/>
+  <line x1="200" y1="40" x2="200" y2="250" stroke="#6B4D6C" stroke-width="3"/>
+  <circle cx="200" cy="40" r="6" fill="#B08968"/>
+  <circle cx="200" cy="250" r="6" fill="#B08968"/>
+  <text x="230" y="45" font-family="Arial" font-size="13" fill="#6B4D6C">الكتف</text>
+  <text x="230" y="255" font-family="Arial" font-size="13" fill="#6B4D6C">الكعب</text>
+  <text x="200" y="280" text-anchor="middle" font-family="Arial" font-size="16" fill="#6B4D6C">طول الروب — من الكتف للكعب</text>
+</svg>

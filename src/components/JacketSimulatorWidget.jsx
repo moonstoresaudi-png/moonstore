@@ -37,7 +37,11 @@ function PatchIcon({ type, color = '#D4AF37' }) {
   }
 }
 
-const PATCH_OPTIONS = ['none', 'star', 'heart', 'moon', 'crown', 'flower'];
+const PATCH_IMAGES = {
+  'butterfly-orange': '/images/patches/butterfly-orange.jpg',
+  'butterfly-pink': '/images/patches/butterfly-pink.jpg',
+};
+const PATCH_OPTIONS = ['none', 'star', 'heart', 'moon', 'crown', 'flower', 'butterfly-orange', 'butterfly-pink'];
 const PATCH_POSITIONS = [
   { key: 'topLeft', label: 'باتش يسار علوي', cls: 'top-[16%] left-[14%]' },
   { key: 'bottomLeft', label: 'باتش يسار سفلي', cls: 'top-[34%] left-[14%]' },
@@ -121,7 +125,9 @@ export default function JacketSimulatorWidget({
           <img src={images.front} alt={`${productName} أمامي`} className="w-full h-full object-cover" />
           {PATCH_POSITIONS.map(pos => patches[pos.key] !== 'none' && (
             <div key={pos.key} className={`absolute ${pos.cls} bg-white/90 rounded-full p-1.5 shadow-md`}>
-              <PatchIcon type={patches[pos.key]} color={thread.value === '#F5F5F5' ? '#D4AF37' : thread.value} />
+              {PATCH_IMAGES[patches[pos.key]]
+                ? <img src={PATCH_IMAGES[patches[pos.key]]} alt="" className="w-7 h-7 object-contain" />
+                : <PatchIcon type={patches[pos.key]} color={thread.value === '#F5F5F5' ? '#D4AF37' : thread.value} />}
             </div>
           ))}
         </div>
@@ -189,7 +195,9 @@ export default function JacketSimulatorWidget({
               {PATCH_OPTIONS.filter(o => o !== 'none').map(opt => (
                 <button key={opt} onClick={() => setPatch(pos.key, opt)}
                   className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all ${patches[pos.key] === opt ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/40'}`}>
-                  <PatchIcon type={opt} color="#4A2060" />
+                  {PATCH_IMAGES[opt]
+                    ? <img src={PATCH_IMAGES[opt]} alt="" className="w-7 h-7 object-contain" />
+                    : <PatchIcon type={opt} color="#4A2060" />}
                 </button>
               ))}
             </div>

@@ -10,6 +10,8 @@ import { CartProvider } from '@/lib/cartContext';
 import Home from './pages/Home';
 import UniversityPackage from './pages/UniversityPackage';
 import SeniorJacket from './pages/SeniorJacket';
+import GraduationCap from './pages/GraduationCap';
+import GraduationSash from './pages/GraduationSash';
 import AdminDashboard from './pages/AdminDashboard';
 import ProductDetail from './pages/ProductDetail';
 import OrderTracking from './pages/OrderTracking';
@@ -39,6 +41,8 @@ function App() {
                 <Route path="/shop/:category" element={<Shop />} />
                 <Route path="/university-package" element={<UniversityPackage />} />
                 <Route path="/senior-jacket" element={<SeniorJacket />} />
+                <Route path="/graduation-cap" element={<GraduationCap />} />
+                <Route path="/graduation-sash" element={<GraduationSash />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/track-order" element={<OrderTracking />} />
                 <Route path="/about" element={<About />} />

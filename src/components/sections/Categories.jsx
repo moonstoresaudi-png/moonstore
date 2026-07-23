@@ -12,16 +12,16 @@ const categories = [
   {
     name: 'أوشحة تخرج',
     sub: 'Graduation Sashes',
-    img: 'https://ayalsa.com/wp-content/uploads/2025/06/JedSh.webp',
+    img: '/images/products/sash/view1.webp',
     wide: true,
-    to: '/shop?category=أوشحة تخرج',
+    to: '/graduation-sash',
   },
   {
     name: 'كاب تخرج',
     sub: 'Graduation Cap',
-    img: 'https://ayalsa.com/wp-content/uploads/2023/03/capview.webp',
+    img: '/images/products/cap/view1.webp',
     wide: false,
-    to: '/shop?category=قبعة تخرج',
+    to: '/graduation-cap',
   },
   {
     name: 'جاكيت تخرج',

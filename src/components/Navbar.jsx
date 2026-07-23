@@ -11,6 +11,8 @@ const links = [
   { label: 'الأكثر مبيعاً', href: '#bestsellers' },
   { label: 'بكج تخرج جامعة', to: '/university-package' },
   { label: 'جاكيت تخرج', to: '/senior-jacket' },
+  { label: 'كاب تخرج', to: '/graduation-cap' },
+  { label: 'وشاح تخرج', to: '/graduation-sash' },
   { label: 'من نحن', to: '/about' },
   { label: 'سياسة التوصيل', to: '/policies' },
   { label: 'تتبع الطلب', to: '/track-order' },

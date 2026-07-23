@@ -14,10 +14,11 @@ const DEFAULTS = {
   cr_number: '',
   shipping_cost: 25,
   cod_fee: 10,
-  instagram: '',
+  instagram: 'https://www.instagram.com/eman220199?igsh=cjNhZHdzdW9naHZh&utm_source=qr',
   twitter: '',
   snapchat: '',
-  tiktok: '',
+  tiktok: 'https://www.tiktok.com/@mon201920?_r=1&_t=ZS-988JTzVr0Ap',
+  youtube: '',
 };
 
 const SettingsContext = createContext({ settings: DEFAULTS, loading: true, refresh: () => {} });

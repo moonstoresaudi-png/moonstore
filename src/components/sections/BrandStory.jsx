@@ -11,7 +11,7 @@ export default function BrandStory() {
         </div>
         <div className="order-1 lg:order-2">
           <p className="text-primary text-xs font-bold tracking-widest mb-2">من نحن</p>
-          <h2 className="font-heading text-2xl sm:text-4xl font-extrabold mb-5">قصة <span className="text-grad-violet">Moon Store</span></h2>
+          <h2 className="font-heading text-2xl sm:text-4xl font-extrabold mb-5 flex items-center gap-2 flex-wrap">قصة <img src="/images/brand/logo.png" alt="Moon Store" className="h-10 sm:h-14 w-auto object-contain inline-block" /></h2>
           <p className="text-foreground/70 leading-relaxed mb-4">بدأت رحلتنا من شغف بتفاصيل التخرج؛ نؤمن أن يوم التخرج ليس مجرد مناسبة، بل لحظة تستحق أن تُتألق بأرقى الخامات. نختار أقمشتنا بعناية، ونطريز كل قطعة بخيوط ذهبية يدوياً.</p>
           <p className="text-foreground/70 leading-relaxed mb-7">من أرواب التخرج إلى الأوشحة والطواقي والبذلات الطبية — كل قطعة تحمل توقيع <span className="text-primary font-bold">MS</span> للجودة والفخامة.</p>
           <div className="grid grid-cols-3 gap-3">

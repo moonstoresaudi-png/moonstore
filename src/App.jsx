@@ -8,10 +8,8 @@ import { SettingsProvider } from '@/lib/SettingsContext';
 import ScrollToTop from './components/ScrollToTop';
 import { CartProvider } from '@/lib/cartContext';
 import Home from './pages/Home';
-import SashSimulator from './pages/SashSimulator';
-import CapSimulator from './pages/CapSimulator';
 import UniversityPackage from './pages/UniversityPackage';
-import JacketSimulator from './pages/JacketSimulator';
+import SeniorJacket from './pages/SeniorJacket';
 import AdminDashboard from './pages/AdminDashboard';
 import ProductDetail from './pages/ProductDetail';
 import OrderTracking from './pages/OrderTracking';
@@ -39,10 +37,8 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/shop/:category" element={<Shop />} />
-                <Route path="/sash-designer" element={<SashSimulator />} />
-                <Route path="/cap-designer" element={<CapSimulator />} />
                 <Route path="/university-package" element={<UniversityPackage />} />
-                <Route path="/jacket-designer" element={<JacketSimulator />} />
+                <Route path="/senior-jacket" element={<SeniorJacket />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/track-order" element={<OrderTracking />} />
                 <Route path="/about" element={<About />} />

@@ -15,8 +15,9 @@ export default function About() {
         <div className="text-center mb-12">
           <span className="chip bg-accent/40 text-primary mb-3">قصتنا</span>
           <h1 className="font-heading text-3xl sm:text-5xl font-extrabold">من <span className="text-grad-violet">نحن</span></h1>
-          <p className="text-foreground/60 mt-4 max-w-2xl mx-auto leading-relaxed">
-            Moon Store علامة سعودية متخصصة في أرواب وملحقات التخرج الفاخرة. بدأت رحلتنا من شغف بصناعة لحظات لا تُنسى لخريجي الجامعات، لنقدّم منتجات تجمع بين الأصالة والأناقة العصرية.
+          <p className="text-foreground/60 mt-4 max-w-2xl mx-auto leading-relaxed flex flex-wrap items-center justify-center gap-2">
+            <img src="/images/brand/logo.png" alt="Moon Store" className="h-8 w-auto object-contain inline-block align-middle" />
+            <span>علامة سعودية متخصصة في أرواب وملحقات التخرج الفاخرة. بدأت رحلتنا من شغف بصناعة لحظات لا تُنسى لخريجي الجامعات، لنقدّم منتجات تجمع بين الأصالة والأناقة العصرية.</span>
           </p>
         </div>
 
@@ -54,7 +55,7 @@ export default function About() {
         </div>
 
         <div className="card-soft p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-xl mb-4">لماذا Moon Store؟</h2>
+          <h2 className="font-heading font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">لماذا <img src="/images/brand/logo.png" alt="Moon Store" className="h-8 w-auto object-contain inline-block" />؟</h2>
           <ul className="space-y-3 text-sm text-foreground/70">
             <li className="flex gap-3"><span className="text-primary font-bold">✦</span> خامات فاخرة مستوردة بأجود الأنواع</li>
             <li className="flex gap-3"><span className="text-primary font-bold">✦</span> تطريز ذهبي يدوي بحرفية عالية</li>

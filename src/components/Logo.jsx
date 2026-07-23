@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 // الشعار الرسمي للمتجر
-const LOGO_URL = '/images/brand/logo.jpg';
+const LOGO_URL = '/images/brand/logo.png';
 
 export default function Logo({ compact = false, dark = false, className = '' }) {
   return (

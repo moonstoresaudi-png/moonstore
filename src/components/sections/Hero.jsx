@@ -16,17 +16,13 @@ export default function Hero() {
         {/* الشعار الكبير في المنتصف */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 sm:py-24">
           <div className="flex items-center gap-3 mb-6 animate-fade-up drop-shadow-2xl">
-            <svg viewBox="0 0 40 40" className="w-14 h-14 sm:w-20 sm:h-20" aria-hidden="true">
-              <circle cx="20" cy="20" r="18" fill="#fff" />
-              <path d="M26 12a10 10 0 1 0 2.5 18.4A12 12 0 0 1 26 12Z" fill="hsl(var(--primary))" />
-            </svg>
-            <span className="font-heading font-extrabold text-3xl sm:text-5xl text-white">Moon Store</span>
+            <img src="/images/brand/logo.png" alt="Moon Store" className="h-20 sm:h-28 w-auto object-contain" />
           </div>
           <span className="chip bg-white/15 text-white backdrop-blur-sm mb-4 animate-fade-up">تشكيلة تخرج 2026</span>
           <h1 className="font-heading text-3xl sm:text-5xl font-extrabold leading-tight text-white drop-shadow-lg animate-fade-up">فخامة تخرّجك<br/>تبدأ من هنا</h1>
           <p className="mt-3 text-white/85 text-sm sm:text-base max-w-md drop-shadow animate-fade-up">أرواب وأوشحة وملحقات تخرج بتطريز ذهبي يدوي.</p>
           <div className="flex flex-wrap gap-3 mt-7 animate-fade-up">
-            <Link to="/sash-designer" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-primary font-bold text-sm hover:bg-white/90 transition-colors shadow-lg">صمّم وشاحك الآن <ArrowLeft className="w-4 h-4" /></Link>
+            <Link to="/shop" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-primary font-bold text-sm hover:bg-white/90 transition-colors shadow-lg">تسوّق الآن <ArrowLeft className="w-4 h-4" /></Link>
             <a href="#categories" className="px-7 py-3.5 rounded-full bg-white/15 text-white backdrop-blur-sm border border-white/30 font-medium text-sm hover:bg-white/25 transition-colors">تسوّق الأقسام</a>
           </div>
         </div>

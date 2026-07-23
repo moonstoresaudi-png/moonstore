@@ -10,11 +10,11 @@ const categories = [
     to: '/shop?category=أرواب تخرج',
   },
   {
-    name: 'صمّم وشاحك',
-    sub: 'Custom Sash Designer',
+    name: 'أوشحة تخرج',
+    sub: 'Graduation Sashes',
     img: 'https://ayalsa.com/wp-content/uploads/2025/06/JedSh.webp',
     wide: true,
-    to: '/sash-designer',
+    to: '/shop?category=أوشحة تخرج',
   },
   {
     name: 'كاب تخرج',
@@ -26,9 +26,9 @@ const categories = [
   {
     name: 'جاكيت تخرج',
     sub: 'Senior Jacket',
-    img: 'https://ayalsa.com/wp-content/uploads/2025/07/AYAL-JACKET-front.webp',
+    img: '/images/products/senior-jacket/front.jpg',
     wide: false,
-    to: '/shop?category=مطرزات',
+    to: '/senior-jacket',
   },
   {
     name: 'كوفلة مواليد',

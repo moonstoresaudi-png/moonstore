@@ -1,16 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Phone, MessageCircle, ShieldCheck } from 'lucide-react';
+import { Instagram, Phone, MessageCircle } from 'lucide-react';
 import Logo from './Logo';
 import { useStoreSettings } from '@/lib/SettingsContext';
 
 const PAYMENT_LOGOS = [
   { name: 'Visa', url: '/images/brand/visa.jpg' },
   { name: 'Mastercard', url: '/images/brand/mastercard.jpg' },
+  { name: 'Mada', url: '/images/brand/mada.png' },
   { name: 'Apple Pay', url: '/images/brand/applepay.jpg' },
-  { name: 'STC Pay', url: '/images/brand/stcpay.jpg' },
+  { name: 'STC Pay', url: '/images/brand/stcpay.webp' },
+  { name: 'Tabby', url: '/images/brand/tabby.webp' },
 ];
-const PAYMENT_TEXT_ONLY = ['Mada', 'Tabby'];
 
 export default function Footer() {
   const { settings } = useStoreSettings();
@@ -81,7 +82,7 @@ export default function Footer() {
               <div className="flex flex-wrap gap-3 mb-4">
                 <a href="/documents/commercial-registry.pdf" target="_blank" rel="noreferrer" title="شهادة السجل التجاري"
                   className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center hover:scale-105 transition-all shadow-lg" style={{ width: 100, minHeight: 100 }}>
-                  <ShieldCheck className="w-8 h-8 text-primary" />
+                  <img src="/images/brand/cr-emblem.png" alt="السجل التجاري" className="w-10 h-10 object-contain" />
                   <span className="text-[10px] text-foreground/60 mt-1.5 text-center font-medium">السجل التجاري</span>
                 </a>
                 <a href="/documents/maroof-certificate.pdf" target="_blank" rel="noreferrer" title="شهادة معروف"
@@ -109,11 +110,6 @@ export default function Footer() {
               {PAYMENT_LOGOS.map(p => (
                 <div key={p.name} className="h-9 px-3 rounded-lg bg-white flex items-center justify-center" style={{ minWidth: 56 }}>
                   <img src={p.url} alt={p.name} className="h-6 w-auto object-contain" />
-                </div>
-              ))}
-              {PAYMENT_TEXT_ONLY.map(name => (
-                <div key={name} className="h-9 px-3.5 rounded-lg bg-white flex items-center justify-center" style={{ minWidth: 56 }}>
-                  <span className="text-[11px] font-bold text-foreground/70">{name}</span>
                 </div>
               ))}
             </div>

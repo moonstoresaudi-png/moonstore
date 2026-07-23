@@ -1,24 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { Type, Palette, RotateCcw, ShoppingBag, Check, ZoomIn, Image as ImageIcon, Upload, X, Loader2 } from 'lucide-react';
-import { FONTS, THREAD_COLORS } from './SashSimulatorWidget';
+import { FONTS, SASH_COLORS as CAP_COLORS, THREAD_COLORS } from './SashSimulatorWidget';
 import { uploadFile } from '@/api/storage';
-
-const CAP_COLORS = [
-  { name: 'أسود', value: '#16161a', light: '#3a3a40' },
-  { name: 'كحلي', value: '#0F2044', light: '#2A4070' },
-  { name: 'بنفسجي ملكي', value: '#4A2060', light: '#7B4FA0' },
-  { name: 'خمري', value: '#5C1A28', light: '#903040' },
-  { name: 'أخضر زيتي', value: '#2A4020', light: '#4A6A38' },
-  { name: 'رمادي', value: '#3A3A4A', light: '#6A6A80' },
-];
 
 const TASSEL_COLORS = [
   { name: 'ذهبي', value: '#D4AF37' },
   { name: 'فضي', value: '#C0C0C0' },
-  { name: 'أبيض', value: '#F5F5F5' },
-  { name: 'أسود', value: '#2A2A2A' },
 ];
+
+const CAP_TYPES = ['دائري', 'مثلث'];
 
 export { CAP_COLORS, TASSEL_COLORS, CapCanvas };
 
@@ -173,6 +164,7 @@ export default function CapSimulatorWidget({ productName = 'كاب تخرج مخ
   const [font, setFont] = useState(FONTS[0]);
   const [capColor, setCapColor] = useState(CAP_COLORS[0]);
   const [tassel, setTassel] = useState(TASSEL_COLORS[0]);
+  const [capType, setCapType] = useState(CAP_TYPES[0]);
   const [thread, setThread] = useState(THREAD_COLORS[0]);
   const [logoUrl, setLogoUrl] = useState('');
   const [logoImg, setLogoImg] = useState(null);
@@ -212,6 +204,7 @@ export default function CapSimulatorWidget({ productName = 'كاب تخرج مخ
     setFont(FONTS[0]);
     setCapColor(CAP_COLORS[0]);
     setTassel(TASSEL_COLORS[0]);
+    setCapType(CAP_TYPES[0]);
     setThread(THREAD_COLORS[0]);
     clearLogo();
   };
@@ -224,6 +217,7 @@ export default function CapSimulatorWidget({ productName = 'كاب تخرج مخ
       font: font.name,
       capColor: capColor.name,
       tassel: tassel.name,
+      capType,
       thread: thread.name,
     };
     addItem({
@@ -369,6 +363,19 @@ export default function CapSimulatorWidget({ productName = 'كاب تخرج مخ
             ))}
           </div>
           <p className="text-xs text-foreground/50 mt-1.5">{tassel.name}</p>
+        </div>
+
+        {/* نوع الكاب */}
+        <div className="card-soft p-4">
+          <label className="flex items-center gap-2 text-sm font-bold mb-2"><Palette className="w-4 h-4 text-primary" /> نوع الكاب</label>
+          <div className="flex flex-wrap gap-2">
+            {CAP_TYPES.map(t => (
+              <button key={t} onClick={() => setCapType(t)}
+                className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${capType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-primary/40'}`}>
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* لون التطريز (للنص) */}

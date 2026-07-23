@@ -11,6 +11,9 @@ export default function About() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <div className="w-full aspect-[21/9] sm:aspect-[3/1] overflow-hidden">
+        <img src="/images/brand/about-banner.jpg" alt="Moon Store" className="w-full h-full object-cover" />
+      </div>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="text-center mb-12">
           <span className="chip bg-accent/40 text-primary mb-3">قصتنا</span>

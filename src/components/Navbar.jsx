@@ -7,9 +7,6 @@ import { useCart } from '@/lib/cartContext';
 const links = [
   { label: 'الرئيسية', href: '#home' },
   { label: 'المتجر', to: '/shop' },
-  { label: 'جاكيت تخرج', to: '/senior-jacket' },
-  { label: 'كاب تخرج', to: '/graduation-cap' },
-  { label: 'وشاح تخرج', to: '/graduation-sash' },
   { label: 'بكج تخرج جامعة', to: '/university-package' },
   { label: 'من نحن', to: '/about' },
   { label: 'تتبع الطلب', to: '/track-order' },

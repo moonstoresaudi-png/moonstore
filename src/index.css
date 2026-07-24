@@ -47,8 +47,11 @@
 
 @layer components {
   .card-soft {
-    @apply bg-card rounded-2xl border border-border;
-    box-shadow: 0 1px 3px hsla(288, 30%, 20%, 0.04), 0 8px 24px -12px hsla(288, 30%, 20%, 0.08);
+    @apply bg-card rounded-2xl border border-border transition-shadow duration-300;
+    box-shadow: 0 1px 2px hsla(310, 30%, 20%, 0.05), 0 6px 20px -8px hsla(310, 30%, 20%, 0.10);
+  }
+  .card-soft:hover {
+    box-shadow: 0 2px 6px hsla(310, 30%, 20%, 0.08), 0 16px 32px -12px hsla(310, 30%, 20%, 0.16);
   }
   .btn-primary {
     @apply bg-primary text-primary-foreground rounded-full font-semibold transition-all hover:opacity-90 active:scale-[.98];

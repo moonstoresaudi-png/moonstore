@@ -6,15 +6,12 @@ import { useCart } from '@/lib/cartContext';
 
 const links = [
   { label: 'الرئيسية', href: '#home' },
-  { label: 'الأقسام', href: '#categories' },
   { label: 'المتجر', to: '/shop' },
-  { label: 'الأكثر مبيعاً', href: '#bestsellers' },
-  { label: 'بكج تخرج جامعة', to: '/university-package' },
   { label: 'جاكيت تخرج', to: '/senior-jacket' },
   { label: 'كاب تخرج', to: '/graduation-cap' },
   { label: 'وشاح تخرج', to: '/graduation-sash' },
+  { label: 'بكج تخرج جامعة', to: '/university-package' },
   { label: 'من نحن', to: '/about' },
-  { label: 'سياسة التوصيل', to: '/policies' },
   { label: 'تتبع الطلب', to: '/track-order' },
 ];
 

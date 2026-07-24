@@ -16,8 +16,8 @@ export default function About() {
       </div>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="text-center mb-12">
-          <span className="chip bg-accent/40 text-primary mb-3">قصتنا</span>
-          <h1 className="font-heading text-3xl sm:text-5xl font-extrabold">من <span className="text-grad-violet">نحن</span></h1>
+          <span className="kicker justify-center mb-4">قصتنا</span>
+          <h1 className="font-display text-3xl sm:text-5xl font-bold">من <span className="text-grad-violet">نحن</span></h1>
           <p className="text-foreground/60 mt-4 max-w-2xl mx-auto leading-relaxed flex flex-wrap items-center justify-center gap-2">
             <img src="/images/brand/logo.png" alt="Moon Store" className="h-8 w-auto object-contain inline-block align-middle" />
             <span>علامة سعودية متخصصة في أرواب وملحقات التخرج الفاخرة. بدأت رحلتنا من شغف بصناعة لحظات لا تُنسى لخريجي الجامعات، لنقدّم منتجات تجمع بين الأصالة والأناقة العصرية.</span>

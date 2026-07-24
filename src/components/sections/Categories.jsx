@@ -48,11 +48,11 @@ const categories = [
 
 export default function Categories() {
   return (
-    <section id="categories" className="py-10 sm:py-14">
+    <section id="categories" className="section-py">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-8">
-          <p className="text-xs font-bold tracking-widest text-primary mb-1.5">Graduation Packages</p>
-          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold">بكجات <span className="text-grad-violet">التخرج</span></h2>
+        <div className="text-center mb-10 sm:mb-14">
+          <p className="kicker justify-center mb-3">Graduation Packages</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold">بكجات <span className="text-grad-violet">التخرج</span></h2>
         </div>
 
         <div className="flex flex-col gap-3 sm:gap-4 mb-3 sm:mb-4">

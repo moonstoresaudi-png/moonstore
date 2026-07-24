@@ -64,6 +64,19 @@
     background: linear-gradient(120deg, hsl(310 34% 28%), hsl(310 28% 46%), hsl(345 40% 62%));
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
+  .kicker {
+    @apply inline-flex items-center gap-2 text-[11px] sm:text-xs font-bold tracking-[0.25em] uppercase;
+    color: hsl(var(--gold));
+  }
+  .kicker::before, .kicker::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: hsl(var(--gold) / 0.6);
+  }
+  .section-py { @apply py-14 sm:py-20; }
+  .divider-gold { height: 1px; background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.6), transparent); }
   .embroidery-text {
     text-shadow:
       1px 1px 0 hsla(0,0%,0%,0.18),

@@ -11,15 +11,18 @@ export default function About() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <div className="w-full aspect-[21/9] sm:aspect-[3/1] overflow-hidden">
-        <img src="/images/brand/about-banner.jpg" alt="Moon Store" className="w-full h-full object-cover" />
+      <div
+        className="w-full flex items-center justify-center py-14 sm:py-20"
+        style={{ background: 'linear-gradient(135deg, hsl(310 34% 28%) 0%, hsl(310 40% 18%) 100%)' }}
+      >
+        <img src="/images/brand/logo.png" alt="Moon Store" className="h-28 sm:h-40 w-auto object-contain" />
       </div>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <div className="text-center mb-12">
           <span className="kicker justify-center mb-4">قصتنا</span>
           <h1 className="font-display text-3xl sm:text-5xl font-bold">من <span className="text-grad-violet">نحن</span></h1>
           <p className="text-foreground/60 mt-4 max-w-2xl mx-auto leading-relaxed flex flex-wrap items-center justify-center gap-2">
-            <img src="/images/brand/logo.png" alt="Moon Store" className="h-8 w-auto object-contain inline-block align-middle" />
+            <img src="/images/brand/logo.png" alt="Moon Store" className="h-10 w-auto object-contain inline-block align-middle" />
             <span>علامة سعودية متخصصة في أرواب وملحقات التخرج الفاخرة. بدأت رحلتنا من شغف بصناعة لحظات لا تُنسى لخريجي الجامعات، لنقدّم منتجات تجمع بين الأصالة والأناقة العصرية.</span>
           </p>
         </div>
@@ -58,7 +61,7 @@ export default function About() {
         </div>
 
         <div className="card-soft p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">لماذا <img src="/images/brand/logo.png" alt="Moon Store" className="h-8 w-auto object-contain inline-block" />؟</h2>
+          <h2 className="font-heading font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">لماذا <img src="/images/brand/logo.png" alt="Moon Store" className="h-10 w-auto object-contain inline-block" />؟</h2>
           <ul className="space-y-3 text-sm text-foreground/70">
             <li className="flex gap-3"><span className="text-primary font-bold">✦</span> خامات فاخرة مستوردة بأجود الأنواع</li>
             <li className="flex gap-3"><span className="text-primary font-bold">✦</span> تطريز ذهبي يدوي بحرفية عالية</li>

@@ -55,7 +55,7 @@ function PhotoCard({ c, wide }) {
       <div className={`relative ${wide ? 'h-[160px] sm:h-[220px]' : 'aspect-square'}`}>
         <img src={c.img} alt={c.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-        <img src="/images/brand/logo.png" alt="" className="absolute top-3 left-3 h-6 w-auto object-contain opacity-70" />
+        <img src="/images/brand/logo.png" alt="" className="absolute top-3 left-3 h-7 w-auto object-contain opacity-80" />
         <div className={`absolute bottom-0 inset-x-0 flex items-end justify-between ${wide ? 'p-4 sm:p-6' : 'p-3'}`}>
           <div>
             <p className={`text-white/60 uppercase tracking-wider ${wide ? 'text-xs' : 'text-[10px]'}`}>{c.sub}</p>

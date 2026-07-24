@@ -10,7 +10,7 @@ export default function Logo({ compact = false, dark = false, className = '' }) 
       <img
         src={LOGO_URL}
         alt="Moon Store"
-        className={compact ? 'h-10 w-auto object-contain rounded-lg' : 'h-16 md:h-20 w-auto object-contain rounded-lg'}
+        className={compact ? 'h-12 w-auto object-contain' : 'h-20 md:h-24 w-auto object-contain'}
       />
     </Link>
   );

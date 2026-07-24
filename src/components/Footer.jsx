@@ -95,16 +95,16 @@ export default function Footer() {
           </div>
 
           {/* الموثوقية */}
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
+          <div className="flex flex-wrap justify-center items-center gap-6 mb-8">
             <a href="/documents/commercial-registry.pdf" target="_blank" rel="noreferrer" title="شهادة السجل التجاري"
-              className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center hover:scale-105 transition-all shadow-lg" style={{ width: 100, minHeight: 100 }}>
-              <img src="/images/brand/cr-emblem.png" alt="السجل التجاري" className="w-10 h-10 object-contain" />
-              <span className="text-[10px] text-foreground/60 mt-1.5 text-center font-medium">السجل التجاري</span>
+              className="flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity">
+              <img src="/images/brand/cr-emblem.png" alt="السجل التجاري" className="w-12 h-12 object-contain" />
+              <span className="text-[10px] text-background/50 font-medium">السجل التجاري</span>
             </a>
             <a href="/documents/maroof-certificate.pdf" target="_blank" rel="noreferrer" title="شهادة معروف"
-              className="bg-white rounded-2xl p-3 flex flex-col items-center justify-center hover:scale-105 transition-all shadow-lg" style={{ width: 100, minHeight: 100 }}>
-              <img src="/images/brand/maroof-badge.jpg" alt="معروف" className="w-10 h-10 object-contain" />
-              <span className="text-[10px] text-foreground/60 mt-1.5 text-center font-medium">معروف</span>
+              className="flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity">
+              <img src="/images/brand/maroof-badge.png" alt="معروف" className="w-12 h-12 object-contain" />
+              <span className="text-[10px] text-background/50 font-medium">معروف</span>
             </a>
           </div>
           {settings.cr_number && (

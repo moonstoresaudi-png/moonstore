@@ -36,7 +36,7 @@ export default function Shop() {
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="text-center mb-8">
-          <img src="/images/brand/logo.png" alt="Moon Store" className="h-8 w-auto object-contain mx-auto mb-2.5" />
+          <img src="/images/brand/logo.png" alt="Moon Store" className="h-10 w-auto object-contain mx-auto mb-2.5" />
           <h1 className="font-display text-3xl font-bold">المتجر</h1>
         </div>
 

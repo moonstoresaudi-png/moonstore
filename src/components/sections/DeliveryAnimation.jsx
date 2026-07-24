@@ -6,16 +6,16 @@ function DeliveryTruck() {
   return (
     <svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
       {/* جسم الشاحنة */}
-      <rect x="2" y="20" width="110" height="42" rx="6" fill="hsl(298 17% 36%)" />
+      <rect x="2" y="20" width="110" height="42" rx="6" fill="hsl(310 34% 28%)" />
       {/* علامة Moon Store على الجسم */}
       <rect x="10" y="30" width="94" height="24" rx="4" fill="white" opacity="0.15" />
       <text x="57" y="46" textAnchor="middle" fontFamily="Georgia,serif" fontSize="11" fontWeight="bold" fontStyle="italic" fill="white">Moon Store</text>
       {/* المقصورة (كابينة السائق) */}
-      <path d="M112,28 L145,28 Q155,28 158,38 L162,62 L112,62 Z" fill="hsl(298 17% 28%)" />
+      <path d="M112,28 L145,28 Q155,28 158,38 L162,62 L112,62 Z" fill="hsl(310 34% 22%)" />
       {/* زجاج الكابينة */}
       <path d="M116,32 L140,32 Q148,32 151,40 L154,56 L116,56 Z" fill="#a8c8f8" opacity="0.6" />
       {/* الشبكة الأمامية */}
-      <rect x="158" y="44" width="6" height="12" rx="2" fill="hsl(298 17% 22%)" />
+      <rect x="158" y="44" width="6" height="12" rx="2" fill="hsl(310 34% 17%)" />
       <rect x="159" y="46" width="4" height="2" rx="1" fill="white" opacity="0.4" />
       <rect x="159" y="50" width="4" height="2" rx="1" fill="white" opacity="0.4" />
       {/* المصابيح */}

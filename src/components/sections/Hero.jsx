@@ -7,7 +7,7 @@ export default function Hero() {
     <section id="home" className="relative">
       <div className="relative overflow-hidden" style={{ minHeight: 520 }}>
         {/* خلفية متدرجة فاخرة */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(298 17% 36%) 0%, hsl(298 20% 25%) 50%, hsl(345 30% 50%) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(310 34% 28%) 0%, hsl(310 40% 18%) 50%, hsl(345 40% 48%) 100%)' }} />
 
         {/* زخارف دائرية */}
         <div className="absolute top-10 right-10 w-72 h-72 rounded-full bg-white/5 blur-3xl" />

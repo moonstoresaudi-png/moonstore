@@ -37,7 +37,7 @@ export default function Footer() {
       {/* Curved top */}
       <div className="w-full overflow-hidden leading-none" style={{ lineHeight: 0 }}>
         <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-12 sm:h-16 block" style={{ background: 'hsl(var(--background))' }}>
-          <path d="M0,60 Q720,0 1440,60 L1440,60 L0,60 Z" fill="hsl(352 26% 73%)" />
+          <path d="M0,60 Q720,0 1440,60 L1440,60 L0,60 Z" fill="hsl(30 25% 97%)" />
           <path d="M0,60 Q720,0 1440,60" fill="none" stroke="hsl(var(--border))" strokeWidth="1.5" />
         </svg>
       </div>

@@ -6,29 +6,30 @@
 
 @layer base {
   :root {
-    --background: 350 30% 74%;
+    --background: 30 25% 97%;
     --foreground: 310 35% 14%;
     --card: 0 0% 100%;
     --card-foreground: 310 35% 14%;
     --popover: 0 0% 100%;
     --popover-foreground: 310 35% 14%;
-    --primary: 310 30% 32%;
+    --primary: 310 34% 28%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 310 22% 95%;
+    --secondary: 310 22% 96%;
     --secondary-foreground: 310 35% 14%;
-    --muted: 310 15% 94%;
-    --muted-foreground: 310 10% 42%;
-    --accent: 350 35% 82%;
-    --accent-foreground: 310 30% 20%;
+    --muted: 30 15% 95%;
+    --muted-foreground: 310 8% 44%;
+    --accent: 350 55% 90%;
+    --accent-foreground: 310 34% 22%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 310 20% 90%;
-    --input: 310 20% 90%;
-    --ring: 310 30% 32%;
-    --pink: 350 35% 82%;
-    --pink-deep: 345 30% 60%;
-    --violet: 310 30% 32%;
-    --violet-light: 310 25% 48%;
+    --border: 310 15% 91%;
+    --input: 310 15% 91%;
+    --ring: 310 34% 28%;
+    --pink: 350 45% 85%;
+    --pink-deep: 345 40% 62%;
+    --violet: 310 34% 28%;
+    --violet-light: 310 28% 46%;
+    --gold: 40 55% 62%;
     --radius: 0.875rem;
     --font-heading: 'Cairo', 'Tajawal', sans-serif;
     --font-body: 'Tajawal', 'Cairo', sans-serif;
@@ -60,7 +61,7 @@
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
   }
   .text-grad-violet {
-    background: linear-gradient(120deg, hsl(310 30% 32%), hsl(310 25% 48%), hsl(345 30% 60%));
+    background: linear-gradient(120deg, hsl(310 34% 28%), hsl(310 28% 46%), hsl(345 40% 62%));
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
   .embroidery-text {

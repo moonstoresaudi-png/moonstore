@@ -107,8 +107,8 @@ export default function ProductConfigurator({ product }) {
             <span className="text-xs text-foreground/50 mr-2">({product.rating || 5})</span>
           </div>
 
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold mb-1">{product.name}</h1>
-          <p className="text-sm text-foreground/60 mb-3">{product.category}</p>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1">{product.name}</h1>
+          <p className="kicker mb-3">{product.category}</p>
 
           <div className="flex items-center gap-2 mb-4">
             <Flame className="w-4 h-4 text-orange-500" />
@@ -116,7 +116,7 @@ export default function ProductConfigurator({ product }) {
           </div>
 
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-heading text-3xl font-extrabold text-primary">{unitPrice} ر.س</span>
+            <span className="font-display text-3xl font-bold text-primary">{unitPrice} ر.س</span>
             {product.old_price > 0 && <span className="text-foreground/40 text-lg line-through">{product.old_price}</span>}
           </div>
 

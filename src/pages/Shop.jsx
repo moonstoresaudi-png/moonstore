@@ -34,22 +34,27 @@ export default function Shop() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="text-center mb-8">
-          <img src="/images/brand/logo.png" alt="Moon Store" className="h-10 w-auto object-contain mx-auto mb-2.5" />
-          <h1 className="font-display text-3xl font-bold">المتجر</h1>
-        </div>
 
+      <div
+        className="w-full flex flex-col items-center justify-center text-center py-12 sm:py-16 px-4"
+        style={{ background: 'linear-gradient(135deg, hsl(310 34% 28%) 0%, hsl(310 40% 18%) 100%)' }}
+      >
+        <img src="/images/brand/logo.png" alt="Moon Store" className="h-14 sm:h-20 w-auto object-contain mb-4" />
+        <p className="kicker text-white/70 mb-2">Shop the Collection</p>
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-white">المتجر</h1>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="ابحث عن منتج..." className="w-full pr-11 pl-4 py-2.5 rounded-full border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="ابحث عن منتج..." className="w-full pr-11 pl-4 py-3 rounded-full border border-border bg-card shadow-sm text-sm focus:border-primary focus:outline-none" />
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-6">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-8">
           {CATEGORIES.map(c => (
-            <button key={c} onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${category === c ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-foreground/60 hover:border-primary/40'}`}>{c}</button>
+            <button key={c} onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${category === c ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-card border border-border text-foreground/60 hover:border-primary/40'}`}>{c}</button>
           ))}
         </div>
 

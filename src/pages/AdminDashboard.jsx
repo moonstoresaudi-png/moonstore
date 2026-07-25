@@ -88,22 +88,22 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-secondary/30">
       <header className="bg-card border-b border-border sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div>
-            <h1 className="font-heading font-extrabold text-lg">لوحة التحكم</h1>
-            <p className="text-xs text-foreground/55">إدارة المتجر — الطلبات، المنتجات، الأرباح، الموردين</p>
+            <h1 className="font-display font-bold text-xl sm:text-2xl">لوحة التحكم</h1>
+            <p className="text-xs sm:text-sm text-foreground/55 mt-0.5">إدارة المتجر — الطلبات، المنتجات، الأرباح، الموردين</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-5">
             <button onClick={logout} className="text-sm text-foreground/60 font-medium hover:text-destructive">تسجيل الخروج</button>
-            <Link to="/" className="text-sm text-primary font-medium inline-flex items-center gap-1 hover:opacity-70">عرض المتجر <ArrowRight className="w-4 h-4" /></Link>
+            <Link to="/" className="px-4 py-2 rounded-full border border-border text-sm text-primary font-medium inline-flex items-center gap-1.5 hover:bg-secondary transition-colors">عرض المتجر <ArrowRight className="w-4 h-4" /></Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="flex gap-1.5 mb-6 overflow-x-auto no-scrollbar pb-1">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex gap-2 mb-8 overflow-x-auto no-scrollbar pb-1">
           {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap inline-flex items-center gap-2 transition-all ${tab === t.key ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-foreground/60 hover:border-primary/40'}`}>
+            <button key={t.key} onClick={() => setTab(t.key)} className={`px-5 py-3 rounded-2xl text-sm font-bold whitespace-nowrap inline-flex items-center gap-2 transition-all ${tab === t.key ? 'bg-primary text-primary-foreground shadow-md' : 'bg-card border border-border text-foreground/60 hover:border-primary/40'}`}>
               <t.icon className="w-4 h-4" /> {t.label}
             </button>
           ))}

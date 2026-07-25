@@ -105,66 +105,143 @@ export default function AdminProducts() {
       </div>
 
       {editing && (
-        <form onSubmit={handleSave} className="card-soft p-5 mb-5 space-y-4">
-          <div className="flex items-center justify-between"><h4 className="font-bold">{editing === 'new' ? 'إضافة منتج جديد' : 'تعديل المنتج'}</h4><button type="button" onClick={cancel} className="p-2 rounded-lg hover:bg-secondary"><X className="w-4 h-4" /></button></div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="اسم المنتج" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select>
-            <input type="number" required value={form.price} onChange={e => setForm({ ...form, price: +e.target.value })} placeholder="السعر" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.old_price} onChange={e => setForm({ ...form, old_price: +e.target.value })} placeholder="السعر القديم" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.cost} onChange={e => setForm({ ...form, cost: +e.target.value })} placeholder="التكلفة" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.stock_quantity} onChange={e => setForm({ ...form, stock_quantity: +e.target.value })} placeholder="كمية المخزون" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.rating} onChange={e => setForm({ ...form, rating: +e.target.value })} step="0.1" min="0" max="5" placeholder="التقييم" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.purchase_count} onChange={e => setForm({ ...form, purchase_count: +e.target.value })} placeholder="عدد مرات الشراء" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.sash_addon} onChange={e => setForm({ ...form, sash_addon: +e.target.value })} placeholder="سعر إضافة الوشاح" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-            <input type="number" value={form.packaging_addon} onChange={e => setForm({ ...form, packaging_addon: +e.target.value })} placeholder="سعر التغليف" className="px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+        <form onSubmit={handleSave} className="card-soft p-6 sm:p-8 mb-6 space-y-7">
+          <div className="flex items-center justify-between border-b border-border pb-4">
+            <div>
+              <h4 className="font-display font-bold text-xl">{editing === 'new' ? 'إضافة منتج جديد' : 'تعديل المنتج'}</h4>
+              <p className="text-xs text-foreground/50 mt-1">عبّي البيانات التالية، الحقول المطلوبة أساسية والباقي اختياري.</p>
+            </div>
+            <button type="button" onClick={cancel} className="p-2 rounded-lg hover:bg-secondary"><X className="w-5 h-5" /></button>
           </div>
-          <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="الوصف" rows={2} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
 
-          <div className="flex items-center gap-3">
-            {form.image_url && <img src={form.image_url} alt="معاينة" className="w-16 h-16 rounded-xl object-cover" />}
-            <label className="px-4 py-2.5 rounded-xl border border-dashed border-border bg-secondary/40 text-sm cursor-pointer hover:border-primary inline-flex items-center gap-2">
-              {uploading ? 'جاري الرفع...' : <><Upload className="w-4 h-4" /> رفع الصورة الرئيسية</>}
-              <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
-            </label>
+          {/* المعلومات الأساسية */}
+          <div>
+            <h5 className="font-bold text-sm mb-3 text-primary">المعلومات الأساسية</h5>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">اسم المنتج *</label>
+                <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="مثال: جاكيت تخرج سينيور" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">القسم *</label>
+                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select>
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="text-xs font-medium text-foreground/60 mb-1.5 block">الوصف</label>
+              <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="وصف قصير يظهر بصفحة المنتج (الخامة، الاستخدام، مميزات...)" rows={3} className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+            </div>
+          </div>
+
+          {/* التسعير والمخزون */}
+          <div>
+            <h5 className="font-bold text-sm mb-3 text-primary">التسعير والمخزون</h5>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">السعر الحالي (ر.س) *</label>
+                <input type="number" required value={form.price} onChange={e => setForm({ ...form, price: +e.target.value })} placeholder="0" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">السعر قبل الخصم</label>
+                <input type="number" value={form.old_price} onChange={e => setForm({ ...form, old_price: +e.target.value })} placeholder="اتركه 0 إذا ما فيه خصم" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">تكلفة الشراء (ر.س)</label>
+                <input type="number" value={form.cost} onChange={e => setForm({ ...form, cost: +e.target.value })} placeholder="لحساب الأرباح فقط، لا يظهر للزوار" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">كمية المخزون</label>
+                <input type="number" value={form.stock_quantity} onChange={e => setForm({ ...form, stock_quantity: +e.target.value })} placeholder="عدد القطع المتوفرة" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">التقييم (من 5)</label>
+                <input type="number" value={form.rating} onChange={e => setForm({ ...form, rating: +e.target.value })} step="0.1" min="0" max="5" placeholder="مثال: 4.8" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">عدد مرات الشراء</label>
+                <input type="number" value={form.purchase_count} onChange={e => setForm({ ...form, purchase_count: +e.target.value })} placeholder="يظهر كـ 'تم شراءه X مرة'" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* إضافات مدفوعة (تظهر فقط لو محاكي الوشاح مفعّل) */}
+          <div>
+            <h5 className="font-bold text-sm mb-3 text-primary">تكلفة الإضافات (اختياري)</h5>
+            <p className="text-xs text-foreground/50 mb-3">تُستخدم فقط إذا فعّلت "محاكي الوشاح" بالأسفل.</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">سعر إضافة الوشاح (ر.س)</label>
+                <input type="number" value={form.sash_addon} onChange={e => setForm({ ...form, sash_addon: +e.target.value })} placeholder="50" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">سعر التغليف الفاخر (ر.س)</label>
+                <input type="number" value={form.packaging_addon} onChange={e => setForm({ ...form, packaging_addon: +e.target.value })} placeholder="15" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* الصور */}
+          <div>
+            <h5 className="font-bold text-sm mb-3 text-primary">الصورة الرئيسية *</h5>
+            <p className="text-xs text-foreground/50 mb-3">هذي الصورة اللي تظهر بكارت المنتج وصفحة المتجر.</p>
+            <div className="flex items-center gap-3">
+              {form.image_url && <img src={form.image_url} alt="معاينة" className="w-20 h-20 rounded-xl object-cover border border-border" />}
+              <label className="px-4 py-2.5 rounded-xl border border-dashed border-border bg-secondary/40 text-sm cursor-pointer hover:border-primary inline-flex items-center gap-2">
+                {uploading ? 'جاري الرفع...' : <><Upload className="w-4 h-4" /> رفع الصورة الرئيسية</>}
+                <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+              </label>
+            </div>
           </div>
 
           {/* Gallery images */}
           <div>
-            <p className="text-sm font-medium mb-2">صور المعرض (Gallery)</p>
-            <div className="flex flex-wrap gap-2 mb-2">
+            <h5 className="font-bold text-sm mb-1.5 text-primary">صور إضافية (معرض الصور)</h5>
+            <p className="text-xs text-foreground/50 mb-3">صور زوايا مختلفة للمنتج تظهر بصفحة المنتج — ألصق رابط الصورة واضغط إضافة.</p>
+            <div className="flex flex-wrap gap-2 mb-3">
               {(form.gallery_images || []).map(url => (
                 <div key={url} className="relative">
-                  <img src={url} alt="" className="w-16 h-16 rounded-xl object-cover" />
-                  <button type="button" onClick={() => removeGalleryUrl(url)} className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
+                  <img src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-border" />
+                  <button type="button" onClick={() => removeGalleryUrl(url)} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
                 </div>
               ))}
             </div>
             <div className="flex gap-2">
-              <input value={galleryInput} onChange={e => setGalleryInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addGalleryUrl())} placeholder="ألصق رابط صورة هنا" className="flex-1 px-3 py-2 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-              <button type="button" onClick={addGalleryUrl} className="px-4 py-2 rounded-xl bg-secondary text-sm">إضافة</button>
+              <input value={galleryInput} onChange={e => setGalleryInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addGalleryUrl())} placeholder="https://... رابط صورة" dir="ltr" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              <button type="button" onClick={addGalleryUrl} className="px-4 py-2.5 rounded-xl bg-secondary text-sm font-medium">إضافة</button>
             </div>
           </div>
 
           {/* Sizes */}
           <div>
-            <p className="text-sm font-medium mb-2">المقاسات</p>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {form.sizes.map(s => <span key={s} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-1">{s}<button type="button" onClick={() => removeSize(s)}><X className="w-3 h-3" /></button></span>)}
+            <h5 className="font-bold text-sm mb-1.5 text-primary">المقاسات المتوفرة</h5>
+            <p className="text-xs text-foreground/50 mb-3">اكتب كل مقاس واضغط Enter أو "إضافة" — مثال: S, M, L, XL</p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {form.sizes.map(s => <span key={s} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center gap-1.5">{s}<button type="button" onClick={() => removeSize(s)}><X className="w-3.5 h-3.5" /></button></span>)}
             </div>
-            <div className="flex gap-2"><input value={sizeInput} onChange={e => setSizeInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSize())} placeholder="أضف مقاسًا" className="flex-1 px-3 py-2 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /><button type="button" onClick={addSize} className="px-4 py-2 rounded-xl bg-secondary text-sm">إضافة</button></div>
+            <div className="flex gap-2">
+              <input value={sizeInput} onChange={e => setSizeInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSize())} placeholder="مثال: M" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              <button type="button" onClick={addSize} className="px-4 py-2.5 rounded-xl bg-secondary text-sm font-medium">إضافة</button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 text-sm">
-            {TOGGLES.map(t => (
-              <label key={t.k} className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form[t.k] || false} onChange={e => setForm({ ...form, [t.k]: e.target.checked })} className="accent-primary w-4 h-4" />{t.l}</label>
-            ))}
+          {/* خيارات وحالة المنتج */}
+          <div>
+            <h5 className="font-bold text-sm mb-1.5 text-primary">خيارات ظهور المنتج</h5>
+            <p className="text-xs text-foreground/50 mb-3">فعّل أي خيار يناسب هذا المنتج بالضبط.</p>
+            <div className="grid sm:grid-cols-2 gap-2.5 bg-secondary/30 rounded-xl p-4">
+              {TOGGLES.map(t => (
+                <label key={t.k} className="flex items-center gap-2.5 cursor-pointer text-sm"><input type="checkbox" checked={form[t.k] || false} onChange={e => setForm({ ...form, [t.k]: e.target.checked })} className="accent-primary w-4 h-4" />{t.l}</label>
+              ))}
+            </div>
+            <p className="text-xs text-foreground/50 mt-2.5">
+              💡 "محاكي الوشاح" يُظهر معاينة حية لاسم العميل والتاريخ ولون الوشاح فوق صورة المنتج الحقيقية — فعّله مع أي من (اسم / تاريخ / وشاح / كاب) لتظهر المعاينة بصفحة المنتج.
+            </p>
           </div>
-          <p className="text-xs text-foreground/50 -mt-3">
-            "محاكي الوشاح" يُظهر معاينة حية لاسم العميل والتاريخ ولون الوشاح فوق صورة المنتج الحقيقية في صفحة المنتج — فعّله مع أي من (اسم / تاريخ / وشاح / كاب) لتظهر المعاينة.
-          </p>
 
-          <div className="flex gap-2"><button type="submit" className="flex-1 py-3 btn-primary">حفظ</button><button type="button" onClick={cancel} className="px-5 py-3 rounded-full border border-border text-sm">إلغاء</button></div>
+          <div className="flex gap-3 pt-2 border-t border-border">
+            <button type="submit" className="flex-1 py-3.5 btn-primary font-bold">حفظ المنتج</button>
+            <button type="button" onClick={cancel} className="px-6 py-3.5 rounded-full border border-border text-sm font-medium hover:bg-secondary">إلغاء</button>
+          </div>
         </form>
       )}
 

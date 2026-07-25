@@ -51,12 +51,14 @@ export default function AdminSettings() {
         </div>
 
         <div>
-          <h4 className="font-bold text-sm flex items-center gap-2 mb-3">روابط التواصل الاجتماعي</h4>
+          <h4 className="font-bold text-sm flex items-center gap-2 mb-1">روابط التواصل الاجتماعي</h4>
+          <p className="text-xs text-foreground/50 mb-3">ألصق الرابط الكامل لكل حساب (اتركه فاضي لو ما عندك حساب — بيظهر باهت بالفوتر تلقائيًا).</p>
           <div className="grid sm:grid-cols-2 gap-3">
-            <input value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} placeholder="رابط انستغرام" className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" />
-            <input value={form.twitter} onChange={e => setForm({ ...form, twitter: e.target.value })} placeholder="رابط إكس / تويتر" className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" />
-            <input value={form.snapchat} onChange={e => setForm({ ...form, snapchat: e.target.value })} placeholder="رابط سناب شات" className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" />
-            <input value={form.tiktok} onChange={e => setForm({ ...form, tiktok: e.target.value })} placeholder="رابط تيك توك" className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" />
+            <div><label className="text-xs text-foreground/55 mb-1 block">انستغرام</label><input value={form.instagram} onChange={e => setForm({ ...form, instagram: e.target.value })} placeholder="https://instagram.com/..." className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" /></div>
+            <div><label className="text-xs text-foreground/55 mb-1 block">إكس (تويتر)</label><input value={form.twitter} onChange={e => setForm({ ...form, twitter: e.target.value })} placeholder="https://x.com/..." className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" /></div>
+            <div><label className="text-xs text-foreground/55 mb-1 block">سناب شات</label><input value={form.snapchat} onChange={e => setForm({ ...form, snapchat: e.target.value })} placeholder="https://snapchat.com/add/..." className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" /></div>
+            <div><label className="text-xs text-foreground/55 mb-1 block">تيك توك</label><input value={form.tiktok} onChange={e => setForm({ ...form, tiktok: e.target.value })} placeholder="https://tiktok.com/@..." className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" /></div>
+            <div><label className="text-xs text-foreground/55 mb-1 block">يوتيوب</label><input value={form.youtube || ''} onChange={e => setForm({ ...form, youtube: e.target.value })} placeholder="https://youtube.com/@..." className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" dir="ltr" /></div>
           </div>
         </div>
 

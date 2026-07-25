@@ -13,6 +13,13 @@ export default function Hero() {
         <div className="absolute top-10 right-10 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-pink/10 blur-3xl" />
 
+        {/* موجة سفلية تندمج مع خلفية الصفحة */}
+        <div className="absolute bottom-0 inset-x-0 leading-none pointer-events-none" style={{ lineHeight: 0 }}>
+          <svg viewBox="0 0 1440 70" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-10 sm:h-16 block">
+            <path d="M0,70 C240,10 480,10 720,40 C960,70 1200,70 1440,20 L1440,70 L0,70 Z" fill="hsl(var(--background))" />
+          </svg>
+        </div>
+
         {/* الشعار الكبير في المنتصف */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-24 sm:py-32">
           <div className="flex items-center gap-3 mb-7 animate-fade-up drop-shadow-2xl">

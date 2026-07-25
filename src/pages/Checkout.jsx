@@ -135,11 +135,11 @@ export default function Checkout() {
         <Navbar />
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-16 text-center">
           <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5"><Check className="w-10 h-10 text-green-600" /></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold mb-2">تم استلام طلبك بنجاح!</h1>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold mb-2">تم استلام طلبك بنجاح!</h1>
           <p className="text-foreground/60 mb-5">سنتواصل معك قريبًا لتأكيد التوصيل</p>
           <div className="card-soft p-5 mb-6 inline-block">
             <p className="text-xs text-foreground/55">رقم الطلب</p>
-            <p className="font-heading font-bold text-xl text-primary">#{orderNumber || orderId?.slice(-6) || '---'}</p>
+            <p className="font-display font-bold text-xl text-primary">#{orderNumber || orderId?.slice(-6) || '---'}</p>
             <p className="text-xs text-foreground/55 mt-2">طريقة الدفع: {paymentMethod === 'card' ? 'بطاقة' : 'الدفع عند الاستلام'}</p>
             <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} ر.س</p>
           </div>

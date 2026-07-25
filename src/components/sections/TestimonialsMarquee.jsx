@@ -27,10 +27,10 @@ function Card({ r }) {
 export default function TestimonialsMarquee() {
   const doubled = [...reviews, ...reviews];
   return (
-    <section id="reviews" className="py-14 sm:py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-8">
-        <p className="text-primary text-xs font-bold tracking-widest mb-2">آراء العملاء</p>
-        <h2 className="font-heading text-2xl sm:text-4xl font-extrabold">ماذا قال <span className="text-grad-violet">عملاؤنا</span></h2>
+    <section id="reviews" className="section-py overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10">
+        <p className="kicker justify-center mb-3">Customer Reviews</p>
+        <h2 className="font-display text-2xl sm:text-4xl font-bold">ماذا قال <span className="text-grad-violet">عملاؤنا</span></h2>
         <div className="flex items-center justify-center gap-1 mt-3">
           {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
           <span className="text-foreground/60 text-sm mr-2">4.9 / 5 من أكثر من 5000 عميل</span>

@@ -15,17 +15,17 @@ export default function OffersSection() {
   if (!offers.length) return null;
 
   return (
-    <section id="offers" className="py-14 sm:py-20" dir="rtl">
+    <section id="offers" className="section-py" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-10">
           <div>
-            <span className="chip bg-red-100 text-red-600 mb-2">
+            <span className="chip bg-red-100 text-red-600 mb-3">
               <Tag className="w-3 h-3" /> عروض حصرية
             </span>
-            <h2 className="font-heading text-2xl sm:text-4xl font-extrabold">
+            <h2 className="font-display text-2xl sm:text-4xl font-bold">
               أفضل <span className="text-red-500">العروض</span>
             </h2>
-            <p className="text-foreground/55 text-sm mt-1">خصومات حقيقية على منتجات مختارة — لفترة محدودة</p>
+            <p className="text-foreground/55 text-sm mt-2">خصومات حقيقية على منتجات مختارة — لفترة محدودة</p>
           </div>
         </div>
 

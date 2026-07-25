@@ -13,14 +13,14 @@ export default function FeaturedProducts() {
   }, []);
 
   return (
-    <section id="bestsellers" className="py-14 sm:py-20 bg-secondary/40">
+    <section id="bestsellers" className="section-py bg-secondary/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-10">
           <div>
-            <p className="text-primary text-xs font-bold tracking-widest mb-2">الأكثر مبيعاً</p>
-            <h2 className="font-heading text-2xl sm:text-4xl font-extrabold">الأكثر <span className="text-grad-violet">طلباً</span></h2>
+            <p className="kicker mb-3">Best Sellers</p>
+            <h2 className="font-display text-2xl sm:text-4xl font-bold">الأكثر <span className="text-grad-violet">طلباً</span></h2>
           </div>
-          <a href="#categories" className="text-sm text-primary font-medium hover:opacity-70">عرض الكل</a>
+          <a href="#categories" className="text-sm text-primary font-medium hover:opacity-70">عرض الكل ←</a>
         </div>
 
         {products === null ? (

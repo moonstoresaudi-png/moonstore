@@ -128,6 +128,13 @@ create policy "orders_select_own_or_admin" on public.orders
 create policy "orders_write_admin" on public.orders
   for update using (public.is_admin()) with check (public.is_admin());
 
+-- تسمح للزائر (بدون تسجيل دخول) بتأكيد دفعه فقط: تحويل حالة نفس الطلب من pending إلى new
+-- بعد رجوعه من بوابة مويسر (Moyasar) — لا تسمح بأي تعديل آخر
+create policy "orders_confirm_payment" on public.orders
+  for update
+  using (status = 'pending')
+  with check (status = 'new');
+
 create policy "orders_delete_admin" on public.orders
   for delete using (public.is_admin());
 

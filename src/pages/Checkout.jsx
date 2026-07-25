@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -6,7 +6,7 @@ import { useCart } from '@/lib/cartContext';
 import { entities, validateDiscountCode } from '@/api/entities';
 import { useAuth } from '@/lib/AuthContext';
 import { useStoreSettings } from '@/lib/SettingsContext';
-import PaymentCard from '@/components/PaymentCard';
+import MoyasarPayment from '@/components/MoyasarPayment';
 import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, ShieldCheck, Tag, X } from 'lucide-react';
 
 const COUNTRIES = ['السعودية', 'الإمارات', 'الكويت', 'البحرين', 'قطر', 'سلطنة عمان'];
@@ -78,17 +78,6 @@ export default function Checkout() {
     });
   };
 
-  const handleCardPaid = async () => {
-    setSubmitting(true);
-    try {
-      const order = await createOrder('new');
-      setOrderId(order.id);
-      setStep(3);
-      setIsOpen(false);
-    } catch {}
-    setSubmitting(false);
-  };
-
   const handleCodSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -105,8 +94,40 @@ export default function Checkout() {
     e.preventDefault();
     setStep(2);
     // نحفظه كـ "pending" مؤقتًا لتتبع السلات المتروكة إن لم يكمل الدفع
-    createOrder('pending').catch(() => {});
+    createOrder('pending').then(order => {
+      localStorage.setItem('ms_pending_order', JSON.stringify({ id: order.id, order_number: order.order_number }));
+    }).catch(() => {});
   };
+
+  // التحقق من نتيجة الدفع عند رجوع الزائر من صفحة مويسر
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    const paymentId = params.get('id');
+    if (!status || !paymentId) return;
+
+    const pendingRaw = localStorage.getItem('ms_pending_order');
+    if (!pendingRaw) return;
+    const pending = JSON.parse(pendingRaw);
+
+    if (status === 'paid') {
+      entities.Order.update(pending.id, { status: 'new', payment_method: 'card' })
+        .then(() => {
+          setOrderId(pending.id);
+          setOrderNumber(pending.order_number);
+          setStep(3);
+          setIsOpen(false);
+          localStorage.removeItem('ms_pending_order');
+        })
+        .catch(() => {});
+    } else if (status === 'failed') {
+      // الطلب يبقى pending كما هو؛ نعرض للزائر خيار إعادة المحاولة
+      setStep(2);
+    }
+    // ننظف الرابط من معاملات مويسر
+    window.history.replaceState({}, '', window.location.pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (step === 3) {
     return (
@@ -226,7 +247,11 @@ export default function Checkout() {
                   </div>
 
                   {paymentMethod === 'card' ? (
-                    <PaymentCard onPaid={handleCardPaid} />
+                    <MoyasarPayment
+                      amount={grandTotal}
+                      description={`طلب ${orderNumber || ''} — Moon Store`}
+                      callbackUrl={window.location.origin + '/checkout'}
+                    />
                   ) : (
                     <form onSubmit={handleCodSubmit}>
                       <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 mb-4">

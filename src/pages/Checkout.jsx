@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useStoreSettings } from '@/lib/SettingsContext';
 import MoyasarPayment from '@/components/MoyasarPayment';
 import LocationPicker from '@/components/LocationPicker';
-import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, ShieldCheck, Tag, X, MapPin, Loader2 } from 'lucide-react';
+import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, ShieldCheck, Tag, X, MapPin } from 'lucide-react';
 
 const COUNTRIES = ['السعودية', 'الإمارات', 'الكويت', 'البحرين', 'قطر', 'سلطنة عمان'];
 
@@ -19,7 +19,6 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ customer_name: '', phone: '', email: '', country: 'السعودية', city: '', address: '', short_address_code: '', lat: null, lng: null, notes: '' });
   const [showMap, setShowMap] = useState(false);
-  const [lookingUpCode, setLookingUpCode] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [step, setStep] = useState(1);
   const [orderId, setOrderId] = useState(null);
@@ -53,24 +52,6 @@ export default function Checkout() {
       setDiscountError('تعذّر التحقق من الكود، حاول لاحقًا');
     }
     setCheckingDiscount(false);
-  };
-
-  const lookupShortCode = async () => {
-    const code = form.short_address_code.trim();
-    if (!code) return;
-    setLookingUpCode(true);
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(code + ' Saudi Arabia')}&accept-language=ar`);
-      const data = await res.json();
-      if (data && data[0]) {
-        setForm(f => ({ ...f, lat: +data[0].lat, lng: +data[0].lon, address: data[0].display_name || f.address }));
-      } else {
-        alert('ما قدرنا نطابق الرمز المختصر تلقائيًا — استخدم "تحديد من الخريطة" لتحديد موقعك بدقة، أو اكتب العنوان يدويًا.');
-      }
-    } catch {
-      alert('تعذّر البحث الآن، جرب تحديد الموقع من الخريطة.');
-    }
-    setLookingUpCode(false);
   };
 
   const handleMapConfirm = ({ lat, lng, city, address }) => {
@@ -236,12 +217,7 @@ export default function Checkout() {
 
                   <div className="sm:col-span-2">
                     <label className="text-xs font-medium text-foreground/60 mb-1 block">الرمز الوطني المختصر (اختياري)</label>
-                    <div className="flex gap-2">
-                      <input value={form.short_address_code} onChange={e => setForm({ ...form, short_address_code: e.target.value.toUpperCase() })} placeholder="مثال: RRRD2929" dir="ltr" className="flex-1 px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" />
-                      <button type="button" onClick={lookupShortCode} disabled={lookingUpCode} className="px-4 py-3 rounded-xl border border-border font-medium text-sm hover:bg-secondary disabled:opacity-50 inline-flex items-center gap-1.5">
-                        {lookingUpCode ? <Loader2 className="w-4 h-4 animate-spin" /> : 'بحث'}
-                      </button>
-                    </div>
+                    <input value={form.short_address_code} onChange={e => setForm({ ...form, short_address_code: e.target.value.toUpperCase() })} placeholder="مثال: RRRD2929" dir="ltr" className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" />
                   </div>
 
                   <div className="sm:col-span-2">

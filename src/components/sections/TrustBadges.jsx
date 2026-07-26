@@ -6,7 +6,7 @@ export default function TrustBadges() {
     { icon: ShieldCheck, title: 'موثّق لدى المركز السعودي للأعمال', sub: 'سجل تجاري رسمي' },
     { icon: Lock, title: 'دفع آمن 100%', sub: 'تشفير SSL كامل' },
     { icon: CreditCard, title: 'وسائل دفع متعددة', sub: 'مدى • فيزا • آبل باي • STC Pay' },
-    { icon: BadgeCheck, title: 'ضمان الجودة', sub: 'إرجاع خلال 7 أيام' },
+    { icon: BadgeCheck, title: 'ضمان الجودة', sub: 'منتجات مطابقة للمواصفات' },
   ];
   return (
     <section className="py-10 border-y border-border bg-card">

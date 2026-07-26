@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Plus, Minus, ShoppingBag, Check, Flame, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Star, Plus, Minus, ShoppingBag, Check, Flame, Truck, ShieldCheck } from 'lucide-react';
 import ProductGallery from './ProductGallery';
 import MeasurementGuide from './MeasurementGuide';
 import { useCart } from '@/lib/cartContext';
@@ -219,7 +219,7 @@ export default function ProductConfigurator({ product }) {
           )}
 
           <div className="grid grid-cols-3 gap-3 pt-6 border-t border-border">
-            {[{ icon: Truck, label: 'توصيل سريع' }, { icon: RotateCcw, label: 'إرجاع خلال 7 أيام' }, { icon: ShieldCheck, label: 'ضمان الجودة' }].map((t, i) => (
+            {[{ icon: Truck, label: 'توصيل سريع' }, { icon: ShieldCheck, label: 'ضمان الجودة' }].map((t, i) => (
               <div key={i} className="text-center">
                 <t.icon className="w-5 h-5 text-primary mx-auto mb-1.5" />
                 <p className="text-xs text-foreground/55">{t.label}</p>

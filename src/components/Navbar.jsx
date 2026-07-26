@@ -33,8 +33,16 @@ export default function Navbar() {
 
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-border' : 'bg-white border-b border-border'}`}>
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-24 flex items-center justify-between gap-4">
-        <Logo className="py-1" />
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-20 md:h-24 grid grid-cols-3 lg:flex items-center lg:justify-between gap-4">
+        <div className="flex items-center gap-1 lg:hidden">
+          <button onClick={() => setMenuOpen(v => !v)} className="p-2.5 rounded-full hover:bg-secondary text-foreground/70" aria-label="القائمة">
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        <div className="flex justify-center lg:justify-start">
+          <Logo className="py-1" />
+        </div>
 
         <ul className="hidden lg:flex items-center gap-7">
           {links.map(l => (
@@ -44,15 +52,12 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-end">
           <Link to="/account" className="hidden sm:flex p-2.5 rounded-full hover:bg-secondary text-foreground/60 transition-colors" aria-label="حسابي"><User className="w-5 h-5" /></Link>
           <button onClick={() => setSearchOpen(v => !v)} className="hidden sm:flex p-2.5 rounded-full hover:bg-secondary text-foreground/60 transition-colors" aria-label="بحث"><Search className="w-5 h-5" /></button>
           <button onClick={() => setIsOpen(true)} className="relative p-2.5 rounded-full hover:bg-secondary text-primary transition-colors" aria-label="السلة">
             <ShoppingBag className="w-5 h-5" />
             {count > 0 && <span className="absolute -top-0.5 -left-0.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center">{count}</span>}
-          </button>
-          <button onClick={() => setMenuOpen(v => !v)} className="lg:hidden p-2.5 rounded-full hover:bg-secondary" aria-label="القائمة">
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </nav>

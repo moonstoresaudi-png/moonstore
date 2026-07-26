@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { entities } from '@/api/entities';
-import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles } from 'lucide-react';
+import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download } from 'lucide-react';
 
 const STATUS = {
   pending: { label: 'قيد الانتظار', cls: 'bg-gray-100 text-gray-700' },
@@ -122,6 +122,30 @@ export default function AdminOrders() {
   const unarchive = (id) => updateStatus(id, 'delivered');
   const toggleExpand = (id) => setExpandedId(prev => prev === id ? null : id);
 
+  const exportCsv = () => {
+    const rows = filtered.map(o => ({
+      'رقم الطلب': o.order_number,
+      'التاريخ': o.created_date?.slice(0, 10) || '',
+      'العميل': o.customer_name,
+      'الجوال': o.phone,
+      'المدينة': o.city,
+      'المنتجات': o.product_name,
+      'الإجمالي': o.total,
+      'طريقة الدفع': o.payment_method,
+      'الحالة': STATUS[o.status]?.label || o.status,
+    }));
+    if (!rows.length) return;
+    const headers = Object.keys(rows[0]);
+    const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${String(r[h] ?? '').replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
@@ -135,6 +159,7 @@ export default function AdminOrders() {
         <div className="p-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
           <h3 className="font-bold flex items-center gap-2"><Inbox className="w-5 h-5 text-primary" /> الطلبات</h3>
           <div className="flex flex-wrap items-center gap-1.5">
+            <button onClick={exportCsv} className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700 inline-flex items-center gap-1"><Download className="w-3.5 h-3.5" /> تصدير Excel</button>
             <button onClick={() => setSortDesc(v => !v)} className="px-3 py-1.5 rounded-full text-xs font-medium bg-secondary text-foreground/60 inline-flex items-center gap-1"><ArrowDownUp className="w-3.5 h-3.5" /> {sortDesc ? 'الأحدث' : 'الأقدم'}</button>
             <button onClick={() => setFilter('all')} className={`px-3 py-1.5 rounded-full text-xs font-medium ${filter === 'all' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground/60'}`}>النشطة</button>
             {Object.entries(STATUS).filter(([k]) => k !== 'pending').map(([k, v]) => (

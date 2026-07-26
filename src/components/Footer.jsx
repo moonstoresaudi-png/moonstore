@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Phone, Smartphone, MessageCircle, Youtube } from 'lucide-react';
+import { Instagram, Phone, Smartphone, MessageCircle } from 'lucide-react';
 import Logo from './Logo';
 import { useStoreSettings } from '@/lib/SettingsContext';
 
@@ -46,7 +46,7 @@ export default function Footer() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-8 text-center">
           {/* اللوجو والوصف */}
           <div className="flex flex-col items-center mb-6">
-            <Logo dark className="mb-3" />
+            <Logo dark size="h-32 sm:h-40" className="mb-4" />
             <p className="text-sm text-background/60 leading-relaxed">
               متجر Moon Store لأرواب وملحقات التخرج الفاخرة<br/>
               زي موحد — أرواب تخرج — جاكيت سينيور
@@ -55,15 +55,8 @@ export default function Footer() {
 
           {/* أيقونات التواصل */}
           <div className="flex justify-center gap-3 mb-8 flex-wrap">
-            <SocialIcon href={settings.youtube} title="يوتيوب"><Youtube className="w-5 h-5" /></SocialIcon>
             <SocialIcon href={settings.tiktok} title="تيك توك">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
-            </SocialIcon>
-            <SocialIcon href={settings.snapchat} title="سناب شات">
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M12 2c3 0 4.7 2.1 4.8 4.7l.1 2.2c0 .3.2.4.5.5.4.1 1-.2 1.3-.2.4 0 1 .2 1 .8 0 .5-.6.8-1.1 1-.3.1-.6.3-.6.5 0 .5.9 2.4 3 2.7.3 0 .5.2.4.5-.2.7-1.5 1.1-2.5 1.3-.2 0-.3.2-.3.4 0 .3.1.7-.2.9-.3.2-.9.1-1.5.1-.7 0-1.3.4-2 .9-.8.6-1.6 1.2-2.9 1.2s-2.1-.6-2.9-1.2c-.7-.5-1.3-.9-2-.9-.6 0-1.2.1-1.5-.1-.3-.2-.2-.6-.2-.9 0-.2-.1-.4-.3-.4-1-.2-2.3-.6-2.5-1.3-.1-.3.1-.5.4-.5 2.1-.3 3-2.2 3-2.7 0-.2-.3-.4-.6-.5-.5-.2-1.1-.5-1.1-1 0-.6.6-.8 1-.8.3 0 .9.3 1.3.2.3-.1.5-.2.5-.5l.1-2.2C7.3 4.1 9 2 12 2z"/></svg>
-            </SocialIcon>
-            <SocialIcon href={settings.twitter} title="X">
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7l-5.5-7.2L4.4 22H1.3l8.2-9.3L1 2h7.2l5 6.6L18.9 2zm-1.2 18h1.7L7.4 4h-1.8l12.1 16z"/></svg>
             </SocialIcon>
             <SocialIcon href={settings.instagram} title="انستقرام"><Instagram className="w-5 h-5" /></SocialIcon>
           </div>

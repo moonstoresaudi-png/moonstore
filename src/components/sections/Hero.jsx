@@ -32,18 +32,18 @@ export default function Hero() {
         {/* الصورة داخل قوس */}
         <div className="relative order-1 lg:order-2 flex items-center justify-center">
           <div
-            className="relative w-full max-w-sm overflow-hidden"
+            className="relative w-full max-w-md overflow-hidden p-2 sm:p-3"
             style={{
-              aspectRatio: '3/4',
-              borderRadius: '180px 180px 24px 24px',
+              aspectRatio: '1280/905',
+              borderRadius: '32px',
               background: 'linear-gradient(160deg, hsl(310 34% 28%), hsl(310 40% 18%))',
             }}
           >
-            <img src="/images/brand/customer-gallery.jpg" alt="Moon Store" className="w-full h-full object-cover" style={{ objectPosition: 'center' }} />
+            <img src="/images/brand/customer-gallery.jpg" alt="Moon Store" className="w-full h-full object-contain rounded-2xl" />
           </div>
 
           {/* نقاط زخرفية */}
-          <div className="hidden sm:flex flex-col gap-2.5 absolute right-0 top-1/3">
+          <div className="hidden sm:flex flex-col gap-2.5 absolute -right-2 top-1/3">
             <span className="w-4 h-4 rounded-full" style={{ background: 'hsl(var(--gold))' }} />
             <span className="w-4 h-4 rounded-full bg-primary" />
             <span className="w-4 h-4 rounded-full" style={{ background: 'hsl(310 40% 14%)' }} />

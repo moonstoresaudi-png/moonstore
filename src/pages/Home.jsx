@@ -11,7 +11,6 @@ import TestimonialsMarquee from '@/components/sections/TestimonialsMarquee';
 import Newsletter from '@/components/sections/Newsletter';
 import OffersSection from '@/components/sections/OffersSection';
 import PrepBanner from '@/components/sections/PrepBanner';
-import CustomerGallery from '@/components/sections/CustomerGallery';
 
 export default function Home() {
   return (
@@ -20,7 +19,6 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <CustomerGallery />
         <TrustBadges />
         <Categories />
         <FeaturedProducts />

@@ -6,6 +6,7 @@ import { storeSettingsApi } from '@/api/entities';
 // البريد في عدة ملفات (Footer, CustomerService, GroupsOrders, AdminSettings) بشكل
 // منفصل وغير مرتبط ببعضه — الآن مصدر واحد فقط.
 const DEFAULTS = {
+  category_images: {},
   store_name: 'Moon Store',
   phone: '966581506903',
   whatsapp: '966581506903',

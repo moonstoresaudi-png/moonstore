@@ -1,15 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, Store, Truck, Loader2 } from 'lucide-react';
+import { Settings, Save, Store, Truck, Loader2, Upload, X } from 'lucide-react';
 import { useStoreSettings } from '@/lib/SettingsContext';
 import { storeSettingsApi } from '@/api/entities';
+import { uploadFile } from '@/api/storage';
+
+const CATEGORY_SLOTS = [
+  { key: 'جاكيت تخرج', label: 'جاكيت تخرج' },
+  { key: 'أوشحة تخرج', label: 'أوشحة تخرج' },
+  { key: 'كاب تخرج', label: 'كاب تخرج' },
+  { key: 'أرواب تخرج', label: 'أرواب تخرج' },
+  { key: 'كوفلة مواليد', label: 'كوفلة مواليد' },
+];
 
 export default function AdminSettings() {
   const { settings, refresh } = useStoreSettings();
   const [form, setForm] = useState(settings);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadingKey, setUploadingKey] = useState(null);
 
   useEffect(() => { setForm(settings); }, [settings]);
+
+  const handleCategoryUpload = async (key, e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingKey(key);
+    try {
+      const { file_url } = await uploadFile({ file });
+      setForm(f => ({ ...f, category_images: { ...(f.category_images || {}), [key]: file_url } }));
+    } catch {
+      alert('تعذّر رفع الصورة');
+    }
+    setUploadingKey(null);
+  };
+
+  const removeCategoryImage = (key) => {
+    setForm(f => {
+      const next = { ...(f.category_images || {}) };
+      delete next[key];
+      return { ...f, category_images: next };
+    });
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -47,6 +78,30 @@ export default function AdminSettings() {
           <div className="grid sm:grid-cols-2 gap-3">
             <div><label className="text-xs text-foreground/55 mb-1 block">سعر الشحن (ر.س)</label><input type="number" value={form.shipping_cost} onChange={e => setForm({ ...form, shipping_cost: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /></div>
             <div><label className="text-xs text-foreground/55 mb-1 block">رسوم الدفع عند الاستلام (ر.س)</label><input type="number" value={form.cod_fee} onChange={e => setForm({ ...form, cod_fee: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /></div>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-sm flex items-center gap-2 mb-1">صور أقسام المتجر (الدوائر بالرئيسية)</h4>
+          <p className="text-xs text-foreground/50 mb-3">ارفع صورة لكل قسم — إذا ما رفعت شي، بيظهر شعار المتجر مكانها مؤقتًا.</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            {CATEGORY_SLOTS.map(slot => {
+              const url = form.category_images?.[slot.key];
+              return (
+                <div key={slot.key} className="flex flex-col items-center gap-1.5">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden bg-secondary border border-border flex items-center justify-center">
+                    {url ? <img src={url} alt={slot.label} className="w-full h-full object-cover" /> : <span className="text-[9px] text-foreground/40">بدون صورة</span>}
+                    {uploadingKey === slot.key && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><Loader2 className="w-4 h-4 text-white animate-spin" /></div>}
+                  </div>
+                  <label className="text-[10px] text-primary font-medium cursor-pointer hover:underline">
+                    رفع
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleCategoryUpload(slot.key, e)} />
+                  </label>
+                  {url && <button type="button" onClick={() => removeCategoryImage(slot.key)} className="text-[10px] text-red-500 hover:underline">حذف</button>}
+                  <span className="text-[10px] text-foreground/50 text-center leading-tight">{slot.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

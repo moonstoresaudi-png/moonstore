@@ -219,6 +219,8 @@ create table if not exists public.store_settings (
   twitter text not null default '',
   snapchat text not null default '',
   tiktok text not null default '',
+  youtube text not null default '',
+  category_images jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
 

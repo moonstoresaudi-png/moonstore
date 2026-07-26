@@ -39,7 +39,7 @@ export default function Hero() {
               background: 'linear-gradient(160deg, hsl(310 34% 28%), hsl(310 40% 18%))',
             }}
           >
-            <img src="/images/products/senior-jacket/front.jpg" alt="Moon Store" className="w-full h-full object-cover" style={{ objectPosition: 'top' }} />
+            <img src="/images/brand/customer-gallery.jpg" alt="Moon Store" className="w-full h-full object-cover" style={{ objectPosition: 'center' }} />
           </div>
 
           {/* نقاط زخرفية */}

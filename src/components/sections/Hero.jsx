@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, Megaphone } from 'lucide-react';
+import { useStoreSettings } from '@/lib/SettingsContext';
 
 export default function Hero() {
+  const { settings } = useStoreSettings();
   return (
     <section id="home" className="relative overflow-hidden">
       {/* خلفية هادئة فاتحة بنقشة زخرفية خفيفة */}
@@ -39,6 +41,13 @@ export default function Hero() {
           <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-bold text-sm hover:-translate-y-0.5 transition-all shadow-lg">تسوّق الآن <ArrowLeft className="w-4 h-4" /></Link>
           <a href="#categories" className="px-8 py-3.5 rounded-full bg-transparent text-primary border border-primary/30 font-medium text-sm hover:bg-primary/5 transition-colors">تسوّق الأقسام</a>
         </div>
+
+        {settings.announcement_enabled && settings.announcement_text && (
+          <div className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent/50 text-primary text-xs sm:text-sm font-bold mx-auto animate-pulse">
+            <Megaphone className="w-4 h-4 flex-shrink-0" />
+            <span>{settings.announcement_text}</span>
+          </div>
+        )}
       </div>
 
 

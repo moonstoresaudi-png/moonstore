@@ -78,7 +78,7 @@ export default function OrderTracking() {
                 <div><p className="text-xs text-foreground/50">المنتج</p><p className="font-medium truncate">{order.product_name}</p></div>
                 <div><p className="text-xs text-foreground/50">الكمية</p><p className="font-medium">{order.quantity || 1}</p></div>
                 {order.size && <div><p className="text-xs text-foreground/50">المقاس</p><p className="font-medium">{order.size}</p></div>}
-                <div><p className="text-xs text-foreground/50">الإجمالي</p><p className="font-bold text-primary">{order.total} ر.س</p></div>
+                <div><p className="text-xs text-foreground/50">الإجمالي</p><p className="font-bold text-primary">{order.total} </p></div>
               </div>
               {order.tracking_number && <p className="text-xs text-foreground/50 mt-3">رقم الشحنة: <span className="font-mono" dir="ltr">{order.tracking_number}</span></p>}
             </div>

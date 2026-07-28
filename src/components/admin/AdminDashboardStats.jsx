@@ -28,7 +28,7 @@ export default function AdminDashboardStats() {
   );
 
   const cards = [
-    { label: 'إجمالي الإيرادات', value: `${stats.revenue.toLocaleString()} ر.س`, icon: Banknote, color: 'bg-green-500', text: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'إجمالي الإيرادات', value: `${stats.revenue.toLocaleString()} `, icon: Banknote, color: 'bg-green-500', text: 'text-green-600', bg: 'bg-green-50' },
     { label: 'جميع الطلبات', value: stats.total, icon: ShoppingBag, color: 'bg-primary', text: 'text-primary', bg: 'bg-primary/5' },
     { label: 'قيد المعالجة', value: stats.pending, icon: Clock, color: 'bg-orange-500', text: 'text-orange-600', bg: 'bg-orange-50' },
     { label: 'تم التسليم', value: stats.delivered, icon: CheckCircle, color: 'bg-blue-500', text: 'text-blue-600', bg: 'bg-blue-50' },

@@ -179,7 +179,7 @@ export default function Checkout() {
             <p className="text-xs text-foreground/55">رقم الطلب</p>
             <p className="font-display font-bold text-xl text-primary">#{orderNumber || orderId?.slice(-6) || '---'}</p>
             <p className="text-xs text-foreground/55 mt-2">طريقة الدفع: {paymentMethod === 'card' ? 'بطاقة' : 'الدفع عند الاستلام'}</p>
-            <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} ر.س</p>
+            <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} </p>
           </div>
           <div className="flex gap-3 justify-center">
             <Link to="/track-order" className="px-6 py-3 btn-primary">تتبع الطلب</Link>
@@ -307,7 +307,7 @@ export default function Checkout() {
                     <button onClick={() => setPaymentMethod('cod')} className={`p-4 rounded-xl border-2 text-center transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-border'}`}>
                       <Banknote className={`w-7 h-7 mx-auto mb-1.5 ${paymentMethod === 'cod' ? 'text-primary' : 'text-foreground/50'}`} />
                       <p className="text-sm font-bold">الدفع عند الاستلام</p>
-                      <p className="text-xs text-foreground/50">+{settings.cod_fee} ر.س رسوم</p>
+                      <p className="text-xs text-foreground/50">+{settings.cod_fee}  رسوم</p>
                     </button>
                   </div>
 
@@ -320,9 +320,9 @@ export default function Checkout() {
                   ) : (
                     <form onSubmit={handleCodSubmit}>
                       <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 mb-4">
-                        <p className="text-sm text-amber-800">سيتم تحصيل مبلغ <span className="font-bold">{grandTotal} ر.س</span> عند استلام الطلب، بما يشمل رسوم الدفع عند الاستلام ({settings.cod_fee} ر.س).</p>
+                        <p className="text-sm text-amber-800">سيتم تحصيل مبلغ <span className="font-bold">{grandTotal} </span> عند استلام الطلب، بما يشمل رسوم الدفع عند الاستلام ({settings.cod_fee} ).</p>
                       </div>
-                      <button type="submit" disabled={submitting} className="w-full py-3.5 btn-primary disabled:opacity-50">تأكيد الطلب — {grandTotal} ر.س</button>
+                      <button type="submit" disabled={submitting} className="w-full py-3.5 btn-primary disabled:opacity-50">تأكيد الطلب — {grandTotal} </button>
                     </form>
                   )}
                 </div>
@@ -340,16 +340,16 @@ export default function Checkout() {
                   <div key={item.id} className="flex gap-3 text-sm">
                     <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">{item.qty}×</div>
                     <div className="flex-1 min-w-0"><p className="truncate font-medium">{item.name}</p>{item.size && <p className="text-xs text-foreground/50">المقاس: {item.size}</p>}</div>
-                    <p className="font-bold text-primary">{item.price * item.qty} ر.س</p>
+                    <p className="font-bold text-primary">{item.price * item.qty} </p>
                   </div>
                 ))}
               </div>
               <div className="space-y-2 pt-4 border-t border-border text-sm">
-                <div className="flex justify-between"><span className="text-foreground/60">المجموع الفرعي</span><span className="font-medium">{total} ر.س</span></div>
-                {discount && <div className="flex justify-between text-green-700"><span>خصم ({discount.code})</span><span className="font-medium">-{discountAmount} ر.س</span></div>}
-                <div className="flex justify-between"><span className="text-foreground/60">الشحن</span><span className="font-medium">{shippingCost} ر.س</span></div>
-                {codFee > 0 && <div className="flex justify-between"><span className="text-foreground/60">رسم الدفع عند الاستلام</span><span className="font-medium">{codFee} ر.س</span></div>}
-                <div className="flex justify-between pt-2 border-t border-border"><span className="font-bold">الإجمالي</span><span className="font-heading font-extrabold text-lg text-primary">{grandTotal} ر.س</span></div>
+                <div className="flex justify-between"><span className="text-foreground/60">المجموع الفرعي</span><span className="font-medium">{total} </span></div>
+                {discount && <div className="flex justify-between text-green-700"><span>خصم ({discount.code})</span><span className="font-medium">-{discountAmount} </span></div>}
+                <div className="flex justify-between"><span className="text-foreground/60">الشحن</span><span className="font-medium">{shippingCost} </span></div>
+                {codFee > 0 && <div className="flex justify-between"><span className="text-foreground/60">رسم الدفع عند الاستلام</span><span className="font-medium">{codFee} </span></div>}
+                <div className="flex justify-between pt-2 border-t border-border"><span className="font-bold">الإجمالي</span><span className="font-heading font-extrabold text-lg text-primary">{grandTotal} </span></div>
               </div>
               <div className="mt-4 pt-4 border-t border-border flex items-center gap-2 text-xs text-foreground/50">
                 <ShieldCheck className="w-4 h-4 text-green-600" /> طلبك محمي ومؤمّن

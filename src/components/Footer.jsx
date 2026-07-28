@@ -115,6 +115,10 @@ export default function Footer() {
               <img src="/images/brand/maroof-badge.png" alt="معروف" className="w-12 h-12 object-contain" />
               <span className="text-[10px] text-background/50 font-medium">معروف</span>
             </a>
+            <div title="موثّق في المركز السعودي للأعمال" className="flex flex-col items-center gap-1.5">
+              <img src="/images/brand/business-center-badge.jpg" alt="المركز السعودي للأعمال" className="w-12 h-12 object-contain rounded-full bg-white" />
+              <span className="text-[10px] text-background/50 font-medium">موثّق في منصة الأعمال</span>
+            </div>
           </div>
           {settings.cr_number && (
             <p className="text-xs text-background/50 mb-8" dir="ltr">السجل التجاري: {settings.cr_number}</p>

@@ -25,9 +25,9 @@ export default function AdminProfits() {
   if (!data) return <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-secondary/60 animate-pulse" />)}</div>;
 
   const cards = [
-    { label: 'الإيرادات', value: `${data.revenue} ر.س`, icon: DollarSign, color: 'bg-green-500' },
-    { label: 'التكاليف', value: `${data.costs} ر.س`, icon: Package, color: 'bg-orange-500' },
-    { label: 'صافي الربح', value: `${data.profit} ر.س`, icon: TrendingUp, color: 'bg-primary' },
+    { label: 'الإيرادات', value: `${data.revenue} `, icon: DollarSign, color: 'bg-green-500' },
+    { label: 'التكاليف', value: `${data.costs} `, icon: Package, color: 'bg-orange-500' },
+    { label: 'صافي الربح', value: `${data.profit} `, icon: TrendingUp, color: 'bg-primary' },
     { label: 'هامش الربح', value: `${data.margin}%`, icon: Percent, color: 'bg-blue-500' },
   ];
 
@@ -46,8 +46,8 @@ export default function AdminProfits() {
 
       <div className="grid sm:grid-cols-3 gap-4 mb-5">
         <div className="card-soft p-5 text-center"><p className="text-xs text-foreground/55 mb-1">عدد الطلبات</p><p className="font-heading text-2xl font-extrabold">{data.orderCount}</p></div>
-        <div className="card-soft p-5 text-center"><p className="text-xs text-foreground/55 mb-1">متوسط قيمة الطلب</p><p className="font-heading text-2xl font-extrabold text-primary">{data.avgOrder} ر.س</p></div>
-        <div className="card-soft p-5 text-center"><p className="text-xs text-foreground/55 mb-1">إجمالي الخصومات</p><p className="font-heading text-2xl font-extrabold text-orange-500">{data.discounts} ر.س</p></div>
+        <div className="card-soft p-5 text-center"><p className="text-xs text-foreground/55 mb-1">متوسط قيمة الطلب</p><p className="font-heading text-2xl font-extrabold text-primary">{data.avgOrder} </p></div>
+        <div className="card-soft p-5 text-center"><p className="text-xs text-foreground/55 mb-1">إجمالي الخصومات</p><p className="font-heading text-2xl font-extrabold text-orange-500">{data.discounts} </p></div>
       </div>
 
       <div className="card-soft p-5">
@@ -57,9 +57,9 @@ export default function AdminProfits() {
           {products.slice(0, 4).map(p => (
             <div key={p.id} className="p-3 rounded-xl bg-secondary/40 text-center">
               <p className="text-xs text-foreground/55 truncate">{p.name}</p>
-              <p className="font-bold text-sm text-primary mt-1">{p.price} ر.س</p>
-              <p className="text-xs text-foreground/45">التكلفة: {p.cost || 0} ر.س</p>
-              <p className="text-xs text-green-600 font-medium">ربح: {(p.price || 0) - (p.cost || 0)} ر.س</p>
+              <p className="font-bold text-sm text-primary mt-1">{p.price} </p>
+              <p className="text-xs text-foreground/45">التكلفة: {p.cost || 0} </p>
+              <p className="text-xs text-green-600 font-medium">ربح: {(p.price || 0) - (p.cost || 0)} </p>
             </div>
           ))}
         </div>

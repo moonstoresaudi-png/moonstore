@@ -255,6 +255,8 @@ create table if not exists public.store_settings (
   tiktok text not null default '',
   youtube text not null default '',
   category_images jsonb not null default '{}'::jsonb,
+  announcement_enabled boolean not null default false,
+  announcement_text text not null default '',
   updated_at timestamptz not null default now()
 );
 

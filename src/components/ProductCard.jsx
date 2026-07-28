@@ -48,8 +48,8 @@ export default function ProductCard({ product }) {
 
         <div className="mt-2 pt-1 flex items-baseline gap-2">
           <span className="text-primary font-display font-bold text-lg">{product.price}</span>
-          <span className="text-primary/70 text-xs font-medium -mr-1">ر.س</span>
-          {product.old_price && <span className="text-foreground/35 text-xs line-through">{product.old_price} ر.س</span>}
+          <span className="text-primary/70 text-xs font-medium -mr-1"></span>
+          {product.old_price && <span className="text-foreground/35 text-xs line-through">{product.old_price} </span>}
         </div>
 
         <button

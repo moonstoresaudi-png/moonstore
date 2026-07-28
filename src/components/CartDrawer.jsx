@@ -29,7 +29,7 @@ export default function CartDrawer() {
                   <img src={item.image_url} alt={item.name} className="w-16 h-16 rounded-xl object-cover" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-primary text-sm font-bold mt-0.5">{item.price} ر.س</p>
+                    <p className="text-primary text-sm font-bold mt-0.5">{item.price} </p>
                     <div className="flex items-center gap-2 mt-2">
                       <button onClick={() => updateQty(item.id, -1)} className="w-6 h-6 rounded-lg border border-border flex items-center justify-center"><Minus className="w-3 h-3" /></button>
                       <span className="text-sm w-5 text-center">{item.qty}</span>
@@ -47,7 +47,7 @@ export default function CartDrawer() {
           <div className="px-5 py-4 border-t border-border space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-foreground/70 text-sm">الإجمالي</span>
-              <span className="text-primary font-heading font-bold text-lg">{total} ر.س</span>
+              <span className="text-primary font-heading font-bold text-lg">{total} </span>
             </div>
             <button onClick={() => { setIsOpen(false); navigate('/checkout'); }} className="w-full py-3.5 btn-primary">إتمام الطلب</button>
           </div>

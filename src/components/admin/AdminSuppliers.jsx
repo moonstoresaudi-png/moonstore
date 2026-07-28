@@ -64,7 +64,7 @@ export default function AdminSuppliers() {
               <div className="space-y-1.5 pt-2 border-t border-border text-sm">
                 <p className="flex items-center gap-2 text-foreground/60"><span className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center"><Package className="w-3 h-3 text-primary" /></span> {s.product_type}</p>
                 {s.phone && <p className="flex items-center gap-2 text-foreground/60" dir="ltr"><span className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center"><Phone className="w-3 h-3 text-primary" /></span> {s.phone}</p>}
-                {s.unit_cost > 0 && <p className="text-primary font-bold">التكلفة: {s.unit_cost} ر.س / وحدة</p>}
+                {s.unit_cost > 0 && <p className="text-primary font-bold">التكلفة: {s.unit_cost}  / وحدة</p>}
                 {s.notes && <p className="text-xs text-foreground/45">{s.notes}</p>}
               </div>
             </div>

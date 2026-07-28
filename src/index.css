@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@300;400;500;700;800&family=Aref+Ruqaa:wght@400;700&family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;600&family=Lateef&family=El+Messiri:wght@400;600&family=Scheherazade+New:wght@400;700&family=Harmattan:wght@400;700&display=swap');
 
+/* رمز الريال السعودي الرسمي (SAMA) — خط محلي مضمّن بالمشروع (رخصة SIL OFL 1.1) */
+@font-face {
+  font-family: 'saudi_riyal';
+  src: url('/fonts/saudi-riyal/saudi_riyal.woff2') format('woff2'),
+       url('/fonts/saudi-riyal/saudi_riyal.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -31,9 +41,9 @@
     --violet-light: 310 28% 46%;
     --gold: 40 55% 62%;
     --radius: 0.875rem;
-    --font-heading: 'Cairo', 'Tajawal', sans-serif;
-    --font-body: 'Tajawal', 'Cairo', sans-serif;
-    --font-display: 'El Messiri', 'Tajawal', serif;
+    --font-heading: 'Tajawal', 'saudi_riyal', 'Cairo', sans-serif;
+    --font-body: 'Tajawal', 'saudi_riyal', 'Cairo', sans-serif;
+    --font-display: 'Tajawal', 'saudi_riyal', 'El Messiri', serif;
   }
 }
 
@@ -95,6 +105,14 @@
     transform: translateZ(0);
   }
   .marquee-track:hover { animation-play-state: paused; }
+  .prep-marquee-track {
+    display: flex; width: max-content;
+    animation: marquee 22s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+  }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
@@ -106,6 +124,12 @@
 @keyframes truck-drive {
   0% { left: -140px; }
   100% { left: 100%; }
+}
+@keyframes car-drive {
+  0% { left: -230px; transform: translateY(0); }
+  48% { transform: translateY(-3px); }
+  50% { left: 105%; transform: translateY(0); }
+  100% { left: 105%; }
 }
 @keyframes wheel-spin {
   from { transform: rotate(0deg); }
@@ -120,6 +144,7 @@
   to { transform: rotateY(180deg); }
 }
 .truck-drive { animation: truck-drive 9s linear infinite; }
+.car-drive { animation: car-drive 5.5s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
 .wheel-spin { animation: wheel-spin 0.5s linear infinite; }
 .coin-bounce { animation: coin-bounce 2s ease-in-out infinite; }
 .card-3d { perspective: 1000px; transform-style: preserve-3d; transition: transform 0.6s; }

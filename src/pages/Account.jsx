@@ -71,7 +71,7 @@ export default function Account() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border text-sm">
                   <div><p className="text-xs text-foreground/50">المنتج</p><p className="font-medium truncate">{o.product_name}</p></div>
                   <div><p className="text-xs text-foreground/50">الكمية</p><p className="font-medium">{o.quantity || 1}</p></div>
-                  <div><p className="text-xs text-foreground/50">الإجمالي</p><p className="font-bold text-primary">{o.total} ر.س</p></div>
+                  <div><p className="text-xs text-foreground/50">الإجمالي</p><p className="font-bold text-primary">{o.total} </p></div>
                   <div><p className="text-xs text-foreground/50">الحالة</p><p className="font-medium">{o.status}</p></div>
                 </div>
               </div>

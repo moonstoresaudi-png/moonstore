@@ -116,18 +116,18 @@ export default function ProductConfigurator({ product }) {
           </div>
 
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-display text-3xl font-bold text-primary">{unitPrice} ر.س</span>
+            <span className="font-display text-3xl font-bold text-primary">{unitPrice} </span>
             {product.old_price > 0 && <span className="text-foreground/40 text-lg line-through">{product.old_price}</span>}
           </div>
 
           <div className="bg-secondary/40 rounded-xl p-3 mb-5 text-sm">
-            <span className="text-foreground/60">ابتداءً من <strong className="text-primary">{Math.ceil(unitPrice / 4)} ر.س</strong> /شهر أو على 4 دفعات بدون فوائد</span>
+            <span className="text-foreground/60">ابتداءً من <strong className="text-primary">{Math.ceil(unitPrice / 4)} </strong> /شهر أو على 4 دفعات بدون فوائد</span>
           </div>
 
           {product.has_sash && (
             <Section label="إضافة وشاح" required>
               <div className="flex gap-2">
-                <button onClick={() => update('addSash', true)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.addSash ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>إضافة وشاح +{product.sash_addon || 50} ر.س</button>
+                <button onClick={() => update('addSash', true)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.addSash ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>إضافة وشاح +{product.sash_addon || 50} </button>
                 <button onClick={() => update('addSash', false)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${!config.addSash ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>بدون</button>
               </div>
             </Section>
@@ -197,7 +197,7 @@ export default function ProductConfigurator({ product }) {
 
           <Section label="التغليف">
             <div className="flex gap-2">
-              <button onClick={() => update('packaging', true)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.packaging ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>إضافة تغليف +{product.packaging_addon || 15} ر.س</button>
+              <button onClick={() => update('packaging', true)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.packaging ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>إضافة تغليف +{product.packaging_addon || 15} </button>
               <button onClick={() => update('packaging', false)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${!config.packaging ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>بدون</button>
             </div>
           </Section>
@@ -209,7 +209,7 @@ export default function ProductConfigurator({ product }) {
               <button onClick={() => setQty(q => q + 1)} className="w-9 h-9 rounded-full hover:bg-secondary flex items-center justify-center"><Plus className="w-4 h-4" /></button>
             </div>
             <button onClick={handleAdd} disabled={!product.in_stock} className="flex-1 py-3.5 btn-primary disabled:opacity-50 inline-flex items-center justify-center gap-2 text-sm">
-              {added ? <><Check className="w-4 h-4" /> تمت الإضافة</> : <><ShoppingBag className="w-4 h-4" /> إضافة إلى السلة — {totalPrice} ر.س</>}
+              {added ? <><Check className="w-4 h-4" /> تمت الإضافة</> : <><ShoppingBag className="w-4 h-4" /> إضافة إلى السلة — {totalPrice} </>}
             </button>
           </div>
 

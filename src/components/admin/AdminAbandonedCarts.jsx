@@ -19,7 +19,7 @@ export default function AdminAbandonedCarts() {
       await sendEmail({
         to: order.email,
         subject: `تذكير: أكمل طلبك في ${settings.store_name} 🛒`,
-        body: `<div dir="rtl" style="font-family:Arial,sans-serif"><h2>مرحبًا ${order.customer_name}،</h2><p>لاحظنا أنك لم تكمل طلبك. منتجاتك لا تزال بانتظارك!</p><p>رقم الطلب: #${order.order_number || order.id.slice(-6)}</p><p>الإجمالي: ${order.total} ر.س</p><a href="${window.location.origin}" style="background:#6B4D6C;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;display:inline-block;margin-top:10px">إكمال الطلب</a></div>`,
+        body: `<div dir="rtl" style="font-family:Arial,sans-serif"><h2>مرحبًا ${order.customer_name}،</h2><p>لاحظنا أنك لم تكمل طلبك. منتجاتك لا تزال بانتظارك!</p><p>رقم الطلب: #${order.order_number || order.id.slice(-6)}</p><p>الإجمالي: ${order.total} </p><a href="${window.location.origin}" style="background:#6B4D6C;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;display:inline-block;margin-top:10px">إكمال الطلب</a></div>`,
       });
       alert('تم إرسال التذكير بنجاح');
     } catch { alert('تعذّر إرسال البريد — تأكد أنك فعّلت Supabase Edge Function (send-email)، راجع SETUP.md'); }
@@ -47,7 +47,7 @@ export default function AdminAbandonedCarts() {
                 <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center"><Clock className="w-5 h-5 text-amber-600" /></div>
                 <div className="min-w-0">
                   <p className="font-bold text-sm truncate">{o.customer_name} <span className="text-foreground/50 font-normal" dir="ltr">— {o.phone}</span></p>
-                  <p className="text-xs text-foreground/50 truncate">{o.product_name} • {o.total} ر.س • {o.city}</p>
+                  <p className="text-xs text-foreground/50 truncate">{o.product_name} • {o.total}  • {o.city}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

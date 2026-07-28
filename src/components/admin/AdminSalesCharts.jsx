@@ -92,7 +92,7 @@ export default function AdminSalesCharts() {
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', fontSize: 13 }} />
-              <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 4 }} name="الإيراد (ر.س)" />
+              <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 4 }} name="الإيراد ()" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -129,8 +129,8 @@ export default function AdminSalesCharts() {
               <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', fontSize: 13 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="revenue" fill="hsl(var(--primary))" name="الإيراد (ر.س)" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="profit" fill="#10b981" name="صافي الربح (ر.س)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="revenue" fill="hsl(var(--primary))" name="الإيراد ()" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="profit" fill="#10b981" name="صافي الربح ()" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

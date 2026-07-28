@@ -150,7 +150,7 @@ export default function AdminOrders() {
     <div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         <StatCard icon={Inbox} label="إجمالي الطلبات" value={stats.total} color="bg-blue-500" />
-        <StatCard icon={DollarSign} label="الإيرادات" value={`${stats.revenue} ر.س`} color="bg-green-500" />
+        <StatCard icon={DollarSign} label="الإيرادات" value={`${stats.revenue} `} color="bg-green-500" />
         <StatCard icon={Clock} label="قيد المعالجة" value={stats.pending} color="bg-amber-500" />
         <StatCard icon={CheckCircle2} label="تم التسليم" value={stats.delivered} color="bg-violet-500" />
       </div>
@@ -187,7 +187,7 @@ export default function AdminOrders() {
                       <td className="p-3"><div className="font-medium">{o.customer_name}</div><div className="text-xs text-foreground/50" dir="ltr">{o.phone}</div></td>
                       <td className="p-3 hidden sm:table-cell text-foreground/70 max-w-[140px] truncate">{o.product_name}</td>
                       <td className="p-3 hidden md:table-cell text-foreground/60">{o.city || '—'}</td>
-                      <td className="p-3 font-bold text-primary">{o.total} ر.س</td>
+                      <td className="p-3 font-bold text-primary">{o.total} </td>
                       <td className="p-3">
                         <select value={o.status} onChange={e => updateStatus(o.id, e.target.value)} className={`text-xs font-bold rounded-full px-2.5 py-1 border-0 cursor-pointer ${STATUS[o.status]?.cls}`}>
                           {Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}

@@ -5,7 +5,7 @@ import Logo from './Logo';
 import { useCart } from '@/lib/cartContext';
 
 const links = [
-  { label: 'الرئيسية', href: '#home' },
+  { label: 'الرئيسية', to: '/' },
   { label: 'المتجر', to: '/shop' },
   { label: 'بكج تخرج جامعة', to: '/university-package' },
   { label: 'من نحن', to: '/about' },

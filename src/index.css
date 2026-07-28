@@ -89,6 +89,10 @@
   .marquee-track {
     display: flex; width: max-content;
     animation: marquee 40s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
   }
   .marquee-track:hover { animation-play-state: paused; }
   .no-scrollbar::-webkit-scrollbar { display: none; }

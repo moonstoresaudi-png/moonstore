@@ -111,6 +111,7 @@ create table if not exists public.orders (
   tracking_number text,
   tracking_stage text not null default 'placed' check (tracking_stage in ('placed','preparing','shipped','out_for_delivery','delivered')),
   payment_method text not null default 'card' check (payment_method in ('card','cod')),
+  payment_id text,
   discount_code text,
   discount_amount numeric not null default 0,
   notes text,
@@ -131,12 +132,11 @@ create policy "orders_select_own_or_admin" on public.orders
 create policy "orders_write_admin" on public.orders
   for update using (public.is_admin()) with check (public.is_admin());
 
--- تسمح للزائر (بدون تسجيل دخول) بتأكيد دفعه فقط: تحويل حالة نفس الطلب من pending إلى new
--- بعد رجوعه من بوابة مويسر (Moyasar) — لا تسمح بأي تعديل آخر
-create policy "orders_confirm_payment" on public.orders
-  for update
-  using (status = 'pending')
-  with check (status = 'new');
+-- ملاحظة أمان: لا يوجد هنا أي صلاحية تسمح للزائر بتغيير حالة الطلب مباشرة
+-- من المتصفح. تأكيد الدفع (تحويل الطلب من pending إلى new) يصير فقط عبر
+-- Edge Function اسمها verify-payment، والتي تتحقق من مويسر سيرفر-لسيرفر
+-- وتطابق المبلغ بالضبط قبل ما تحدّث الطلب (بصلاحية service_role الكاملة
+-- التي تتجاوز RLS تلقائيًا). راجع supabase/functions/verify-payment.
 
 create policy "orders_delete_admin" on public.orders
   for delete using (public.is_admin());

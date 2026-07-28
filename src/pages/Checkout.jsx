@@ -12,6 +12,9 @@ import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, Shiel
 
 const COUNTRIES = ['السعودية', 'الإمارات', 'الكويت', 'البحرين', 'قطر', 'سلطنة عمان'];
 
+// صيغة الرمز المختصر للعنوان الوطني السعودي: 4 حروف إنجليزية + 4 أرقام (مثال: RRRD2929)
+const NATIONAL_ADDRESS_PATTERN = /^[A-Z]{4}[0-9]{4}$/;
+
 export default function Checkout() {
   const { items, total, setIsOpen } = useCart();
   const { user } = useAuth();
@@ -28,6 +31,8 @@ export default function Checkout() {
   const [discount, setDiscount] = useState(null); // { code, discount_percent }
   const [discountError, setDiscountError] = useState('');
   const [checkingDiscount, setCheckingDiscount] = useState(false);
+  const [nationalAddressError, setNationalAddressError] = useState('');
+  const isSaudi = form.country === 'السعودية';
 
   const shippingCost = settings.shipping_cost;
   const codFee = paymentMethod === 'cod' ? settings.cod_fee : 0;
@@ -102,6 +107,14 @@ export default function Checkout() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    if (isSaudi) {
+      const code = (form.short_address_code || '').trim().toUpperCase();
+      if (!NATIONAL_ADDRESS_PATTERN.test(code)) {
+        setNationalAddressError('العنوان الوطني مطلوب — أدخل الرمز المختصر بصيغة صحيحة (4 حروف إنجليزية + 4 أرقام)، مثال: RRRD2929');
+        return;
+      }
+    }
+    setNationalAddressError('');
     setStep(2);
     // نحفظه كـ "pending" مؤقتًا لتتبع السلات المتروكة إن لم يكمل الدفع
     createOrder('pending').then(order => {
@@ -121,15 +134,30 @@ export default function Checkout() {
     const pending = JSON.parse(pendingRaw);
 
     if (status === 'paid') {
-      entities.Order.update(pending.id, { status: 'new', payment_method: 'card' })
-        .then(() => {
-          setOrderId(pending.id);
-          setOrderNumber(pending.order_number);
-          setStep(3);
-          setIsOpen(false);
-          localStorage.removeItem('ms_pending_order');
+      // مهم: لا نثق بـ status=paid من الرابط وحده — هذا فقط مؤشر أن نراجع.
+      // التأكيد الفعلي يصير عبر Edge Function تتحقق من مويسر سيرفر-لسيرفر
+      // وتطابق المبلغ قبل ما تحدّث حالة الطلب.
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ order_id: pending.id, payment_id: paymentId }),
+      })
+        .then(res => res.json())
+        .then(result => {
+          if (result.ok) {
+            setOrderId(pending.id);
+            setOrderNumber(pending.order_number);
+            setStep(3);
+            setIsOpen(false);
+            localStorage.removeItem('ms_pending_order');
+          } else {
+            setStep(2);
+          }
         })
-        .catch(() => {});
+        .catch(() => setStep(2));
     } else if (status === 'failed') {
       // الطلب يبقى pending كما هو؛ نعرض للزائر خيار إعادة المحاولة
       setStep(2);
@@ -216,13 +244,29 @@ export default function Checkout() {
                   <div><label className="text-xs font-medium text-foreground/60 mb-1 block">العنوان التفصيلي *</label><input required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" /></div>
 
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-medium text-foreground/60 mb-1 block">الرمز الوطني المختصر (اختياري)</label>
-                    <input value={form.short_address_code} onChange={e => setForm({ ...form, short_address_code: e.target.value.toUpperCase() })} placeholder="مثال: RRRD2929" dir="ltr" className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" />
+                    <label className="text-xs font-medium text-foreground/60 mb-1 block">
+                      العنوان الوطني (الرمز المختصر) {isSaudi ? '*' : '(اختياري)'}
+                    </label>
+                    <input
+                      required={isSaudi}
+                      value={form.short_address_code}
+                      onChange={e => { setForm({ ...form, short_address_code: e.target.value.toUpperCase() }); setNationalAddressError(''); }}
+                      placeholder="مثال: RRRD2929"
+                      dir="ltr"
+                      maxLength={8}
+                      className={`w-full px-4 py-3 rounded-xl border bg-card focus:outline-none ${nationalAddressError ? 'border-red-400 focus:border-red-500' : 'border-border focus:border-primary'}`}
+                    />
+                    {isSaudi && (
+                      <p className="text-[11px] text-foreground/45 mt-1">مطلوب للطلبات داخل السعودية — 4 حروف إنجليزية ثم 4 أرقام، تجده برسالة نصية من البريد السعودي أو تطبيق "بريدي".</p>
+                    )}
+                    {nationalAddressError && (
+                      <p className="text-[11px] text-red-500 mt-1">{nationalAddressError}</p>
+                    )}
                   </div>
 
                   <div className="sm:col-span-2">
                     <button type="button" onClick={() => setShowMap(true)} className="w-full py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary font-medium text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/5 transition-colors">
-                      <MapPin className="w-4 h-4" /> {form.lat ? 'تم تحديد الموقع ✓ — تعديل الموقع' : 'تحديد الموقع من الخريطة'}
+                      <MapPin className="w-4 h-4" /> {form.lat ? 'تم تحديد الموقع ✓ — تعديل الموقع' : 'تحديد الموقع من الخريطة (اختياري)'}
                     </button>
                   </div>
                 </div>

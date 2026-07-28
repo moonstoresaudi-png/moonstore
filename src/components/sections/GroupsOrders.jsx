@@ -1,10 +1,8 @@
 import React from 'react';
 import { Users, MessageCircle, Percent, Package } from 'lucide-react';
-import { useStoreSettings } from '@/lib/SettingsContext';
+import { CONTACT_WHATSAPP_LINK } from '@/lib/contact';
 
 export default function GroupsOrders() {
-  const { settings } = useStoreSettings();
-  const phone = settings.whatsapp || settings.phone;
   return (
     <section className="py-12 sm:py-16 bg-secondary/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -28,7 +26,7 @@ export default function GroupsOrders() {
                   </div>
                 ))}
               </div>
-              <a href={`https://wa.me/${phone}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors">
+              <a href={CONTACT_WHATSAPP_LINK} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors">
                 <MessageCircle className="w-5 h-5" /> تواصل عبر واتساب للطلب الجماعي
               </a>
             </div>

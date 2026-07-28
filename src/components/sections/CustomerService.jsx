@@ -1,14 +1,15 @@
 import React from 'react';
 import { Phone, MessageCircle, Mail } from 'lucide-react';
 import { useStoreSettings } from '@/lib/SettingsContext';
+import { CONTACT_PHONE, CONTACT_WHATSAPP_LINK, CONTACT_TEL_LINK } from '@/lib/contact';
 
 export default function CustomerService() {
   const { settings } = useStoreSettings();
-  const phone = settings.whatsapp || settings.phone;
+  const phone = CONTACT_PHONE;
 
   const items = [
-    { icon: Phone, label: 'اتصال', sub: `+${settings.phone}`, href: `tel:+${settings.phone}`, color: 'bg-green-500' },
-    { icon: MessageCircle, label: 'واتساب', sub: 'تواصل مباشر', href: `https://wa.me/${phone}`, color: 'bg-green-600' },
+    { icon: Phone, label: 'اتصال', sub: `+${phone}`, href: CONTACT_TEL_LINK, color: 'bg-green-500' },
+    { icon: MessageCircle, label: 'واتساب', sub: 'تواصل مباشر', href: CONTACT_WHATSAPP_LINK, color: 'bg-green-600' },
     { icon: Mail, label: 'بريد', sub: 'خدمة العملاء', href: `mailto:${settings.email}`, color: 'bg-primary' },
   ];
   return (

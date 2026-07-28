@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Instagram, Phone, Smartphone, MessageCircle } from 'lucide-react';
 import Logo from './Logo';
 import { useStoreSettings } from '@/lib/SettingsContext';
+import { CONTACT_PHONE, CONTACT_WHATSAPP_LINK, CONTACT_TEL_LINK } from '@/lib/contact';
 
 const PAYMENT_LOGOS = [
   { name: 'Visa', url: '/images/brand/visa.jpg' },
@@ -30,7 +31,7 @@ function SocialIcon({ href, title, children }) {
 
 export default function Footer() {
   const { settings } = useStoreSettings();
-  const phone = settings.whatsapp || settings.phone;
+  const phone = CONTACT_PHONE;
 
   return (
     <footer className="mt-10 relative" dir="rtl">
@@ -55,10 +56,25 @@ export default function Footer() {
 
           {/* أيقونات التواصل */}
           <div className="flex justify-center gap-3 mb-8 flex-wrap">
-            <SocialIcon href={settings.tiktok} title="تيك توك">
+            <SocialIcon href={settings.instagram || 'https://www.instagram.com/eman220199?igsh=cjNhZHdzdW9naHZh&utm_source=qr'} title="انستقرام"><Instagram className="w-5 h-5" /></SocialIcon>
+            <SocialIcon href={settings.tiktok || 'https://www.tiktok.com/@mon201920?_r=1&_t=ZS-988JTzVr0Ap'} title="تيك توك">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
             </SocialIcon>
-            <SocialIcon href={settings.instagram} title="انستقرام"><Instagram className="w-5 h-5" /></SocialIcon>
+            {settings.twitter && (
+              <SocialIcon href={settings.twitter} title="إكس (تويتر)">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.9 2H22l-7.2 8.2L23.3 22h-6.6l-5.2-6.8L5.4 22H2.3l7.7-8.8L1 2h6.8l4.7 6.2L18.9 2zm-1.2 18h1.8L7.4 4H5.5l12.2 16z"/></svg>
+              </SocialIcon>
+            )}
+            {settings.snapchat && (
+              <SocialIcon href={settings.snapchat} title="سناب شات">
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M12 2c3.5 0 5.6 2.3 5.7 5.4l.1 2.1c0 .2.1.3.4.4.4.1 1.2-.4 1.5-.4.3 0 1.1.1 1.1.8 0 .5-.5.8-1 1-.2.1-.6.2-.6.5 0 .5.7 1.8 2.4 2.4.3.1.5.4.4.7-.2.6-1.3.8-2 1-.1.3-.2.7-.3 1-.1.3-.4.3-.7.3-.5 0-1-.1-1.6.1-.6.2-1.1.9-2.5.9-1.3 0-1.8-.7-2.4-.9-.6-.2-1.1-.1-1.6-.1-.3 0-.6 0-.7-.3-.1-.3-.2-.7-.3-1-.7-.2-1.8-.4-2-1-.1-.3.1-.6.4-.7 1.7-.6 2.4-1.9 2.4-2.4 0-.3-.4-.4-.6-.5-.5-.2-1-.5-1-1 0-.7.8-.8 1.1-.8.3 0 1.1.5 1.5.4.3-.1.4-.2.4-.4l.1-2.1C6.4 4.3 8.5 2 12 2z"/></svg>
+              </SocialIcon>
+            )}
+            {settings.youtube && (
+              <SocialIcon href={settings.youtube} title="يوتيوب">
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.5v-7l6.3 3.5-6.3 3.5z"/></svg>
+              </SocialIcon>
+            )}
           </div>
 
           <hr className="border-white/10 mb-8" />

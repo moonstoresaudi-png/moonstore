@@ -37,10 +37,10 @@ export default function Policies() {
             <table className="w-full text-sm">
               <thead><tr className="bg-secondary/50 text-right"><th className="p-3 font-medium">المنطقة</th><th className="p-3 font-medium">المدة</th><th className="p-3 font-medium">الرسوم</th></tr></thead>
               <tbody className="divide-y divide-border">
-                <tr><td className="p-3">الرياض، جدة، الدمام</td><td className="p-3">2-3 أيام</td><td className="p-3 font-bold text-primary">25 ر.س</td></tr>
-                <tr><td className="p-3">باقي المدن الرئيسية</td><td className="p-3">3-5 أيام</td><td className="p-3 font-bold text-primary">30 ر.س</td></tr>
-                <tr><td className="p-3">المناطق النائية</td><td className="p-3">5-7 أيام</td><td className="p-3 font-bold text-primary">40 ر.س</td></tr>
-                <tr className="bg-green-50/50"><td className="p-3 font-medium">شحن مجاني</td><td className="p-3">—</td><td className="p-3 font-bold text-green-600">للطلبات فوق 400 ر.س</td></tr>
+                <tr><td className="p-3">الرياض، جدة، الدمام</td><td className="p-3">2-3 أيام</td><td className="p-3 font-bold text-primary">25 </td></tr>
+                <tr><td className="p-3">باقي المدن الرئيسية</td><td className="p-3">3-5 أيام</td><td className="p-3 font-bold text-primary">30 </td></tr>
+                <tr><td className="p-3">المناطق النائية</td><td className="p-3">5-7 أيام</td><td className="p-3 font-bold text-primary">40 </td></tr>
+                <tr className="bg-green-50/50"><td className="p-3 font-medium">شحن مجاني</td><td className="p-3">—</td><td className="p-3 font-bold text-green-600">للطلبات فوق 400 </td></tr>
               </tbody>
             </table>
           </div>
@@ -65,7 +65,7 @@ export default function Policies() {
             </div>
             <div className="flex gap-3">
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">3</span>
-              <div><p className="font-bold text-sm mb-1">طريقة الإرجاع</p><p className="text-sm text-foreground/60">تواصل معنا عبر واتساب برقم الطلب، وسنرسل مندوب الشحن لاستلام المنتج. تُخصم رسوم شحن الإرجاع (15 ر.س) من المبلغ المسترد.</p></div>
+              <div><p className="font-bold text-sm mb-1">طريقة الإرجاع</p><p className="text-sm text-foreground/60">تواصل معنا عبر واتساب برقم الطلب، وسنرسل مندوب الشحن لاستلام المنتج. تُخصم رسوم شحن الإرجاع (15 ) من المبلغ المسترد.</p></div>
             </div>
             <div className="flex gap-3">
               <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shrink-0">4</span>

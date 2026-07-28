@@ -6,6 +6,7 @@ import Hero from '@/components/sections/Hero';
 import TrustBadges from '@/components/sections/TrustBadges';
 import Categories from '@/components/sections/Categories';
 import FeaturedProducts from '@/components/sections/FeaturedProducts';
+import GroupsOrders from '@/components/sections/GroupsOrders';
 import DeliveryAnimation from '@/components/sections/DeliveryAnimation';
 import TestimonialsMarquee from '@/components/sections/TestimonialsMarquee';
 import Newsletter from '@/components/sections/Newsletter';
@@ -22,6 +23,7 @@ export default function Home() {
         <TrustBadges />
         <Categories />
         <FeaturedProducts />
+        <GroupsOrders />
         <OffersSection />
         <DeliveryAnimation />
         <TestimonialsMarquee />

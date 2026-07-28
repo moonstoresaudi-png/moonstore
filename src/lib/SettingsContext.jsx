@@ -20,6 +20,8 @@ const DEFAULTS = {
   snapchat: '',
   tiktok: 'https://www.tiktok.com/@mon201920?_r=1&_t=ZS-988JTzVr0Ap',
   youtube: '',
+  announcement_enabled: false,
+  announcement_text: '',
 };
 
 const SettingsContext = createContext({ settings: DEFAULTS, loading: true, refresh: () => {} });

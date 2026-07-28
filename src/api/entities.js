@@ -95,6 +95,7 @@ export const entities = {
   Order: createEntity('orders'),
   DiscountCode: createEntity('discount_codes'),
   Supplier: createEntity('suppliers'),
+  Review: createEntity('reviews'),
 };
 
 // تتبّع طلب بأمان (زائر بدون تسجيل دخول) عبر رقم الطلب أو الجوال

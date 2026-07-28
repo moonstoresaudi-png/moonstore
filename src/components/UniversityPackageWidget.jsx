@@ -253,7 +253,7 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
           <button onClick={handleAdd} className="flex-1 py-3 btn-primary inline-flex items-center justify-center gap-2">
             {added
               ? <><Check className="w-4 h-4" /> تمت الإضافة</>
-              : <><ShoppingBag className="w-4 h-4" /> أضف البكج للسلة — {productPrice} ر.س</>}
+              : <><ShoppingBag className="w-4 h-4" /> أضف البكج للسلة — {productPrice} </>}
           </button>
         </div>
       </div>

@@ -138,7 +138,7 @@ export default function AdminProducts() {
             <h5 className="font-bold text-sm mb-3 text-primary">التسعير والمخزون</h5>
             <div className="grid sm:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">السعر الحالي (ر.س) *</label>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">السعر الحالي () *</label>
                 <input type="number" required value={form.price} onChange={e => setForm({ ...form, price: +e.target.value })} placeholder="0" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
               </div>
               <div>
@@ -146,7 +146,7 @@ export default function AdminProducts() {
                 <input type="number" value={form.old_price} onChange={e => setForm({ ...form, old_price: +e.target.value })} placeholder="اتركه 0 إذا ما فيه خصم" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
               </div>
               <div>
-                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">تكلفة الشراء (ر.س)</label>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">تكلفة الشراء ()</label>
                 <input type="number" value={form.cost} onChange={e => setForm({ ...form, cost: +e.target.value })} placeholder="لحساب الأرباح فقط، لا يظهر للزوار" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
               </div>
               <div>
@@ -170,11 +170,11 @@ export default function AdminProducts() {
             <p className="text-xs text-foreground/50 mb-3">تُستخدم فقط إذا فعّلت "محاكي الوشاح" بالأسفل.</p>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">سعر إضافة الوشاح (ر.س)</label>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">سعر إضافة الوشاح ()</label>
                 <input type="number" value={form.sash_addon} onChange={e => setForm({ ...form, sash_addon: +e.target.value })} placeholder="50" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
               </div>
               <div>
-                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">سعر التغليف الفاخر (ر.س)</label>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">سعر التغليف الفاخر ()</label>
                 <input type="number" value={form.packaging_addon} onChange={e => setForm({ ...form, packaging_addon: +e.target.value })} placeholder="15" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function AdminProducts() {
               <div className="p-3">
                 <p className="font-medium text-sm truncate">{p.name}</p>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-primary">السعر: <InlineEdit value={p.price} onSave={v => updateField(p.id, 'price', v)} suffix=" ر.س" /></span>
+                  <span className="text-primary">السعر: <InlineEdit value={p.price} onSave={v => updateField(p.id, 'price', v)} suffix=" " /></span>
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-xs text-foreground/55">المخزون: <InlineEdit value={p.stock_quantity || 0} onSave={v => updateField(p.id, 'stock_quantity', v)} /></span>

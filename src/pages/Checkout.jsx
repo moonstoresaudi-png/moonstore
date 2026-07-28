@@ -12,6 +12,9 @@ import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, Shiel
 
 const COUNTRIES = ['السعودية', 'الإمارات', 'الكويت', 'البحرين', 'قطر', 'سلطنة عمان'];
 
+// صيغة الرمز المختصر للعنوان الوطني السعودي: 4 حروف إنجليزية + 4 أرقام (مثال: RRRD2929)
+const NATIONAL_ADDRESS_PATTERN = /^[A-Z]{4}[0-9]{4}$/;
+
 export default function Checkout() {
   const { items, total, setIsOpen } = useCart();
   const { user } = useAuth();
@@ -28,6 +31,8 @@ export default function Checkout() {
   const [discount, setDiscount] = useState(null); // { code, discount_percent }
   const [discountError, setDiscountError] = useState('');
   const [checkingDiscount, setCheckingDiscount] = useState(false);
+  const [nationalAddressError, setNationalAddressError] = useState('');
+  const isSaudi = form.country === 'السعودية';
 
   const shippingCost = settings.shipping_cost;
   const codFee = paymentMethod === 'cod' ? settings.cod_fee : 0;
@@ -102,6 +107,14 @@ export default function Checkout() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    if (isSaudi) {
+      const code = (form.short_address_code || '').trim().toUpperCase();
+      if (!NATIONAL_ADDRESS_PATTERN.test(code)) {
+        setNationalAddressError('العنوان الوطني مطلوب — أدخل الرمز المختصر بصيغة صحيحة (4 حروف إنجليزية + 4 أرقام)، مثال: RRRD2929');
+        return;
+      }
+    }
+    setNationalAddressError('');
     setStep(2);
     // نحفظه كـ "pending" مؤقتًا لتتبع السلات المتروكة إن لم يكمل الدفع
     createOrder('pending').then(order => {
@@ -121,15 +134,30 @@ export default function Checkout() {
     const pending = JSON.parse(pendingRaw);
 
     if (status === 'paid') {
-      entities.Order.update(pending.id, { status: 'new', payment_method: 'card' })
-        .then(() => {
-          setOrderId(pending.id);
-          setOrderNumber(pending.order_number);
-          setStep(3);
-          setIsOpen(false);
-          localStorage.removeItem('ms_pending_order');
+      // مهم: لا نثق بـ status=paid من الرابط وحده — هذا فقط مؤشر أن نراجع.
+      // التأكيد الفعلي يصير عبر Edge Function تتحقق من مويسر سيرفر-لسيرفر
+      // وتطابق المبلغ قبل ما تحدّث حالة الطلب.
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ order_id: pending.id, payment_id: paymentId }),
+      })
+        .then(res => res.json())
+        .then(result => {
+          if (result.ok) {
+            setOrderId(pending.id);
+            setOrderNumber(pending.order_number);
+            setStep(3);
+            setIsOpen(false);
+            localStorage.removeItem('ms_pending_order');
+          } else {
+            setStep(2);
+          }
         })
-        .catch(() => {});
+        .catch(() => setStep(2));
     } else if (status === 'failed') {
       // الطلب يبقى pending كما هو؛ نعرض للزائر خيار إعادة المحاولة
       setStep(2);
@@ -151,7 +179,7 @@ export default function Checkout() {
             <p className="text-xs text-foreground/55">رقم الطلب</p>
             <p className="font-display font-bold text-xl text-primary">#{orderNumber || orderId?.slice(-6) || '---'}</p>
             <p className="text-xs text-foreground/55 mt-2">طريقة الدفع: {paymentMethod === 'card' ? 'بطاقة' : 'الدفع عند الاستلام'}</p>
-            <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} ر.س</p>
+            <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} </p>
           </div>
           <div className="flex gap-3 justify-center">
             <Link to="/track-order" className="px-6 py-3 btn-primary">تتبع الطلب</Link>
@@ -216,13 +244,29 @@ export default function Checkout() {
                   <div><label className="text-xs font-medium text-foreground/60 mb-1 block">العنوان التفصيلي *</label><input required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" /></div>
 
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-medium text-foreground/60 mb-1 block">الرمز الوطني المختصر (اختياري)</label>
-                    <input value={form.short_address_code} onChange={e => setForm({ ...form, short_address_code: e.target.value.toUpperCase() })} placeholder="مثال: RRRD2929" dir="ltr" className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" />
+                    <label className="text-xs font-medium text-foreground/60 mb-1 block">
+                      العنوان الوطني (الرمز المختصر) {isSaudi ? '*' : '(اختياري)'}
+                    </label>
+                    <input
+                      required={isSaudi}
+                      value={form.short_address_code}
+                      onChange={e => { setForm({ ...form, short_address_code: e.target.value.toUpperCase() }); setNationalAddressError(''); }}
+                      placeholder="مثال: RRRD2929"
+                      dir="ltr"
+                      maxLength={8}
+                      className={`w-full px-4 py-3 rounded-xl border bg-card focus:outline-none ${nationalAddressError ? 'border-red-400 focus:border-red-500' : 'border-border focus:border-primary'}`}
+                    />
+                    {isSaudi && (
+                      <p className="text-[11px] text-foreground/45 mt-1">مطلوب للطلبات داخل السعودية — 4 حروف إنجليزية ثم 4 أرقام، تجده برسالة نصية من البريد السعودي أو تطبيق "بريدي".</p>
+                    )}
+                    {nationalAddressError && (
+                      <p className="text-[11px] text-red-500 mt-1">{nationalAddressError}</p>
+                    )}
                   </div>
 
                   <div className="sm:col-span-2">
                     <button type="button" onClick={() => setShowMap(true)} className="w-full py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary font-medium text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/5 transition-colors">
-                      <MapPin className="w-4 h-4" /> {form.lat ? 'تم تحديد الموقع ✓ — تعديل الموقع' : 'تحديد الموقع من الخريطة'}
+                      <MapPin className="w-4 h-4" /> {form.lat ? 'تم تحديد الموقع ✓ — تعديل الموقع' : 'تحديد الموقع من الخريطة (اختياري)'}
                     </button>
                   </div>
                 </div>
@@ -263,7 +307,7 @@ export default function Checkout() {
                     <button onClick={() => setPaymentMethod('cod')} className={`p-4 rounded-xl border-2 text-center transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-border'}`}>
                       <Banknote className={`w-7 h-7 mx-auto mb-1.5 ${paymentMethod === 'cod' ? 'text-primary' : 'text-foreground/50'}`} />
                       <p className="text-sm font-bold">الدفع عند الاستلام</p>
-                      <p className="text-xs text-foreground/50">+{settings.cod_fee} ر.س رسوم</p>
+                      <p className="text-xs text-foreground/50">+{settings.cod_fee}  رسوم</p>
                     </button>
                   </div>
 
@@ -276,9 +320,9 @@ export default function Checkout() {
                   ) : (
                     <form onSubmit={handleCodSubmit}>
                       <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 mb-4">
-                        <p className="text-sm text-amber-800">سيتم تحصيل مبلغ <span className="font-bold">{grandTotal} ر.س</span> عند استلام الطلب، بما يشمل رسوم الدفع عند الاستلام ({settings.cod_fee} ر.س).</p>
+                        <p className="text-sm text-amber-800">سيتم تحصيل مبلغ <span className="font-bold">{grandTotal} </span> عند استلام الطلب، بما يشمل رسوم الدفع عند الاستلام ({settings.cod_fee} ).</p>
                       </div>
-                      <button type="submit" disabled={submitting} className="w-full py-3.5 btn-primary disabled:opacity-50">تأكيد الطلب — {grandTotal} ر.س</button>
+                      <button type="submit" disabled={submitting} className="w-full py-3.5 btn-primary disabled:opacity-50">تأكيد الطلب — {grandTotal} </button>
                     </form>
                   )}
                 </div>
@@ -296,16 +340,16 @@ export default function Checkout() {
                   <div key={item.id} className="flex gap-3 text-sm">
                     <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">{item.qty}×</div>
                     <div className="flex-1 min-w-0"><p className="truncate font-medium">{item.name}</p>{item.size && <p className="text-xs text-foreground/50">المقاس: {item.size}</p>}</div>
-                    <p className="font-bold text-primary">{item.price * item.qty} ر.س</p>
+                    <p className="font-bold text-primary">{item.price * item.qty} </p>
                   </div>
                 ))}
               </div>
               <div className="space-y-2 pt-4 border-t border-border text-sm">
-                <div className="flex justify-between"><span className="text-foreground/60">المجموع الفرعي</span><span className="font-medium">{total} ر.س</span></div>
-                {discount && <div className="flex justify-between text-green-700"><span>خصم ({discount.code})</span><span className="font-medium">-{discountAmount} ر.س</span></div>}
-                <div className="flex justify-between"><span className="text-foreground/60">الشحن</span><span className="font-medium">{shippingCost} ر.س</span></div>
-                {codFee > 0 && <div className="flex justify-between"><span className="text-foreground/60">رسم الدفع عند الاستلام</span><span className="font-medium">{codFee} ر.س</span></div>}
-                <div className="flex justify-between pt-2 border-t border-border"><span className="font-bold">الإجمالي</span><span className="font-heading font-extrabold text-lg text-primary">{grandTotal} ر.س</span></div>
+                <div className="flex justify-between"><span className="text-foreground/60">المجموع الفرعي</span><span className="font-medium">{total} </span></div>
+                {discount && <div className="flex justify-between text-green-700"><span>خصم ({discount.code})</span><span className="font-medium">-{discountAmount} </span></div>}
+                <div className="flex justify-between"><span className="text-foreground/60">الشحن</span><span className="font-medium">{shippingCost} </span></div>
+                {codFee > 0 && <div className="flex justify-between"><span className="text-foreground/60">رسم الدفع عند الاستلام</span><span className="font-medium">{codFee} </span></div>}
+                <div className="flex justify-between pt-2 border-t border-border"><span className="font-bold">الإجمالي</span><span className="font-heading font-extrabold text-lg text-primary">{grandTotal} </span></div>
               </div>
               <div className="mt-4 pt-4 border-t border-border flex items-center gap-2 text-xs text-foreground/50">
                 <ShieldCheck className="w-4 h-4 text-green-600" /> طلبك محمي ومؤمّن

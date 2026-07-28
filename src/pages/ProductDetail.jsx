@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import ProductCard from '@/components/ProductCard';
 import ProductConfigurator from '@/components/ProductConfigurator';
+import ProductReviews from '@/components/ProductReviews';
 import { ChevronLeft } from 'lucide-react';
 
 export default function ProductDetail() {
@@ -63,6 +64,8 @@ export default function ProductDetail() {
         </nav>
 
         <ProductConfigurator product={product} />
+
+        <ProductReviews productId={product.id} />
 
         {related.length > 0 && (
           <div className="mt-12">

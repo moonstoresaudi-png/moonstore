@@ -76,8 +76,8 @@ export default function AdminSettings() {
         <div>
           <h4 className="font-bold text-sm flex items-center gap-2 mb-3"><Truck className="w-4 h-4 text-primary" /> الشحن والدفع</h4>
           <div className="grid sm:grid-cols-2 gap-3">
-            <div><label className="text-xs text-foreground/55 mb-1 block">سعر الشحن (ر.س)</label><input type="number" value={form.shipping_cost} onChange={e => setForm({ ...form, shipping_cost: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /></div>
-            <div><label className="text-xs text-foreground/55 mb-1 block">رسوم الدفع عند الاستلام (ر.س)</label><input type="number" value={form.cod_fee} onChange={e => setForm({ ...form, cod_fee: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /></div>
+            <div><label className="text-xs text-foreground/55 mb-1 block">سعر الشحن ()</label><input type="number" value={form.shipping_cost} onChange={e => setForm({ ...form, shipping_cost: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /></div>
+            <div><label className="text-xs text-foreground/55 mb-1 block">رسوم الدفع عند الاستلام ()</label><input type="number" value={form.cod_fee} onChange={e => setForm({ ...form, cod_fee: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" /></div>
           </div>
         </div>
 
@@ -103,6 +103,16 @@ export default function AdminSettings() {
               );
             })}
           </div>
+        </div>
+
+        <div>
+          <h4 className="font-bold text-sm flex items-center gap-2 mb-1">إعلان/عرض أسفل زر "تسوّق الآن"</h4>
+          <p className="text-xs text-foreground/50 mb-3">فعّله وقتما تبي تعلن عن عرض أو مناسبة — يختفي تلقائيًا لو عطّلته.</p>
+          <label className="flex items-center gap-2 mb-3 cursor-pointer w-fit">
+            <input type="checkbox" checked={!!form.announcement_enabled} onChange={e => setForm({ ...form, announcement_enabled: e.target.checked })} className="w-4 h-4 accent-primary" />
+            <span className="text-sm font-medium">تفعيل الإعلان بالصفحة الرئيسية</span>
+          </label>
+          <input value={form.announcement_text || ''} onChange={e => setForm({ ...form, announcement_text: e.target.value })} placeholder="مثال: خصم 20% لفترة محدودة على جميع الأرواب 🎓" className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
         </div>
 
         <div>

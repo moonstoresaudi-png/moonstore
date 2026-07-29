@@ -105,7 +105,9 @@ export default function Checkout() {
     setSubmitting(false);
   };
 
-  const handleFormSubmit = (e) => {
+  const [checkingAddress, setCheckingAddress] = useState(false);
+
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (isSaudi) {
       const code = (form.short_address_code || '').trim().toUpperCase();
@@ -113,6 +115,27 @@ export default function Checkout() {
         setNationalAddressError('العنوان الوطني مطلوب — أدخل الرمز المختصر بصيغة صحيحة (4 حروف إنجليزية + 4 أرقام)، مثال: RRRD2929');
         return;
       }
+      setCheckingAddress(true);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-national-address`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+          body: JSON.stringify({ short_address: code }),
+        });
+        const result = await res.json();
+        if (result.ok && result.valid === false) {
+          setCheckingAddress(false);
+          setNationalAddressError('هذا الرمز غير مسجّل بالعنوان الوطني — تأكد منه عبر تطبيق "بريدي" أو موقع البريد السعودي وحاول مرة ثانية');
+          return;
+        }
+        // نستخدم العنوان المرجّع تلقائيًا (المدينة/الحي) لو توفر، لتعبئة الحقول بدقة
+        if (result.address?.city && !form.city) {
+          setForm(f => ({ ...f, city: result.address.city }));
+        }
+      } catch {
+        // لو تعذّر الاتصال بخدمة التحقق (مثلاً ما زبطت بعد)، نكمل بالاعتماد على صيغة الرمز فقط
+      }
+      setCheckingAddress(false);
     }
     setNationalAddressError('');
     setStep(2);
@@ -289,7 +312,7 @@ export default function Checkout() {
                   {discountError && <p className="text-xs text-destructive mt-1.5">{discountError}</p>}
                 </div>
 
-                <button type="submit" className="w-full py-3.5 btn-primary">متابعة للدفع</button>
+                <button type="submit" disabled={checkingAddress} className="w-full py-3.5 btn-primary disabled:opacity-60">{checkingAddress ? 'جارٍ التحقق من العنوان...' : 'متابعة للدفع'}</button>
               </form>
             )}
 

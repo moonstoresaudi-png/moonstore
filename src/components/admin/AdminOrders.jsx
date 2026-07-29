@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { entities } from '@/api/entities';
-import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download, Printer, RefreshCw, Truck, AlertTriangle } from 'lucide-react';
 
 const STATUS = {
   pending: { label: 'قيد الانتظار', cls: 'bg-gray-100 text-gray-700' },
@@ -10,6 +11,13 @@ const STATUS = {
   delivered: { label: 'تم التسليم', cls: 'bg-green-100 text-green-700' },
   cancelled: { label: 'ملغي', cls: 'bg-red-100 text-red-700' },
   archived: { label: 'مؤرشف', cls: 'bg-gray-200 text-gray-600' },
+};
+
+const AWB_STATUS = {
+  not_shipped: { label: '—', cls: 'text-foreground/35' },
+  processing: { label: 'جارٍ الإصدار...', cls: 'text-amber-600' },
+  shipped: { label: 'تم إصدار البوليصة', cls: 'text-green-600' },
+  failed: { label: 'فشل الإصدار', cls: 'text-red-600' },
 };
 
 // تسميات عربية للحقول الشائعة داخل sash_config حتى تُعرض بشكل مفهوم في لوحة التحكم
@@ -118,6 +126,27 @@ export default function AdminOrders() {
     try { await entities.Order.update(id, { status }); } catch { load(); }
   };
 
+  const [issuingId, setIssuingId] = useState(null);
+  const issueShipment = async (id) => {
+    setIssuingId(id);
+    setOrders(prev => prev ? prev.map(o => o.id === id ? { ...o, awb_status: 'processing' } : o) : prev);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-shipment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ order_id: id }),
+      });
+      await res.json();
+    } catch { /* الحالة النهائية تنقرأ من الطلب بعد التحديث */ }
+    load();
+    setIssuingId(null);
+  };
+
   const archive = (id) => updateStatus(id, 'archived');
   const unarchive = (id) => updateStatus(id, 'delivered');
   const toggleExpand = (id) => setExpandedId(prev => prev === id ? null : id);
@@ -177,7 +206,7 @@ export default function AdminOrders() {
               <thead><tr className="text-right text-foreground/55 border-b border-border">
                 <th className="p-3 font-medium">رقم الطلب</th><th className="p-3 font-medium">العميل</th>
                 <th className="p-3 font-medium hidden sm:table-cell">المنتج</th><th className="p-3 font-medium hidden md:table-cell">المدينة</th>
-                <th className="p-3 font-medium">الإجمالي</th><th className="p-3 font-medium">الحالة</th><th className="p-3 font-medium"></th>
+                <th className="p-3 font-medium">الإجمالي</th><th className="p-3 font-medium">الحالة</th><th className="p-3 font-medium">البوليصة</th><th className="p-3 font-medium"></th>
               </tr></thead>
               <tbody>
                 {filtered.map(o => (
@@ -192,6 +221,22 @@ export default function AdminOrders() {
                         <select value={o.status} onChange={e => updateStatus(o.id, e.target.value)} className={`text-xs font-bold rounded-full px-2.5 py-1 border-0 cursor-pointer ${STATUS[o.status]?.cls}`}>
                           {Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                         </select>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          {o.awb_status === 'failed' && <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />}
+                          <span className={AWB_STATUS[o.awb_status || 'not_shipped']?.cls}>{AWB_STATUS[o.awb_status || 'not_shipped']?.label}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          {o.awb_url && (
+                            <a href={o.awb_url} target="_blank" rel="noreferrer" title="طباعة البوليصة" className="p-1 rounded-lg text-primary hover:bg-secondary"><Printer className="w-3.5 h-3.5" /></a>
+                          )}
+                          {(o.awb_status === 'failed' || o.awb_status === 'not_shipped' || !o.awb_status) && o.status !== 'pending' && (
+                            <button onClick={() => issueShipment(o.id)} disabled={issuingId === o.id} title="إصدار/إعادة محاولة البوليصة" className="p-1 rounded-lg text-foreground/50 hover:bg-secondary disabled:opacity-40">
+                              {issuingId === o.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td className="p-3">
                         <div className="flex items-center gap-1">
@@ -209,7 +254,7 @@ export default function AdminOrders() {
                     </tr>
                     {expandedId === o.id && o.sash_config && (
                       <tr className="bg-secondary/20">
-                        <td colSpan={7} className="p-4">
+                        <td colSpan={8} className="p-4">
                           <p className="text-xs font-bold text-foreground/60 mb-2 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" /> تفاصيل تخصيص المنتج (من المحاكي)</p>
                           <ConfigDetails sashConfig={o.sash_config} />
                         </td>

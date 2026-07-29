@@ -126,7 +126,7 @@
   100% { left: 100%; }
 }
 @keyframes car-drive {
-  0% { left: -230px; transform: translateY(0); }
+  0% { left: -240px; transform: translateY(0); }
   48% { transform: translateY(-3px); }
   50% { left: 105%; transform: translateY(0); }
   100% { left: 105%; }
@@ -143,9 +143,20 @@
   from { transform: rotateY(0deg); }
   to { transform: rotateY(180deg); }
 }
-.truck-drive { animation: truck-drive 9s linear infinite; }
-.car-drive { animation: car-drive 5.5s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
-.wheel-spin { animation: wheel-spin 0.5s linear infinite; }
-.coin-bounce { animation: coin-bounce 2s ease-in-out infinite; }
+.truck-drive { animation: truck-drive 9s linear infinite !important; }
+.car-drive { animation: car-drive 5.5s cubic-bezier(0.45, 0, 0.55, 1) infinite !important; }
+.wheel-spin { animation: wheel-spin 0.5s linear infinite !important; }
+.coin-bounce { animation: coin-bounce 2s ease-in-out infinite !important; }
+.marquee-track { animation-iteration-count: infinite !important; animation-play-state: running !important; }
+.prep-marquee-track { animation-iteration-count: infinite !important; animation-play-state: running !important; }
+
+/* هذي الحركات زخرفية بسيطة (شريط، سيارة) — نخليها تشتغل دائمًا حتى مع تفعيل خاصية
+   "تقليل الحركة" بالجهاز، لأنها ما تسبب أي إزعاج أو دوّخة وجزء أساسي من تصميم الصفحة */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .prep-marquee-track, .car-drive, .truck-drive {
+    animation-iteration-count: infinite !important;
+    animation-play-state: running !important;
+  }
+}
 .card-3d { perspective: 1000px; transform-style: preserve-3d; transition: transform 0.6s; }
 .card-flipped { transform: rotateY(180deg); }

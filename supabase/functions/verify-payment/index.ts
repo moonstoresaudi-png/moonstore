@@ -114,6 +114,20 @@ serve(async (req) => {
       });
     }
 
+    // 5) إصدار بوليصة الشحن تلقائيًا عند Tryoto لهذا الطلب المدفوع — ننتظرها فعليًا
+    // (بدل "أطلقها وانسها" اللي ممكن تتوقف قبل ما تكمل في بيئة Edge Functions)،
+    // لكن فشلها ما يوقف تأكيد الدفع للعميل؛ فقط تنحفظ حالة الشحن كـ "failed"
+    // ويقدر الأدمن يعيد المحاولة يدويًا من لوحة التحكم.
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/create-shipment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+        body: JSON.stringify({ order_id }),
+      });
+    } catch (_e) {
+      // يتم إعادة المحاولة يدويًا من لوحة تحكم الأدمن
+    }
+
     return new Response(JSON.stringify({ ok: true, status: 'paid' }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -84,15 +84,16 @@ serve(async (req) => {
     await supabase.from('orders').update({ awb_status: 'processing', shipping_error: null }).eq('id', order_id);
 
     // تجهيز عناصر الطلب لـ Tryoto
-    const items = Array.isArray(order.items) ? order.items : [];
-    const orderItems = items.length
-      ? items.map((it) => ({
-          name: it.name || it.product_name || 'منتج',
-          sku: it.sku || it.product_id || 'SKU',
-          qty: it.quantity || it.qty || 1,
-          unitPrice: it.price || it.unit_price || 0,
-        }))
-      : [{ name: `طلب ${order.order_number || order.id}`, sku: 'ORDER', qty: 1, unitPrice: order.total || 0 }];
+    // ملاحظة: جدول orders ما فيه عمود items منفصل — المنتجات محفوظة كنص
+    // مجمّع بـ product_name والكمية الإجمالية بـ quantity، فنبني منها سطر شحن واحد
+    const orderItems = [
+      {
+        name: order.product_name || `طلب ${order.order_number || order.id}`,
+        sku: String(order.order_number || order.id),
+        qty: order.quantity || 1,
+        unitPrice: order.total || 0,
+      },
+    ];
 
     const accessToken = await getAccessToken();
 

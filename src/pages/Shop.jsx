@@ -5,11 +5,12 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import ProductCard from '@/components/ProductCard';
+import { useStoreSettings } from '@/lib/SettingsContext';
 import { Search, Package } from 'lucide-react';
 
-const CATEGORIES = ['الكل', 'أرواب تخرج', 'وشاح تخرج', 'قبعة تخرج', 'لابكوت', 'سكراب طبي', 'مطرزات', 'كوفلة مواليد'];
-
 export default function Shop() {
+  const { settings } = useStoreSettings();
+  const CATEGORIES = ['الكل', ...(settings.categories || [])];
   const { category: pathCat } = useParams();
   const [searchParams] = useSearchParams();
   const initialCat = pathCat || searchParams.get('category') || 'الكل';

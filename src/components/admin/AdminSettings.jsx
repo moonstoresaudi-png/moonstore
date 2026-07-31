@@ -4,22 +4,32 @@ import { useStoreSettings } from '@/lib/SettingsContext';
 import { storeSettingsApi } from '@/api/entities';
 import { uploadFile } from '@/api/storage';
 
-const CATEGORY_SLOTS = [
-  { key: 'جاكيت تخرج', label: 'جاكيت تخرج' },
-  { key: 'أوشحة تخرج', label: 'أوشحة تخرج' },
-  { key: 'كاب تخرج', label: 'كاب تخرج' },
-  { key: 'أرواب تخرج', label: 'أرواب تخرج' },
-  { key: 'كوفلة مواليد', label: 'كوفلة مواليد' },
-];
-
 export default function AdminSettings() {
   const { settings, refresh } = useStoreSettings();
   const [form, setForm] = useState(settings);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingKey, setUploadingKey] = useState(null);
+  const [newCategory, setNewCategory] = useState('');
 
   useEffect(() => { setForm(settings); }, [settings]);
+
+  const addCategory = () => {
+    const name = newCategory.trim();
+    if (!name) return;
+    if ((form.categories || []).includes(name)) { setNewCategory(''); return; }
+    setForm(f => ({ ...f, categories: [...(f.categories || []), name] }));
+    setNewCategory('');
+  };
+
+  const removeCategory = (name) => {
+    if (!confirm(`حذف قسم "${name}"؟ المنتجات الموجودة بهذا القسم تبقى موجودة لكن القسم يختفي من قوائم الاختيار.`)) return;
+    setForm(f => {
+      const nextImages = { ...(f.category_images || {}) };
+      delete nextImages[name];
+      return { ...f, categories: (f.categories || []).filter(c => c !== name), category_images: nextImages };
+    });
+  };
 
   const handleCategoryUpload = async (key, e) => {
     const file = e.target.files?.[0];
@@ -32,14 +42,6 @@ export default function AdminSettings() {
       alert('تعذّر رفع الصورة');
     }
     setUploadingKey(null);
-  };
-
-  const removeCategoryImage = (key) => {
-    setForm(f => {
-      const next = { ...(f.category_images || {}) };
-      delete next[key];
-      return { ...f, category_images: next };
-    });
   };
 
   const handleSave = async (e) => {
@@ -82,26 +84,30 @@ export default function AdminSettings() {
         </div>
 
         <div>
-          <h4 className="font-bold text-sm flex items-center gap-2 mb-1">صور أقسام المتجر (الدوائر بالرئيسية)</h4>
-          <p className="text-xs text-foreground/50 mb-3">ارفع صورة لكل قسم — إذا ما رفعت شي، بيظهر شعار المتجر مكانها مؤقتًا.</p>
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-            {CATEGORY_SLOTS.map(slot => {
-              const url = form.category_images?.[slot.key];
+          <h4 className="font-bold text-sm flex items-center gap-2 mb-1">أقسام المتجر</h4>
+          <p className="text-xs text-foreground/50 mb-3">أضف أو احذف أي قسم وقتما تبي، وارفع له صورة (تظهر كدوائر بالصفحة الرئيسية).</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
+            {(form.categories || []).map(cat => {
+              const url = form.category_images?.[cat];
               return (
-                <div key={slot.key} className="flex flex-col items-center gap-1.5">
+                <div key={cat} className="flex flex-col items-center gap-1.5">
                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-secondary border border-border flex items-center justify-center">
-                    {url ? <img src={url} alt={slot.label} className="w-full h-full object-cover" /> : <span className="text-[9px] text-foreground/40">بدون صورة</span>}
-                    {uploadingKey === slot.key && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><Loader2 className="w-4 h-4 text-white animate-spin" /></div>}
+                    {url ? <img src={url} alt={cat} className="w-full h-full object-cover" /> : <span className="text-[9px] text-foreground/40">بدون صورة</span>}
+                    {uploadingKey === cat && <div className="absolute inset-0 bg-black/40 flex items-center justify-center"><Loader2 className="w-4 h-4 text-white animate-spin" /></div>}
                   </div>
                   <label className="text-[10px] text-primary font-medium cursor-pointer hover:underline">
-                    رفع
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleCategoryUpload(slot.key, e)} />
+                    رفع صورة
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleCategoryUpload(cat, e)} />
                   </label>
-                  {url && <button type="button" onClick={() => removeCategoryImage(slot.key)} className="text-[10px] text-red-500 hover:underline">حذف</button>}
-                  <span className="text-[10px] text-foreground/50 text-center leading-tight">{slot.label}</span>
+                  <span className="text-[10px] text-foreground/50 text-center leading-tight">{cat}</span>
+                  <button type="button" onClick={() => removeCategory(cat)} className="text-[10px] text-red-500 hover:underline">حذف القسم</button>
                 </div>
               );
             })}
+          </div>
+          <div className="flex gap-2">
+            <input value={newCategory} onChange={e => setNewCategory(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCategory())} placeholder="اسم القسم الجديد" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+            <button type="button" onClick={addCategory} className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium">إضافة قسم</button>
           </div>
         </div>
 

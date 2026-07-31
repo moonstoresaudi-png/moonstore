@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Users, TrendingUp, Tag, Truck, ArrowRight, Lock, ShoppingCart, Settings, Plus, BarChart3, Mail, Loader2 } from 'lucide-react';
+import { Package, Users, TrendingUp, Tag, Truck, ArrowRight, Lock, ShoppingCart, Settings, Plus, BarChart3, Mail, Loader2, CreditCard } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { auth } from '@/api/auth';
 import AdminOrders from '@/components/admin/AdminOrders';
@@ -13,10 +13,15 @@ import AdminAbandonedCarts from '@/components/admin/AdminAbandonedCarts';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminDashboardStats from '@/components/admin/AdminDashboardStats';
 import AdminSalesCharts from '@/components/admin/AdminSalesCharts';
+import AdminRecentOrders from '@/components/admin/AdminRecentOrders';
+import AdminShipping from '@/components/admin/AdminShipping';
+import AdminPayments from '@/components/admin/AdminPayments';
 
 const TABS = [
   { key: 'dashboard', label: 'لوحة المبيعات', icon: BarChart3 },
   { key: 'orders', label: 'الطلبات', icon: Package },
+  { key: 'shipping', label: 'الشحن والبوليصات', icon: Truck },
+  { key: 'payments', label: 'مدفوعات ميسر', icon: CreditCard },
   { key: 'products', label: 'المنتجات', icon: Plus },
   { key: 'customers', label: 'العملاء', icon: Users },
   { key: 'profits', label: 'الأرباح والتكاليف', icon: TrendingUp },
@@ -109,8 +114,10 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {tab === 'dashboard' && <><AdminDashboardStats /><AdminSalesCharts /></>}
+        {tab === 'dashboard' && <><AdminDashboardStats /><div className="grid lg:grid-cols-3 gap-5 mb-6"><div className="lg:col-span-2"><AdminSalesCharts /></div><AdminRecentOrders onOpenOrders={() => setTab('orders')} /></div></>}
         {tab === 'orders' && <AdminOrders />}
+        {tab === 'shipping' && <AdminShipping />}
+        {tab === 'payments' && <AdminPayments />}
         {tab === 'products' && <AdminProducts />}
         {tab === 'customers' && <AdminCustomers />}
         {tab === 'profits' && <AdminProfits />}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { entities } from '@/api/entities';
 import { uploadFile } from '@/api/storage';
-import { Package, Plus, Trash2, Pencil, X, Upload, Star, Check } from 'lucide-react';
+import { Package, Plus, Trash2, Pencil, X, Upload, Star, Check, ImagePlus, Loader2 } from 'lucide-react';
+import { useStoreSettings } from '@/lib/SettingsContext';
 
-const CATEGORIES = ['أرواب تخرج', 'وشاح تخرج', 'قبعة تخرج', 'لابكوت', 'سكراب طبي', 'مطرزات', 'كوفلة مواليد'];
 const EMPTY = { name: '', description: '', price: 0, old_price: 0, cost: 0, category: 'أرواب تخرج', image_url: '', gallery_images: [], sizes: [], simulator_enabled: false, featured: false, bestseller: false, in_stock: true, rating: 5, stock_quantity: 0, purchase_count: 0, has_sash: false, has_name: false, has_date: false, has_cap: false, sash_addon: 50, packaging_addon: 15 };
 
 function InlineEdit({ value, onSave, suffix = '' }) {
@@ -32,6 +32,8 @@ function InlineEdit({ value, onSave, suffix = '' }) {
 }
 
 export default function AdminProducts() {
+  const { settings } = useStoreSettings();
+  const CATEGORIES = settings.categories || [];
   const [products, setProducts] = useState(null);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
@@ -60,6 +62,20 @@ export default function AdminProducts() {
 
   const addSize = () => { if (sizeInput.trim()) { setForm(f => ({ ...f, sizes: [...f.sizes, sizeInput.trim()] })); setSizeInput(''); } };
   const removeSize = (s) => setForm(f => ({ ...f, sizes: f.sizes.filter(x => x !== s) }));
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setGalleryUploading(true);
+    try {
+      for (const file of files) {
+        const { file_url } = await uploadFile({ file });
+        setForm(f => ({ ...f, gallery_images: [...(f.gallery_images || []), file_url] }));
+      }
+    } catch {}
+    setGalleryUploading(false);
+    e.target.value = '';
+  };
   const addGalleryUrl = () => { if (galleryInput.trim()) { setForm(f => ({ ...f, gallery_images: [...(f.gallery_images || []), galleryInput.trim()] })); setGalleryInput(''); } };
   const removeGalleryUrl = (url) => setForm(f => ({ ...f, gallery_images: (f.gallery_images || []).filter(x => x !== url) }));
 
@@ -196,7 +212,7 @@ export default function AdminProducts() {
           {/* Gallery images */}
           <div>
             <h5 className="font-bold text-sm mb-1.5 text-primary">صور إضافية (معرض الصور)</h5>
-            <p className="text-xs text-foreground/50 mb-3">صور زوايا مختلفة للمنتج تظهر بصفحة المنتج — ألصق رابط الصورة واضغط إضافة.</p>
+            <p className="text-xs text-foreground/50 mb-3">صور زوايا مختلفة للمنتج تظهر بصفحة المنتج — ارفعها من جهازك مباشرة (تقدر تختار أكثر من صورة دفعة وحدة).</p>
             <div className="flex flex-wrap gap-2 mb-3">
               {(form.gallery_images || []).map(url => (
                 <div key={url} className="relative">
@@ -205,10 +221,18 @@ export default function AdminProducts() {
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
-              <input value={galleryInput} onChange={e => setGalleryInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addGalleryUrl())} placeholder="https://... رابط صورة" dir="ltr" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
-              <button type="button" onClick={addGalleryUrl} className="px-4 py-2.5 rounded-xl bg-secondary text-sm font-medium">إضافة</button>
-            </div>
+            <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-sm font-medium cursor-pointer hover:bg-primary/5 transition-colors">
+              {galleryUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+              {galleryUploading ? 'جارٍ الرفع...' : 'اختر صورة أو أكثر من جهازك'}
+              <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={galleryUploading} className="hidden" />
+            </label>
+            <details className="mt-2">
+              <summary className="text-xs text-foreground/45 cursor-pointer">أو ألصق رابط صورة جاهز</summary>
+              <div className="flex gap-2 mt-2">
+                <input value={galleryInput} onChange={e => setGalleryInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addGalleryUrl())} placeholder="https://..." dir="ltr" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+                <button type="button" onClick={addGalleryUrl} className="px-4 py-2.5 rounded-xl bg-secondary text-sm font-medium">إضافة</button>
+              </div>
+            </details>
           </div>
 
           {/* Sizes */}

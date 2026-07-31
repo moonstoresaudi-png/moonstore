@@ -1,29 +1,40 @@
 // Supabase Edge Function: create-shipment
-// يُنشئ طلب شحن (Order) وبوليصة شحن (AWB) تلقائيًا عند Tryoto (OTO)
-// لطلب معيّن، ويحفظ رابط طباعة البوليصة ورقم التتبع على الطلب.
+// يُنشئ طلب شحن تلقائي عند Tryoto (OTO) لطلب معيّن، على 4 خطوات حسب توثيق Tryoto:
+//   1) POST /rest/v2/orders          — إنشاء الطلب عند Tryoto
+//   2) GET  /rest/v2/delivery-fee    — جلب شركات التوصيل المتاحة وأسعارها
+//   3) POST /rest/v2/shipments       — إنشاء الشحنة الفعلية (يختار أرخص شركة تلقائيًا)
+//   4) GET  /rest/v2/orderStatus     — جلب رابط طباعة البوليصة ورقم التتبع
 //
-// يُستدعى تلقائيًا من verify-payment بعد تأكيد أي دفع أونلاين (إصدار تلقائي)،
-// ويقدر الأدمن يستدعيه يدويًا من لوحة التحكم لأي طلب (زر "إصدار بوليصة"/"إعادة محاولة").
+// يُستدعى تلقائيًا من verify-payment بعد تأكيد أي دفع أونلاين (إصدار تلقائي بدون
+// تدخل بشري)، ويقدر الأدمن يستدعيه يدويًا من لوحة التحكم لأي طلب (زر "إصدار"/"إعادة محاولة").
 //
 // النشر:
 //   supabase functions deploy create-shipment
 //   supabase secrets set TRYOTO_REFRESH_TOKEN=xxxxxxxx
-//   supabase secrets set TRYOTO_PICKUP_LOCATION_CODE=your-warehouse-code
 //
-// طريقة الحصول على القيم:
-//   1) TRYOTO_REFRESH_TOKEN: من لوحة تحكم Tryoto → Settings → Developers → API Integrations → Connect
-//   2) TRYOTO_PICKUP_LOCATION_CODE: كود المستودع/الفرع اللي سجّلته بلوحة Tryoto (Settings → Warehouses/Locations)
-//      — تأكد إنك حاطط له "Short Address" (عنوانك الوطني أنت كمرسل) من نفس الإعدادات
+// طريقة الحصول على القيمة:
+//   لوحة تحكم Tryoto → Settings → Developers → API Integrations → Connect
+//
+// ملاحظة: ما نحتاج TRYOTO_PICKUP_LOCATION_CODE — نرسل عنوان المرسل (senderInformation)
+// مباشرة بكل طلب بدلها (معبّى أدناه بعنوانك الفعلي بجدة). لو غيّرت مستودعك مستقبلاً
+// عدّل القيم بـ SENDER_INFO تحت.
 
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const TRYOTO_REFRESH_TOKEN = Deno.env.get('TRYOTO_REFRESH_TOKEN');
-const TRYOTO_PICKUP_LOCATION_CODE = Deno.env.get('TRYOTO_PICKUP_LOCATION_CODE');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 const TRYOTO_BASE = 'https://api.tryoto.com/rest/v2';
+
+// عنوان المرسل (متجرك) — من بياناتك المرسلة
+const SENDER_INFO = {
+  name: 'موقع الإرسال الخاص بي',
+  city: 'Jeddah',
+  address: 'jjsb7989, 7989, Kamal Al Deen Al Farsi, 3239, As Sanabel Dist., 22444, Jeddah, Kingdom of Saudi Arabia',
+  country: 'Saudi Arabia',
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -56,9 +67,9 @@ serve(async (req) => {
   }
 
   try {
-    if (!TRYOTO_REFRESH_TOKEN || !TRYOTO_PICKUP_LOCATION_CODE || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
+    if (!TRYOTO_REFRESH_TOKEN || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
       return new Response(
-        JSON.stringify({ ok: false, error: 'إعدادات Tryoto ناقصة على السيرفر (TRYOTO_REFRESH_TOKEN أو TRYOTO_PICKUP_LOCATION_CODE)' }),
+        JSON.stringify({ ok: false, error: 'إعدادات Tryoto ناقصة على السيرفر (TRYOTO_REFRESH_TOKEN)' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -83,69 +94,102 @@ serve(async (req) => {
 
     await supabase.from('orders').update({ awb_status: 'processing', shipping_error: null }).eq('id', order_id);
 
-    // تجهيز عناصر الطلب لـ Tryoto
-    // ملاحظة: جدول orders ما فيه عمود items منفصل — المنتجات محفوظة كنص
-    // مجمّع بـ product_name والكمية الإجمالية بـ quantity، فنبني منها سطر شحن واحد
-    const orderItems = [
-      {
-        name: order.product_name || `طلب ${order.order_number || order.id}`,
-        sku: String(order.order_number || order.id),
-        qty: order.quantity || 1,
-        unitPrice: order.total || 0,
-      },
-    ];
-
     const accessToken = await getAccessToken();
+    const otoOrderId = String(order.order_number || order.id);
+    const authHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` };
 
-    const createOrderBody = {
-      orderId: String(order.order_number || order.id),
-      pickupLocationCode: TRYOTO_PICKUP_LOCATION_CODE,
-      createShipment: true,
+    // ---------- 1) إنشاء الطلب عند Tryoto ----------
+    const orderBody = {
+      orderId: otoOrderId,
+      customer: {
+        name: order.customer_name || 'عميل',
+        mobile: order.phone,
+      },
+      senderInformation: SENDER_INFO,
+      item_description: order.product_name || `طلب ${otoOrderId}`,
+      packageWeight: 1,
+      amount: order.total || 0,
       currency: 'SAR',
       paymentType: order.payment_method === 'cod' ? 'COD' : 'Prepaid',
       codAmount: order.payment_method === 'cod' ? order.total : 0,
-      customerFirstName: order.customer_name || 'عميل',
-      customerLastName: '',
-      customerPhone: order.phone,
-      customerEmail: order.email || undefined,
-      address: order.address,
-      city: order.city,
-      country: order.country || 'Saudi Arabia',
-      shortAddressCode: order.short_address_code || undefined,
+      // لو عندنا رمز العنوان الوطني يكفي وحده، وإلا نرسل تفاصيل العنوان كاملة
+      ...(order.short_address_code
+        ? { shortAddressCode: order.short_address_code }
+        : { address: order.address, city: order.city, country: order.country || 'Saudi Arabia' }),
       latitude: order.lat || undefined,
       longitude: order.lng || undefined,
-      items: orderItems,
     };
 
-    const createRes = await fetch(`${TRYOTO_BASE}/createOrder`, {
+    const createRes = await fetch(`${TRYOTO_BASE}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify(createOrderBody),
+      headers: authHeaders,
+      body: JSON.stringify(orderBody),
     });
     const createData = await createRes.json();
 
     if (!createRes.ok || createData.success === false) {
       const errMsg = createData.message || createData.error || JSON.stringify(createData);
-      await supabase.from('orders').update({ awb_status: 'failed', shipping_error: errMsg }).eq('id', order_id);
+      await supabase.from('orders').update({ awb_status: 'failed', shipping_error: `إنشاء الطلب: ${errMsg}` }).eq('id', order_id);
       return new Response(JSON.stringify({ ok: false, error: errMsg }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // محاولة الحصول على رابط طباعة البوليصة (AWB) — إما من نفس الرد أو عبر endpoint الطباعة
-    let awbUrl = createData.printAWBURL || createData.awbUrl || null;
-    let trackingNumber = createData.trackingNumber || createData.dcTrackingNumber || null;
+    // ---------- 2) جلب شركات التوصيل المتاحة والأسعار ----------
+    const feeRes = await fetch(`${TRYOTO_BASE}/delivery-fee?orderId=${encodeURIComponent(otoOrderId)}`, {
+      headers: authHeaders,
+    });
+    const feeData = await feeRes.json();
+    const options = Array.isArray(feeData) ? feeData : feeData?.deliveryOptions || feeData?.data || [];
+
+    if (!options.length) {
+      await supabase.from('orders').update({ awb_status: 'failed', shipping_error: 'لا توجد شركات توصيل متاحة لهذا العنوان' }).eq('id', order_id);
+      return new Response(JSON.stringify({ ok: false, error: 'لا توجد شركات توصيل متاحة' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // اختيار أرخص شركة توصيل تلقائيًا (بدون تدخل بشري)
+    const cheapest = options.reduce((best, cur) => {
+      const curPrice = cur.priceAmount ?? cur.price ?? Infinity;
+      const bestPrice = best.priceAmount ?? best.price ?? Infinity;
+      return curPrice < bestPrice ? cur : best;
+    }, options[0]);
+    const deliveryOptionId = cheapest.deliveryOptionId ?? cheapest.id;
+
+    // ---------- 3) إنشاء الشحنة الفعلية (البوليصة) ----------
+    const shipRes = await fetch(`${TRYOTO_BASE}/shipments`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({ orderId: otoOrderId, deliveryOptionId }),
+    });
+    const shipData = await shipRes.json();
+
+    if (!shipRes.ok || shipData.success === false) {
+      const errMsg = shipData.message || shipData.error || JSON.stringify(shipData);
+      await supabase.from('orders').update({ awb_status: 'failed', shipping_error: `إنشاء الشحنة: ${errMsg}` }).eq('id', order_id);
+      return new Response(JSON.stringify({ ok: false, error: errMsg }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ---------- 4) جلب رابط طباعة البوليصة ورقم التتبع ----------
+    let awbUrl = shipData.printAWBURL || null;
+    let trackingNumber = shipData.trackingNumber || shipData.trackingURL || null;
 
     if (!awbUrl) {
       try {
-        const printRes = await fetch(`${TRYOTO_BASE}/print/${encodeURIComponent(createOrderBody.orderId)}`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
+        const statusRes = await fetch(`${TRYOTO_BASE}/orderStatus?orderId=${encodeURIComponent(otoOrderId)}`, {
+          headers: authHeaders,
         });
-        const printData = await printRes.json();
-        awbUrl = printData.printAWBURL || printData.url || null;
+        const statusData = await statusRes.json();
+        awbUrl = statusData.printAWBURL || null;
+        trackingNumber = trackingNumber || statusData.trackingURL || null;
       } catch (_e) {
-        // ما تعطلنا لو فشلت خطوة الطباعة، البوليصة صارت موجودة عند Tryoto أصلاً
+        // البوليصة صارت موجودة عند Tryoto أصلاً حتى لو تعذّر جلب الرابط هنا
       }
     }
 
@@ -153,14 +197,14 @@ serve(async (req) => {
       .from('orders')
       .update({
         awb_status: 'shipped',
-        oto_order_id: String(createData.otoId || createData.orderId || ''),
+        oto_order_id: otoOrderId,
         tracking_number: trackingNumber,
         awb_url: awbUrl,
         shipping_error: null,
       })
       .eq('id', order_id);
 
-    return new Response(JSON.stringify({ ok: true, awb_url: awbUrl, tracking_number: trackingNumber }), {
+    return new Response(JSON.stringify({ ok: true, awb_url: awbUrl, tracking_number: trackingNumber, carrier: cheapest.name }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

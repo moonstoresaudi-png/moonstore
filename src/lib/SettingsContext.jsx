@@ -19,6 +19,7 @@ const DEFAULTS = {
   twitter: '',
   snapchat: '',
   tiktok: 'https://www.tiktok.com/@mon201920?_r=1&_t=ZS-988JTzVr0Ap',
+  categories: ['أرواب تخرج', 'وشاح تخرج', 'قبعة تخرج', 'لابكوت', 'سكراب طبي', 'مطرزات', 'كوفلة مواليد'],
   youtube: '',
   announcement_enabled: false,
   announcement_text: '',

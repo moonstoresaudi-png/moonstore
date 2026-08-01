@@ -23,7 +23,7 @@ export default function About() {
           <h1 className="font-display text-3xl sm:text-5xl font-bold">من <span className="text-grad-violet">نحن</span></h1>
           <p className="text-foreground/60 mt-4 max-w-2xl mx-auto leading-relaxed flex flex-wrap items-center justify-center gap-2">
             <img src="/images/brand/logo.png" alt="Moon Store" className="h-10 w-auto object-contain inline-block align-middle" />
-            <span>علامة سعودية متخصصة في أرواب وملحقات التخرج الفاخرة. بدأت رحلتنا من شغف بصناعة لحظات لا تُنسى لخريجي الجامعات، لنقدّم منتجات تجمع بين الأصالة والأناقة العصرية.</span>
+            <span>علامة سعودية متخصصة في المنتجات الفاخرة المطرزة يدويًا — أرواب تخرج، جاكيتات، كوفلات مواليد وملحقات راقية. بدأت رحلتنا من شغف بصناعة لحظات لا تُنسى، لنقدّم منتجات تجمع بين الأصالة والأناقة العصرية.</span>
           </p>
         </div>
 
@@ -34,7 +34,7 @@ export default function About() {
         <div className="grid md:grid-cols-3 gap-5 mb-12">
           {[
             { icon: Target, title: 'رسالتنا', text: 'تمكين كل خريج من الاحتفال بإنجازه بأناقة تليق بتعبه، بمنتجات فاخرة بأسعار عادلة.' },
-            { icon: Eye, title: 'رؤيتنا', text: 'أن نكون الخيار الأول لملحقات التخرج في المملكة، بخامات راقية وتطريز يدوي أصيل.' },
+            { icon: Eye, title: 'رؤيتنا', text: 'أن نكون الخيار الأول للمنتجات الفاخرة المطرزة يدويًا بالمملكة، بخامات راقية وتطريز أصيل يليق بكل مناسبة.' },
             { icon: Heart, title: 'قيمنا', text: 'الجودة، الأصالة، الاهتمام بأدق التفاصيل، ورضا العملاء فوق كل اعتبار.' },
           ].map((v, i) => (
             <div key={i} className="card-soft p-6 text-center">

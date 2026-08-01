@@ -54,9 +54,15 @@ export default function Shop() {
         </div>
 
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-8">
-          {CATEGORIES.map(c => (
-            <button key={c} onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${category === c ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-card border border-border text-foreground/60 hover:border-primary/40'}`}>{c}</button>
-          ))}
+          {CATEGORIES.map(c => {
+            const count = c === 'الكل' ? (products || []).length : (products || []).filter(p => p.category === c).length;
+            return (
+              <button key={c} onClick={() => setCategory(c)} className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all inline-flex items-center gap-1.5 ${category === c ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-card border border-border text-foreground/60 hover:border-primary/40'}`}>
+                {c}
+                {products && <span className={`text-[10px] ${category === c ? 'opacity-80' : 'opacity-50'}`}>({count})</span>}
+              </button>
+            );
+          })}
         </div>
 
         {!filtered ? (

@@ -1,7 +1,7 @@
 {
-  "name": "Moon Store | متجر التخرج الفاخر",
+  "name": "Moon Store | فخامة تليق بكل لحظاتك",
   "short_name": "Moon Store",
-  "description": "أرواب وملحقات تخرج فاخرة بتطريز ذهبي يدوي",
+  "description": "أرواب تخرج، جاكيتات، كوفلات مواليد وملحقات فاخرة بتطريز ذهبي يدوي",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

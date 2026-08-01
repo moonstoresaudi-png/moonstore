@@ -55,7 +55,7 @@ export default function ProductConfigurator({ product }) {
     addSash: false,
     name: '',
     fontType: 'ثلث',
-    date: '2026',
+    date: '',
     size: product.sizes?.[0] || '',
     capType: 'دائري',
     threadColor: '#D4AF37',

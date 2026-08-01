@@ -28,14 +28,14 @@ export default function Hero() {
 
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-10 text-center">
         <span className="kicker justify-center mb-5">
-          <Sparkles className="w-3.5 h-3.5" /> تشكيلة تخرج 2026
+          <Sparkles className="w-3.5 h-3.5" /> تشكيلتنا المميزة
         </span>
         <h1 className="font-display text-4xl sm:text-6xl font-bold leading-[1.15] text-foreground">
-          فخامة تخرّجك <span className="text-grad-violet">تبدأ من هنا</span>
+          فخامة لحظاتك <span className="text-grad-violet">تبدأ من هنا</span>
         </h1>
         <div className="w-16 divider-gold my-6 mx-auto opacity-80" />
         <p className="text-foreground/60 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-          أرواب وأوشحة وملحقات تخرج بتطريز ذهبي يدوي — تفاصيل مصممة لتليق بلحظتك.
+          أرواب تخرج، جاكيتات، كوفلات مواليد، وملحقات فاخرة بتطريز ذهبي يدوي — تفاصيل مصممة لتليق بلحظتك.
         </p>
         <div className="flex flex-wrap justify-center gap-3 mt-9">
           <Link to="/shop" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-primary text-primary-foreground font-bold text-sm hover:-translate-y-0.5 transition-all shadow-lg">تسوّق الآن <ArrowLeft className="w-4 h-4" /></Link>

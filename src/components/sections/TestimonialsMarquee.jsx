@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useMarquee from '@/hooks/useMarquee';
 import { Star, Quote } from 'lucide-react';
 import { entities } from '@/api/entities';
 
@@ -44,6 +45,7 @@ export default function TestimonialsMarquee() {
   }, []);
 
   const doubled = [...reviews, ...reviews];
+  const trackRef = useMarquee(45);
   return (
     <section id="reviews" className="section-py overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10">
@@ -55,7 +57,7 @@ export default function TestimonialsMarquee() {
         </div>
       </div>
       <div className="relative">
-        <div className="marquee-track">
+        <div ref={trackRef} className="flex w-max" style={{ willChange: 'transform' }}>
           {doubled.map((r, i) => <Card key={i} r={r} />)}
         </div>
         <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none" />

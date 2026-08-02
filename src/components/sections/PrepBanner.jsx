@@ -1,5 +1,6 @@
 import React from 'react';
 import { Clock, Shirt, Sparkles, CalendarClock } from 'lucide-react';
+import useMarquee from '@/hooks/useMarquee';
 
 const items = [
   { Icon: Shirt, text: 'جاكت السينور: 30-45 يوم' },
@@ -19,10 +20,11 @@ function Item({ Icon, text }) {
 }
 
 export default function PrepBanner() {
-  const doubled = [...items, ...items, ...items];
+  const doubled = [...items, ...items];
+  const trackRef = useMarquee(35);
   return (
     <div className="bg-gradient-to-l from-primary via-violet to-pink-deep text-white overflow-hidden">
-      <div className="py-2.5 prep-marquee-track">
+      <div ref={trackRef} className="py-2.5 flex w-max" style={{ willChange: 'transform' }}>
         {doubled.map((it, i) => <Item key={i} {...it} />)}
       </div>
     </div>

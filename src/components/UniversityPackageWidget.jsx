@@ -2,47 +2,41 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { Type, Palette, RotateCcw, ShoppingBag, Check, ZoomIn, Image as ImageIcon, Upload, X, Loader2, GraduationCap, Ruler } from 'lucide-react';
 import { FONTS, THREAD_COLORS, SASH_COLORS, SashCanvas } from './SashSimulatorWidget';
-import { CAP_COLORS, TASSEL_COLORS, CapCanvas } from './CapSimulatorWidget';
 import { uploadFile } from '@/api/storage';
 
-// أسماء جامعات شائعة + مجموعة ألوان مقترحة لكل واحدة (تصميم أصلي، يقدر الزبون يغيّرها بحرية)
+// أسماء جامعات شائعة + لون وشاح مقترح لكل واحدة (تصميم أصلي، يقدر الزبون يغيّرها بحرية)
 const UNIVERSITIES = [
-  { id: 'custom', name: 'تصميم حر (بدون جامعة)', sash: 1, cap: 5, tassel: 0, thread: 0 },
-  { id: 'jeddah', name: 'جامعة جدة', sash: 2, cap: 1, tassel: 0, thread: 0 },
-  { id: 'kau', name: 'جامعة الملك عبدالعزيز', sash: 1, cap: 0, tassel: 0, thread: 0 },
-  { id: 'uqu', name: 'جامعة أم القرى', sash: 4, cap: 4, tassel: 0, thread: 0 },
-  { id: 'taibah', name: 'جامعة طيبة', sash: 6, cap: 4, tassel: 0, thread: 0 },
-  { id: 'taif', name: 'جامعة الطائف', sash: 3, cap: 3, tassel: 3, thread: 5 },
-  { id: 'ksu', name: 'جامعة الملك سعود', sash: 0, cap: 2, tassel: 0, thread: 0 },
+  { id: 'custom', name: 'تصميم حر (بدون جامعة)', sash: 1, thread: 0 },
+  { id: 'jeddah', name: 'جامعة جدة', sash: 2, thread: 0 },
+  { id: 'kau', name: 'جامعة الملك عبدالعزيز', sash: 1, thread: 0 },
+  { id: 'uqu', name: 'جامعة أم القرى', sash: 4, thread: 0 },
+  { id: 'taibah', name: 'جامعة طيبة', sash: 6, thread: 0 },
+  { id: 'taif', name: 'جامعة الطائف', sash: 3, thread: 5 },
+  { id: 'ksu', name: 'جامعة الملك سعود', sash: 0, thread: 0 },
 ];
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const YEARS = ['2026', '1447', '2027', '1448'];
 
-export default function UniversityPackageWidget({ productName = 'بكج تخرج جامعي (عباية + كاب + وشاح)', productPrice = 190 }) {
+export default function UniversityPackageWidget({ productName = 'صمم وشاحك', productPrice = 190 }) {
   const [uni, setUni] = useState(UNIVERSITIES[0]);
   const [sashColor, setSashColor] = useState(SASH_COLORS[UNIVERSITIES[0].sash]);
-  const [capColor, setCapColor] = useState(CAP_COLORS[UNIVERSITIES[0].cap]);
-  const [tassel, setTassel] = useState(TASSEL_COLORS[UNIVERSITIES[0].tassel]);
   const [thread, setThread] = useState(THREAD_COLORS[UNIVERSITIES[0].thread]);
   const [name, setName] = useState('');
   const [year, setYear] = useState(YEARS[0]);
   const [font, setFont] = useState(FONTS[0]);
   const [size, setSize] = useState(SIZES[1]);
   const [logoUrl, setLogoUrl] = useState('');
-  const [logoImg, setLogoImg] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
   const fileRef = useRef(null);
 
-  const text = [name, year].filter(Boolean).join(' — ');
+  const text = name;
 
   const pickUniversity = (u) => {
     setUni(u);
     setSashColor(SASH_COLORS[u.sash]);
-    setCapColor(CAP_COLORS[u.cap]);
-    setTassel(TASSEL_COLORS[u.tassel]);
     setThread(THREAD_COLORS[u.thread]);
   };
 
@@ -53,10 +47,6 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
     try {
       const { file_url } = await uploadFile({ file });
       setLogoUrl(file_url);
-      const img = new window.Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => setLogoImg(img);
-      img.src = file_url;
     } catch (err) {
       console.error('logo upload failed', err);
     } finally {
@@ -66,7 +56,6 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
 
   const clearLogo = () => {
     setLogoUrl('');
-    setLogoImg(null);
     if (fileRef.current) fileRef.current.value = '';
   };
 
@@ -87,8 +76,6 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
       font: font.name,
       size,
       sashColor: sashColor.name,
-      capColor: capColor.name,
-      tassel: tassel.name,
       thread: thread.name,
       logo_url: logoUrl || '',
     };
@@ -105,37 +92,23 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
 
   return (
     <div className="grid lg:grid-cols-5 gap-6">
-      {/* المعاينة الحية: الوشاح + الكاب معاً */}
+      {/* المعاينة الحية: الوشاح على الصورة الحقيقية */}
       <div className="lg:col-span-3 space-y-4">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="card-soft overflow-hidden bg-gradient-to-b from-secondary/20 to-card p-2 sm:p-3">
-            <SashCanvas
-              text={text}
-              fontStyle={font.style}
-              sashColor={sashColor.value}
-              sashLight={sashColor.light}
-              threadColor={thread.value}
-              threadGlow={thread.glow}
-              fontSize={22}
-            />
-          </div>
-          <div className="card-soft overflow-hidden bg-gradient-to-b from-secondary/20 to-card p-2 sm:p-3">
-            <CapCanvas
-              capColor={capColor.value}
-              capLight={capColor.light}
-              tasselColor={tassel.value}
-              mode={logoImg ? 'logo' : 'text'}
-              text={name}
-              fontStyle={font.style}
-              threadColor={thread.value}
-              threadGlow={thread.glow}
-              logoImg={logoImg}
-            />
-          </div>
+        <div className="card-soft overflow-hidden bg-gradient-to-b from-secondary/20 to-card p-2 sm:p-4 max-w-md mx-auto">
+          <SashCanvas
+            text={text}
+            date={year}
+            fontStyle={font.style}
+            sashColor={sashColor.value}
+            threadColor={thread.value}
+            threadGlow={thread.glow}
+            fontSize={26}
+            logoUrl={logoUrl}
+          />
         </div>
         <p className="text-center text-xs text-foreground/50 flex items-center justify-center gap-1">
           <ZoomIn className="w-3 h-3" />
-          معاينة حية للبكج الكامل — عباية + كاب + وشاح
+          معاينة حية على صورة المنتج الحقيقية
         </p>
 
         {/* اختيار الجامعة */}
@@ -204,7 +177,7 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
         </div>
 
         <div className="card-soft p-4">
-          <label className="flex items-center gap-2 text-sm font-bold mb-2"><ImageIcon className="w-4 h-4 text-primary" /> شعار الجامعة على الكاب (اختياري)</label>
+          <label className="flex items-center gap-2 text-sm font-bold mb-2"><ImageIcon className="w-4 h-4 text-primary" /> شعار الجامعة (اختياري)</label>
           {!logoUrl ? (
             <button
               onClick={() => fileRef.current?.click()}
@@ -232,12 +205,6 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
               <button key={c.value} onClick={() => setSashColor(c)} title={c.name} className={`w-7 h-7 rounded-full border-2 transition-all ${sashColor.value === c.value ? 'border-primary scale-125' : 'border-border'}`} style={{ background: `linear-gradient(135deg, ${c.light}, ${c.value})` }} />
             ))}
           </div>
-          <label className="flex items-center gap-2 text-sm font-bold mb-2"><Palette className="w-4 h-4 text-primary" /> لون الكاب</label>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {CAP_COLORS.map(c => (
-              <button key={c.value} onClick={() => setCapColor(c)} title={c.name} className={`w-7 h-7 rounded-full border-2 transition-all ${capColor.value === c.value ? 'border-primary scale-125' : 'border-border'}`} style={{ background: `linear-gradient(135deg, ${c.light}, ${c.value})` }} />
-            ))}
-          </div>
           <label className="flex items-center gap-2 text-sm font-bold mb-2"><Palette className="w-4 h-4 text-primary" /> لون التطريز</label>
           <div className="flex flex-wrap gap-2">
             {THREAD_COLORS.map(c => (
@@ -253,7 +220,7 @@ export default function UniversityPackageWidget({ productName = 'بكج تخرج
           <button onClick={handleAdd} className="flex-1 py-3 btn-primary inline-flex items-center justify-center gap-2">
             {added
               ? <><Check className="w-4 h-4" /> تمت الإضافة</>
-              : <><ShoppingBag className="w-4 h-4" /> أضف البكج للسلة — {productPrice} </>}
+              : <><ShoppingBag className="w-4 h-4" /> أضف وشاحك للسلة — {productPrice} </>}
           </button>
         </div>
       </div>

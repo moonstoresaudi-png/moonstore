@@ -7,7 +7,7 @@ import { useCart } from '@/lib/cartContext';
 const links = [
   { label: 'الرئيسية', to: '/' },
   { label: 'المتجر', to: '/shop' },
-  { label: 'بكج تخرج جامعة', to: '/university-package' },
+  { label: 'صمم وشاحك', to: '/university-package' },
   { label: 'من نحن', to: '/about' },
   { label: 'تتبع الطلب', to: '/track-order' },
 ];

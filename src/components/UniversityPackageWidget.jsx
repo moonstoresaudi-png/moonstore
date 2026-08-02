@@ -1,29 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { Type, Palette, RotateCcw, ShoppingBag, Check, ZoomIn, Image as ImageIcon, Upload, X, Loader2, GraduationCap, Ruler } from 'lucide-react';
-import { FONTS, THREAD_COLORS, SASH_COLORS, SashCanvas } from './SashSimulatorWidget';
+import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, SashCanvas } from './SashSimulatorWidget';
 import { uploadFile } from '@/api/storage';
 
-// أسماء جامعات شائعة + لون وشاح مقترح لكل واحدة (تصميم أصلي، يقدر الزبون يغيّرها بحرية)
+// أسماء جامعات شائعة + لون وشاح وشعار مقترح لكل واحدة (شعارات تصميم أصلي بسيط، يقدر الزبون يستبدلها برفع شعاره الخاص)
 const UNIVERSITIES = [
-  { id: 'custom', name: 'تصميم حر (بدون جامعة)', sash: 1, thread: 0 },
-  { id: 'jeddah', name: 'جامعة جدة', sash: 2, thread: 0 },
-  { id: 'kau', name: 'جامعة الملك عبدالعزيز', sash: 1, thread: 0 },
-  { id: 'uqu', name: 'جامعة أم القرى', sash: 4, thread: 0 },
-  { id: 'taibah', name: 'جامعة طيبة', sash: 6, thread: 0 },
-  { id: 'taif', name: 'جامعة الطائف', sash: 3, thread: 5 },
-  { id: 'ksu', name: 'جامعة الملك سعود', sash: 0, thread: 0 },
+  { id: 'custom', name: 'تصميم حر (بدون جامعة)', sash: 1, thread: 0, logo: '' },
+  { id: 'jeddah', name: 'جامعة جدة', sash: 2, thread: 0, logo: '/images/universities/jeddah.svg' },
+  { id: 'kau', name: 'جامعة الملك عبدالعزيز', sash: 1, thread: 0, logo: '/images/universities/kau.svg' },
+  { id: 'uqu', name: 'جامعة أم القرى', sash: 4, thread: 0, logo: '/images/universities/uqu.svg' },
+  { id: 'taibah', name: 'جامعة طيبة', sash: 6, thread: 0, logo: '/images/universities/taibah.svg' },
+  { id: 'taif', name: 'جامعة الطائف', sash: 3, thread: 5, logo: '/images/universities/taif.svg' },
+  { id: 'ksu', name: 'جامعة الملك سعود', sash: 0, thread: 0, logo: '/images/universities/ksu.svg' },
 ];
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
-const YEARS = ['2026', '1447', '2027', '1448'];
 
 export default function UniversityPackageWidget({ productName = 'صمم وشاحك', productPrice = 190 }) {
   const [uni, setUni] = useState(UNIVERSITIES[0]);
   const [sashColor, setSashColor] = useState(SASH_COLORS[UNIVERSITIES[0].sash]);
   const [thread, setThread] = useState(THREAD_COLORS[UNIVERSITIES[0].thread]);
   const [name, setName] = useState('');
-  const [year, setYear] = useState(YEARS[0]);
+  const [year, setYear] = useState(SASH_DATES[0]);
   const [font, setFont] = useState(FONTS[0]);
   const [size, setSize] = useState(SIZES[1]);
   const [logoUrl, setLogoUrl] = useState('');
@@ -38,6 +37,7 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
     setUni(u);
     setSashColor(SASH_COLORS[u.sash]);
     setThread(THREAD_COLORS[u.thread]);
+    setLogoUrl(u.logo || '');
   };
 
   const handleLogoPick = async (e) => {
@@ -62,7 +62,7 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
   const reset = () => {
     pickUniversity(UNIVERSITIES[0]);
     setName('');
-    setYear(YEARS[0]);
+    setYear(SASH_DATES[0]);
     setFont(FONTS[0]);
     setSize(SIZES[1]);
     clearLogo();
@@ -143,12 +143,10 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
         </div>
 
         <div className="card-soft p-4">
-          <label className="flex items-center gap-2 text-sm font-bold mb-2">سنة التخرج</label>
-          <div className="flex flex-wrap gap-2">
-            {YEARS.map(y => (
-              <button key={y} onClick={() => setYear(y)} className={`px-4 py-2 rounded-xl border text-sm transition-all ${year === y ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-secondary/40 hover:border-primary/40'}`}>{y}</button>
-            ))}
-          </div>
+          <label className="flex items-center gap-2 text-sm font-bold mb-2">سنة التخرج / التاريخ</label>
+          <select value={year} onChange={e => setYear(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary">
+            {SASH_DATES.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
         </div>
 
         <div className="card-soft p-4">
@@ -177,26 +175,33 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
         </div>
 
         <div className="card-soft p-4">
-          <label className="flex items-center gap-2 text-sm font-bold mb-2"><ImageIcon className="w-4 h-4 text-primary" /> شعار الجامعة (اختياري)</label>
-          {!logoUrl ? (
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="w-full py-5 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-sm text-foreground/60 transition-colors"
-            >
-              {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
-              {uploading ? 'جاري الرفع...' : 'اضغط لرفع صورة الشعار'}
-            </button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <img src={logoUrl} alt="الشعار" className="w-14 h-14 rounded-lg object-cover border border-border" />
-              <button onClick={clearLogo} className="text-sm text-destructive inline-flex items-center gap-1 hover:opacity-70">
-                <X className="w-4 h-4" /> إزالة
+          <label className="flex items-center gap-2 text-sm font-bold mb-3"><ImageIcon className="w-4 h-4 text-primary" /> شعار الجامعة</label>
+          <div className="grid grid-cols-4 gap-2 mb-3">
+            {UNIVERSITIES.filter(u => u.logo).map(u => (
+              <button key={u.id} onClick={() => setLogoUrl(u.logo)} title={u.name} className={`aspect-square rounded-xl border-2 overflow-hidden transition-all ${logoUrl === u.logo ? 'border-primary scale-105' : 'border-border hover:border-primary/40'}`}>
+                <img src={u.logo} alt={u.name} className="w-full h-full object-cover" />
               </button>
+            ))}
+            <button onClick={clearLogo} className={`aspect-square rounded-xl border-2 flex items-center justify-center text-[10px] font-medium transition-all ${!logoUrl ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground/50 hover:border-primary/40'}`}>بدون</button>
+          </div>
+          {logoUrl && !UNIVERSITIES.some(u => u.logo === logoUrl) && (
+            <div className="flex items-center gap-3 mb-3 p-2 rounded-lg bg-secondary/40">
+              <img src={logoUrl} alt="الشعار" className="w-10 h-10 rounded-lg object-cover border border-border" />
+              <span className="text-xs text-foreground/60">شعارك المرفوع</span>
+              <button onClick={clearLogo} className="text-xs text-destructive inline-flex items-center gap-1 hover:opacity-70 mr-auto"><X className="w-3.5 h-3.5" /></button>
             </div>
           )}
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="w-full py-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center gap-2 text-xs text-foreground/60 transition-colors"
+          >
+            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            {uploading ? 'جاري الرفع...' : 'جامعتك مو موجودة؟ ارفع شعارها بنفسك'}
+          </button>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoPick} className="hidden" />
         </div>
+
 
         <div className="card-soft p-4">
           <label className="flex items-center gap-2 text-sm font-bold mb-2"><Palette className="w-4 h-4 text-primary" /> لون الوشاح</label>

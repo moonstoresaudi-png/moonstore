@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="grad-jeddah" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F5C4A" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0F5C4A" stop-opacity="0.75"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="94" fill="url(#grad-jeddah)" stroke="#D4AF37" stroke-width="4"/>
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#D4AF37" stroke-width="1.2" opacity="0.6"/>
+  <text x="100" y="98" font-family="Cairo, Tajawal, sans-serif" font-size="54" font-weight="800" fill="#F4E9C9" text-anchor="middle" dominant-baseline="middle">ج</text>
+  <text x="100" y="150" font-family="Tajawal, sans-serif" font-size="15" font-weight="700" fill="#F4E9C9" text-anchor="middle">جامعة جدة</text>
+  <path d="M60,42 L100,26 L140,42 L100,58 Z" fill="#D4AF37" opacity="0.9"/>
+</svg>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { entities } from '@/api/entities';
 import { sendEmail } from '@/api/email';
 import { useStoreSettings } from '@/lib/SettingsContext';
-import { ShoppingCart, Mail, Trash2, Clock, AlertCircle, Wallet } from 'lucide-react';
+import { ShoppingCart, Mail, Trash2, Clock, AlertCircle, Wallet, MessageCircle } from 'lucide-react';
 
 function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -20,14 +20,23 @@ const ACTIVE_WINDOW_MIN = 15; // أقل من كذا دقيقة = لسه بيكم
 export default function AdminAbandonedCarts() {
   const { settings } = useStoreSettings();
   const [orders, setOrders] = useState(null);
+  const [leads, setLeads] = useState(null);
   const [sending, setSending] = useState(null);
 
-  const load = () => entities.Order.filter({ status: 'pending' }, '-created_date', 200).then(setOrders).catch(() => setOrders([]));
+  const load = () => {
+    entities.Order.filter({ status: 'pending' }, '-created_date', 200).then(setOrders).catch(() => setOrders([]));
+    entities.CartLead.list('-created_date', 100).then(setLeads).catch(() => setLeads([]));
+  };
   useEffect(() => {
     load();
     const t = setInterval(load, 60000); // تحديث تلقائي كل دقيقة
     return () => clearInterval(t);
   }, []);
+
+  const removeLead = async (id) => {
+    setLeads(prev => prev ? prev.filter(l => l.id !== id) : prev);
+    try { await entities.CartLead.delete(id); } catch {}
+  };
 
   const { active, abandoned, totalValue } = React.useMemo(() => {
     if (!orders) return { active: [], abandoned: [], totalValue: 0 };
@@ -134,6 +143,28 @@ export default function AdminAbandonedCarts() {
             </div>
           )}
         </>
+      )}
+
+      {leads && leads.length > 0 && (
+        <div className="space-y-3 mt-8">
+          <h4 className="font-bold text-sm text-violet-600">حاطين بالسلة بس ({leads.length}) <span className="text-foreground/40 font-normal">— ما فتحوا صفحة الدفع أصلاً، بس تركوا جوالهم</span></h4>
+          {leads.map(l => (
+            <div key={l.id} className="card-soft p-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0"><ShoppingCart className="w-5 h-5 text-violet-600" /></div>
+                <div className="min-w-0">
+                  <p className="font-bold text-sm truncate" dir="ltr">{l.phone}</p>
+                  <p className="text-xs text-foreground/50 truncate">{l.cart_summary} • {l.cart_total} ريال</p>
+                  <p className="text-[11px] text-violet-600 font-medium mt-0.5">{timeAgo(l.created_date)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <a href={`https://wa.me/${l.phone.replace(/^0/, '966')}`} target="_blank" rel="noreferrer" className="px-3 py-2 rounded-full bg-green-600 text-white text-xs font-medium inline-flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> واتساب</a>
+                <button onClick={() => removeLead(l.id)} className="p-2 rounded-lg text-destructive/60 hover:bg-red-50"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

@@ -242,6 +242,31 @@ create index if not exists reviews_product_id_idx on public.reviews(product_id);
 create index if not exists reviews_rating_idx on public.reviews(rating);
 
 -- -------------------------------------------------------------------------
+-- cart_leads: "احفظ سلتك" — جوال عميل حاط منتجات ولسه ما بدأ الدفع
+-- -------------------------------------------------------------------------
+create table if not exists public.cart_leads (
+  id uuid primary key default gen_random_uuid(),
+  phone text not null,
+  cart_summary text,
+  cart_total numeric not null default 0,
+  contacted boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.cart_leads enable row level security;
+
+create policy "cart_leads_insert_anyone" on public.cart_leads
+  for insert with check (char_length(phone) between 6 and 20);
+create policy "cart_leads_select_admin" on public.cart_leads
+  for select using (public.is_admin());
+create policy "cart_leads_update_admin" on public.cart_leads
+  for update using (public.is_admin()) with check (public.is_admin());
+create policy "cart_leads_delete_admin" on public.cart_leads
+  for delete using (public.is_admin());
+
+create index if not exists cart_leads_created_at_idx on public.cart_leads(created_at desc);
+
+-- -------------------------------------------------------------------------
 -- store_settings: صف واحد فقط، معلومات المتجر العامة (يقرأها كل الموقع)
 -- -------------------------------------------------------------------------
 create table if not exists public.store_settings (

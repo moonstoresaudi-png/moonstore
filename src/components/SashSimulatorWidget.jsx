@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
-import { Type, Palette, RotateCcw, ShoppingBag, Check, Ruler, ZoomIn } from 'lucide-react';
+import { uploadFile } from '@/api/storage';
+import { Type, Palette, RotateCcw, ShoppingBag, Check, Ruler, ZoomIn, Image as ImageIcon, Loader2, X } from 'lucide-react';
 
 const FONTS = [
   { id: 'thuluth-light', name: 'ثلث لايت', cls: 'font-thuluth', style: '"Amiri", serif' },
@@ -49,162 +50,117 @@ const THREAD_COLORS = [
 
 export { FONTS, SASH_COLORS, THREAD_COLORS, SASH_EDGE_COLORS, SASH_DATES, SashCanvas };
 
-// معاينة الوشاح الحقيقية بـ Canvas
-function SashCanvas({ text, fontStyle, sashColor, sashLight, threadColor, threadGlow, fontSize }) {
+// الصورة الحقيقية للوشاح — نفس المنتج الفعلي (مو رسم توضيحي)
+const SASH_IMG_SRC = '/images/products/sash/view1.webp';
+
+// إحداثيات محسوبة بدقة من أبعاد الصورة الحقيقية (933×700) لتحديد مكان
+// الشريطين المستقيمين بالضبط، حتى يوضع النص بمكانه الصحيح تمامًا
+const STRAP_LEFT_X = 0.374;   // مركز الشريط الأيسر (كنسبة من عرض الصورة)
+const STRAP_RIGHT_X = 0.639;  // مركز الشريط الأيمن
+const STRAP_MAX_TEXT_W = 0.30; // أقصى عرض نص داخل شريط واحد
+const TEXT_CENTER_Y = 0.60;    // منتصف المنطقة المستقيمة (كنسبة من ارتفاع الصورة)
+const LOGO_CENTER_X = 0.505;   // منتصف منطقة الرقبة (بين الشريطين)
+const LOGO_CENTER_Y = 0.145;
+const LOGO_MAX_W = 0.17;
+
+// معاينة الوشاح على الصورة الحقيقية بـ Canvas — إعادة تلوين + نص التطريز
+function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize, logoUrl }) {
   const canvasRef = useRef(null);
+  const [baseImg, setBaseImg] = useState(null);
+  const [logoImg, setLogoImg] = useState(null);
+
+  useEffect(() => {
+    const img = new window.Image();
+    img.onload = () => setBaseImg(img);
+    img.src = SASH_IMG_SRC;
+  }, []);
+
+  useEffect(() => {
+    if (!logoUrl) { setLogoImg(null); return; }
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => setLogoImg(img);
+    img.onerror = () => setLogoImg(null);
+    img.src = logoUrl;
+  }, [logoUrl]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !baseImg) return;
     const ctx = canvas.getContext('2d');
-    const W = canvas.width;
-    const H = canvas.height;
+    const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    // خلفية المشهد (كتف)
+    // خلفية ناعمة خلف الصورة
     ctx.fillStyle = '#f8f4f0';
     ctx.fillRect(0, 0, W, H);
 
-    // شبح الجسم / الروب
-    ctx.save();
-    ctx.globalAlpha = 0.08;
-    ctx.fillStyle = '#4A2060';
-    ctx.beginPath();
-    ctx.ellipse(W / 2, H * 0.18, W * 0.32, H * 0.14, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.roundRect(W * 0.22, H * 0.28, W * 0.56, H * 0.65, 20);
-    ctx.fill();
-    ctx.restore();
+    // ===== إعادة تلوين الصورة الحقيقية حسب اللون المختار (تحافظ على الطيات والظلال) =====
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const octx = off.getContext('2d');
+    octx.drawImage(baseImg, 0, 0, W, H);
+    octx.globalCompositeOperation = 'source-atop';
+    octx.fillStyle = sashColor;
+    octx.fillRect(0, 0, W, H);
+    octx.globalCompositeOperation = 'soft-light';
+    octx.globalAlpha = 0.55;
+    octx.drawImage(baseImg, 0, 0, W, H);
+    octx.globalAlpha = 1;
+    octx.globalCompositeOperation = 'source-over';
 
-    // ===== رسم الوشاح =====
-    // الوشاح شريط مائل من أعلى الكتف الأيمن إلى أسفل الخصر الأيسر
-    const x1 = W * 0.72, y1 = H * 0.12;   // نقطة البداية (الكتف الأيمن)
-    const x2 = W * 0.28, y2 = H * 0.88;   // نقطة النهاية (الخصر الأيسر)
-    const W_SASH = 54; // عرض الوشاح بالبكسل
+    ctx.drawImage(off, 0, 0);
 
-    // حساب المتجه العمودي على اتجاه الوشاح
-    const dx = x2 - x1, dy = y2 - y1;
-    const len = Math.sqrt(dx * dx + dy * dy);
-    const nx = -dy / len, ny = dx / len; // المتجه العمودي
+    // ===== نص مطرّز بالمقاس الصحيح داخل حدود كل شريط =====
+    const drawFittedText = (str, xFrac) => {
+      if (!str || !str.trim()) return;
+      const x = W * xFrac;
+      const y = H * TEXT_CENTER_Y;
+      const maxWidth = W * STRAP_MAX_TEXT_W;
+      let fs = Math.min(fontSize, 30);
 
-    // تدرج قماش الوشاح
-    const gradFabric = ctx.createLinearGradient(
-      x1 + nx * W_SASH * 0.5, y1 + ny * W_SASH * 0.5,
-      x1 - nx * W_SASH * 0.5, y1 - ny * W_SASH * 0.5
-    );
-    gradFabric.addColorStop(0, sashLight);
-    gradFabric.addColorStop(0.3, sashColor);
-    gradFabric.addColorStop(0.7, sashColor);
-    gradFabric.addColorStop(1, '#111');
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(x1 + nx * W_SASH * 0.5, y1 + ny * W_SASH * 0.5);
-    ctx.lineTo(x2 + nx * W_SASH * 0.5, y2 + ny * W_SASH * 0.5);
-    ctx.lineTo(x2 - nx * W_SASH * 0.5, y2 - ny * W_SASH * 0.5);
-    ctx.lineTo(x1 - nx * W_SASH * 0.5, y1 - ny * W_SASH * 0.5);
-    ctx.closePath();
-    ctx.fillStyle = gradFabric;
-    ctx.fill();
-    // حدود الوشاح
-    ctx.strokeStyle = threadColor;
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.6;
-    ctx.stroke();
-    ctx.restore();
-
-    // بريق / لمعة على الوشاح
-    ctx.save();
-    ctx.globalAlpha = 0.12;
-    const gradSheen = ctx.createLinearGradient(x1 + nx * W_SASH * 0.2, y1, x1 - nx * W_SASH * 0.1, y1);
-    gradSheen.addColorStop(0, '#ffffff');
-    gradSheen.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradSheen;
-    ctx.beginPath();
-    ctx.moveTo(x1 + nx * W_SASH * 0.2, y1 + ny * W_SASH * 0.2);
-    ctx.lineTo(x2 + nx * W_SASH * 0.2, y2 + ny * W_SASH * 0.2);
-    ctx.lineTo(x2 + nx * W_SASH * 0.0, y2 + ny * W_SASH * 0.0);
-    ctx.lineTo(x1 + nx * W_SASH * 0.0, y1 + ny * W_SASH * 0.0);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    // خطوط التطريز على الحواف
-    ['0.48', '-0.48'].forEach(frac => {
-      const f = parseFloat(frac);
       ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x1 + nx * W_SASH * f, y1 + ny * W_SASH * f);
-      ctx.lineTo(x2 + nx * W_SASH * f, y2 + ny * W_SASH * f);
-      ctx.strokeStyle = threadColor;
-      ctx.lineWidth = 1.5;
-      ctx.globalAlpha = 0.75;
-      ctx.stroke();
-      ctx.restore();
-    });
-
-    // الهدابة / الشراشيب في الأسفل
-    ctx.save();
-    ctx.globalAlpha = 0.85;
-    const fringeCount = 12;
-    for (let i = 0; i < fringeCount; i++) {
-      const t = (i - fringeCount / 2) / fringeCount;
-      const fx = x2 + nx * W_SASH * t * 0.9;
-      const fy = y2 + ny * W_SASH * t * 0.9;
-      const flen = 28 + Math.sin(i * 1.7) * 6;
-      const ex = fx + (dx / len) * flen;
-      const ey = fy + (dy / len) * flen;
-      ctx.beginPath();
-      ctx.moveTo(fx, fy);
-      ctx.lineTo(ex, ey);
-      ctx.strokeStyle = threadColor;
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // ===== النص المطرّز =====
-    if (text && text.trim()) {
-      ctx.save();
-      // حساب منتصف الوشاح وزاوية الميل
-      const midX = (x1 + x2) / 2;
-      const midY = (y1 + y2) / 2;
-      const angle = Math.atan2(dy, dx);
-
-      ctx.translate(midX, midY);
-      ctx.rotate(angle);
-
-      const fs = Math.min(fontSize, 32);
-      ctx.font = `bold ${fs}px ${fontStyle}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-
-      // ظل النص (تأثير التطريز)
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.font = `bold ${fs}px ${fontStyle}`;
+      while (ctx.measureText(str).width > maxWidth && fs > 10) {
+        fs -= 1;
+        ctx.font = `bold ${fs}px ${fontStyle}`;
+      }
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
       ctx.shadowBlur = 3;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
       ctx.fillStyle = threadColor;
       ctx.globalAlpha = 0.95;
-      ctx.fillText(text, 0, 0);
-
-      // بريق النص
+      ctx.fillText(str, x, y);
       ctx.shadowBlur = 6;
       ctx.shadowColor = threadGlow;
-      ctx.globalAlpha = 0.4;
-      ctx.fillText(text, 0, 0);
+      ctx.globalAlpha = 0.35;
+      ctx.fillText(str, x, y);
+      ctx.restore();
+    };
 
+    drawFittedText(text, STRAP_RIGHT_X);
+    drawFittedText(date, STRAP_LEFT_X);
+
+    // ===== الشعار عند منطقة الرقبة =====
+    if (logoImg) {
+      const lw = W * LOGO_MAX_W;
+      const lh = lw * (logoImg.height / logoImg.width);
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 4;
+      ctx.drawImage(logoImg, W * LOGO_CENTER_X - lw / 2, H * LOGO_CENTER_Y - lh / 2, lw, lh);
       ctx.restore();
     }
-
-  }, [text, fontStyle, sashColor, sashLight, threadColor, threadGlow, fontSize]);
+  }, [baseImg, logoImg, text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={320}
-      height={420}
+      width={466}
+      height={350}
       className="w-full h-auto rounded-xl"
       style={{ background: '#f8f4f0' }}
     />
@@ -219,8 +175,22 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
   const [edge, setEdge] = useState(SASH_EDGE_COLORS[0]);
   const [date, setDate] = useState(SASH_DATES[0]);
   const [fontSize, setFontSize] = useState(28);
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const { file_url } = await uploadFile({ file });
+      setLogoUrl(file_url);
+    } catch { /* تجاهل بصمت — الشعار اختياري */ }
+    setLogoUploading(false);
+    e.target.value = '';
+  };
 
   const reset = () => {
     setText('');
@@ -230,10 +200,11 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
     setEdge(SASH_EDGE_COLORS[0]);
     setDate(SASH_DATES[0]);
     setFontSize(28);
+    setLogoUrl('');
   };
 
   const handleAdd = () => {
-    const config = { text: text || 'بدون اسم', date, font: font.name, sashColor: sashColor.name, thread: thread.name, edge: edge.name };
+    const config = { text: text || 'بدون اسم', date, font: font.name, sashColor: sashColor.name, thread: thread.name, edge: edge.name, logoUrl };
     addItem({
       id: `sash-${Date.now()}`,
       name: `${productName} — ${config.text}`,
@@ -252,12 +223,13 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
         <div className="card-soft overflow-hidden bg-gradient-to-b from-secondary/20 to-card p-2 sm:p-4">
           <SashCanvas
             text={text}
+            date={date}
             fontStyle={font.style}
             sashColor={sashColor.value}
-            sashLight={sashColor.light}
             threadColor={thread.value}
             threadGlow={thread.glow}
             fontSize={fontSize}
+            logoUrl={logoUrl}
           />
         </div>
         <p className="text-center text-xs text-foreground/50 mt-2 flex items-center justify-center gap-1">
@@ -351,6 +323,24 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
           <select value={date} onChange={e => setDate(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary">
             {SASH_DATES.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
+        </div>
+
+        {/* الشعار */}
+        <div className="card-soft p-4">
+          <label className="flex items-center gap-2 text-sm font-bold mb-2"><ImageIcon className="w-4 h-4 text-primary" /> إضافة شعار (اختياري)</label>
+          {logoUrl ? (
+            <div className="flex items-center gap-3">
+              <img src={logoUrl} alt="" className="w-14 h-14 rounded-lg object-contain border border-border bg-secondary/30" />
+              <button type="button" onClick={() => setLogoUrl('')} className="p-2 rounded-lg text-red-500 hover:bg-red-50"><X className="w-4 h-4" /></button>
+              <span className="text-xs text-foreground/50">تم رفع الشعار</span>
+            </div>
+          ) : (
+            <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
+              {logoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+              {logoUploading ? 'جارٍ الرفع...' : 'ارفع شعار جامعتك من جهازك'}
+              <input type="file" accept="image/*" onChange={handleLogoUpload} disabled={logoUploading} className="hidden" />
+            </label>
+          )}
         </div>
 
         {/* حجم الخط */}

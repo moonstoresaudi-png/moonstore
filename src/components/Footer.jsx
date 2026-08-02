@@ -83,6 +83,7 @@ export default function Footer() {
           <h4 className="font-heading font-bold mb-4 text-background">روابط تهمك</h4>
           <ul className="space-y-2.5 text-sm text-background/60 mb-8">
             <li><Link to="/policies" className="hover:text-background transition-colors">الأسئلة الشائعة لطلبات التخرج</Link></li>
+            <li><Link to="/size-guide" className="hover:text-background transition-colors">دليل المقاسات</Link></li>
             <li><Link to="/policies" className="hover:text-background transition-colors">سياسة الطلب من المتجر</Link></li>
             <li><Link to="/policies" className="hover:text-background transition-colors">سياسة الاسترجاع والاستبدال</Link></li>
             <li><Link to="/track-order" className="hover:text-background transition-colors">تتبع الطلب</Link></li>

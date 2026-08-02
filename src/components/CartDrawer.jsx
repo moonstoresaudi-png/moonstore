@@ -1,7 +1,54 @@
-import React from 'react';
-import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Plus, Minus, Trash2, ShoppingBag, PhoneCall, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/lib/cartContext';
+import { entities } from '@/api/entities';
+
+function SaveCartPrompt({ items, total }) {
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem('ms_cart_lead_dismissed') === '1');
+  const [saved, setSaved] = useState(() => sessionStorage.getItem('ms_cart_lead_saved') === '1');
+  const [phone, setPhone] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  if (saved) {
+    return (
+      <div className="mx-5 mb-3 px-4 py-3 rounded-xl bg-green-50 text-green-700 text-xs font-medium flex items-center gap-2">
+        <Check className="w-4 h-4" /> حفظنا سلتك، بنتواصل معك لو احتجت مساعدة 🌙
+      </div>
+    );
+  }
+  if (dismissed) return null;
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (phone.trim().length < 8) return;
+    setSaving(true);
+    try {
+      await entities.CartLead.create({
+        phone: phone.trim(),
+        cart_summary: items.map(i => `${i.name} ×${i.qty}`).join('، '),
+        cart_total: total,
+      });
+      sessionStorage.setItem('ms_cart_lead_saved', '1');
+      setSaved(true);
+    } catch { /* ما نزعج العميل برسالة خطأ على شي اختياري */ }
+    setSaving(false);
+  };
+
+  return (
+    <form onSubmit={handleSave} className="mx-5 mb-3 p-3.5 rounded-xl bg-secondary/50 border border-border">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <p className="text-xs font-bold text-foreground/80 flex items-center gap-1.5"><PhoneCall className="w-3.5 h-3.5 text-primary" /> احفظ سلتك؟</p>
+        <button type="button" onClick={() => { sessionStorage.setItem('ms_cart_lead_dismissed', '1'); setDismissed(true); }} className="text-foreground/30 hover:text-foreground/60"><X className="w-3.5 h-3.5" /></button>
+      </div>
+      <p className="text-[11px] text-foreground/50 mb-2">اختياري — خلّي جوالك عشان نذكّرك لو ما كملت الطلب</p>
+      <div className="flex gap-1.5">
+        <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="05xxxxxxxx" dir="ltr" className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-xs focus:border-primary focus:outline-none" />
+        <button type="submit" disabled={saving} className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold disabled:opacity-50">{saving ? '...' : 'حفظ'}</button>
+      </div>
+    </form>
+  );
+}
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, removeItem, updateQty, total } = useCart();
@@ -44,13 +91,16 @@ export default function CartDrawer() {
         </div>
 
         {items.length > 0 && (
-          <div className="px-5 py-4 border-t border-border space-y-3">
+          <>
+            <SaveCartPrompt items={items} total={total} />
+            <div className="px-5 py-4 border-t border-border space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-foreground/70 text-sm">الإجمالي</span>
               <span className="text-primary font-heading font-bold text-lg">{total} </span>
             </div>
             <button onClick={() => { setIsOpen(false); navigate('/checkout'); }} className="w-full py-3.5 btn-primary">إتمام الطلب</button>
-          </div>
+            </div>
+          </>
         )}
       </aside>
     </>

@@ -1,39 +1,11 @@
 import React, { useState } from 'react';
-import { Star, Plus, Minus, ShoppingBag, Check, Flame, Truck, ShieldCheck } from 'lucide-react';
+import { Star, Plus, Minus, ShoppingBag, Check, Flame, Truck, ShieldCheck, Image as ImageIcon, Upload, X, Loader2 } from 'lucide-react';
 import ProductGallery from './ProductGallery';
 import MeasurementGuide from './MeasurementGuide';
 import { useCart } from '@/lib/cartContext';
+import { uploadFile } from '@/api/storage';
+import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, SashCanvas } from './SashSimulatorWidget';
 
-const FONTS = [
-  { label: 'ثلث', cls: 'font-thuluth' },
-  { label: 'ديواني', cls: 'font-diwani' },
-  { label: 'كوفي', cls: 'font-kufi' },
-  { label: 'نسخ', cls: 'font-naskh' },
-  { label: 'لطيف', cls: 'font-lateef' },
-  { label: 'مصري', cls: 'font-messiri' },
-  { label: 'قاهرة', cls: 'font-cairo' },
-  { label: 'طاجوال', cls: 'font-body' },
-];
-
-const THREAD_COLORS = [
-  { label: 'ذهبي', value: '#D4AF37' },
-  { label: 'فضي', value: '#C0C0C0' },
-  { label: 'أبيض', value: '#FFFFFF' },
-  { label: 'أسود', value: '#222222' },
-  { label: 'أحمر', value: '#DC2626' },
-  { label: 'أزرق', value: '#2563EB' },
-];
-
-const SASH_COLORS = [
-  { label: 'بنفسجي', value: '#6B4D6C' },
-  { label: 'أسود', value: '#1a1a2e' },
-  { label: 'كحلي', value: '#1B2A4A' },
-  { label: 'أخضر زيتي', value: '#556B2F' },
-  { label: 'خمري', value: '#800020' },
-  { label: 'وردي', value: '#C58B8B' },
-];
-
-const YEARS = ['2025', '2026', '1446', '1447'];
 const CAP_TYPES = ['دائري', 'مثلث'];
 
 function Section({ label, required, children }) {
@@ -49,21 +21,35 @@ export default function ProductConfigurator({ product }) {
   const [activeTab, setActiveTab] = useState('description');
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
   const { addItem } = useCart();
 
   const [config, setConfig] = useState({
     addSash: false,
     name: '',
-    fontType: 'ثلث',
+    font: FONTS[0],
     date: '',
     size: product.sizes?.[0] || '',
     capType: 'دائري',
-    threadColor: '#D4AF37',
-    sashColor: '#6B4D6C',
+    thread: THREAD_COLORS[0],
+    sash: SASH_COLORS[0],
+    logoUrl: '',
     packaging: false,
   });
 
   const update = (key, val) => setConfig(c => ({ ...c, [key]: val }));
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const { file_url } = await uploadFile({ file });
+      update('logoUrl', file_url);
+    } catch { /* الشعار اختياري، نتجاهل الخطأ بصمت */ }
+    setLogoUploading(false);
+    e.target.value = '';
+  };
 
   const gallery = product.gallery_images?.length ? product.gallery_images : [product.image_url].filter(Boolean);
   const discount = product.old_price ? Math.round((1 - product.price / product.old_price) * 100) : 0;
@@ -74,12 +60,14 @@ export default function ProductConfigurator({ product }) {
 
   const handleAdd = () => {
     const summary = [
-      config.addSash && `وشاح (${SASH_COLORS.find(c => c.value === config.sashColor)?.label || ''})`,
+      config.addSash && `وشاح (${config.sash.name})`,
       config.name && `الاسم: ${config.name}`,
-      `خط: ${config.fontType}`,
+      `خط: ${config.font.name}`,
+      config.date && `التاريخ: ${config.date}`,
       config.size && `مقاس: ${config.size}`,
       product.has_cap && `كاب: ${config.capType}`,
-      `تطريز: ${THREAD_COLORS.find(c => c.value === config.threadColor)?.label || ''}`,
+      `تطريز: ${config.thread.name}`,
+      config.logoUrl && 'مع شعار',
       config.packaging && 'تغليف فاخر',
     ].filter(Boolean).join(' | ');
 
@@ -97,7 +85,25 @@ export default function ProductConfigurator({ product }) {
   return (
     <div>
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-        <ProductGallery images={gallery} name={product.name} discount={discount} product={product} previewConfig={config} />
+        {product.has_sash ? (
+          <div className="space-y-3 lg:sticky lg:top-24">
+            <div className="card-soft overflow-hidden bg-gradient-to-b from-secondary/20 to-card p-2 sm:p-4">
+              <SashCanvas
+                text={config.name}
+                date={config.date}
+                fontStyle={config.font.style}
+                sashColor={config.sash.value}
+                threadColor={config.thread.value}
+                threadGlow={config.thread.glow}
+                fontSize={26}
+                logoUrl={config.logoUrl}
+              />
+            </div>
+            <p className="text-center text-xs text-foreground/50">معاينة حية على صورة المنتج الحقيقية</p>
+          </div>
+        ) : (
+          <ProductGallery images={gallery} name={product.name} discount={discount} product={product} previewConfig={config} />
+        )}
 
         <div>
           <div className="flex items-center gap-1 mb-2">
@@ -142,18 +148,34 @@ export default function ProductConfigurator({ product }) {
           <Section label="نوع الخط" required>
             <div className="flex flex-wrap gap-2">
               {FONTS.map(f => (
-                <button key={f.label} onClick={() => update('fontType', f.label)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${f.cls} ${config.fontType === f.label ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>{f.label}</button>
+                <button key={f.id} onClick={() => update('font', f)} style={{ fontFamily: f.style }} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.font.id === f.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>{f.name}</button>
               ))}
             </div>
           </Section>
 
           {product.has_date && (
             <Section label="إضافة تاريخ" required>
-              <div className="flex flex-wrap gap-2">
-                {YEARS.map(y => (
-                  <button key={y} onClick={() => update('date', y)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.date === y ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>{y}</button>
-                ))}
-              </div>
+              <select value={config.date} onChange={e => update('date', e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary">
+                <option value="">اختر...</option>
+                {SASH_DATES.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </Section>
+          )}
+
+          {product.has_sash && (
+            <Section label="شعار (اختياري)">
+              {config.logoUrl ? (
+                <div className="flex items-center gap-3">
+                  <img src={config.logoUrl} alt="" className="w-12 h-12 rounded-lg object-contain border border-border bg-secondary/30" />
+                  <button type="button" onClick={() => update('logoUrl', '')} className="p-2 rounded-lg text-red-500 hover:bg-red-50"><X className="w-4 h-4" /></button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
+                  {logoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {logoUploading ? 'جارٍ الرفع...' : 'ارفع شعار جامعتك'}
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} disabled={logoUploading} className="hidden" />
+                </label>
+              )}
             </Section>
           )}
 
@@ -180,16 +202,16 @@ export default function ProductConfigurator({ product }) {
           <Section label="لون التطريز">
             <div className="flex gap-2">
               {THREAD_COLORS.map(c => (
-                <button key={c.value} onClick={() => update('threadColor', c.value)} className={`w-9 h-9 rounded-full border-2 transition-all ${config.threadColor === c.value ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-border'}`} style={{ background: c.value }} title={c.label} />
+                <button key={c.value} onClick={() => update('thread', c)} className={`w-9 h-9 rounded-full border-2 transition-all ${config.thread.value === c.value ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-border'}`} style={{ background: c.value }} title={c.name} />
               ))}
             </div>
           </Section>
 
           {config.addSash && (
             <Section label="لون الوشاح">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {SASH_COLORS.map(c => (
-                  <button key={c.value} onClick={() => update('sashColor', c.value)} className={`w-9 h-9 rounded-full border-2 transition-all ${config.sashColor === c.value ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-border'}`} style={{ background: c.value }} title={c.label} />
+                  <button key={c.value} onClick={() => update('sash', c)} className={`w-9 h-9 rounded-full border-2 transition-all ${config.sash.value === c.value ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-border'}`} style={{ background: `linear-gradient(135deg, ${c.light}, ${c.value})` }} title={c.name} />
                 ))}
               </div>
             </Section>

@@ -7,8 +7,8 @@ const FONTS = [
   { id: 'thuluth-light', name: 'ثلث لايت', cls: 'font-thuluth', style: '"Amiri", serif' },
   { id: 'thuluth', name: 'الثلث', cls: 'font-thuluth', style: '"Amiri", serif' },
   { id: 'diwani', name: 'ديواني', cls: 'font-diwani', style: '"Aref Ruqaa", serif' },
-  { id: 'monotype', name: 'Monotype (إنجليزي)', cls: 'font-body', style: '"Monotype Corsiva", cursive' },
-  { id: 'calisto', name: 'Calisto (إنجليزي)', cls: 'font-body', style: '"Calisto MT", serif' },
+  { id: 'monotype', name: 'Great Vibes (إنجليزي)', cls: 'font-body', style: '"Great Vibes", cursive' },
+  { id: 'calisto', name: 'Playfair (إنجليزي)', cls: 'font-body', style: '"Playfair Display", serif' },
 ];
 
 const SASH_COLORS = [
@@ -87,73 +87,89 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !baseImg) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
+    let cancelled = false;
 
-    // خلفية ناعمة خلف الصورة
-    ctx.fillStyle = '#f8f4f0';
-    ctx.fillRect(0, 0, W, H);
+    async function draw() {
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
 
-    // ===== إعادة تلوين الصورة الحقيقية حسب اللون المختار (تحافظ على الطيات والظلال) =====
-    const off = document.createElement('canvas');
-    off.width = W; off.height = H;
-    const octx = off.getContext('2d');
-    octx.drawImage(baseImg, 0, 0, W, H);
-    octx.globalCompositeOperation = 'source-atop';
-    octx.fillStyle = sashColor;
-    octx.fillRect(0, 0, W, H);
-    octx.globalCompositeOperation = 'soft-light';
-    octx.globalAlpha = 0.55;
-    octx.drawImage(baseImg, 0, 0, W, H);
-    octx.globalAlpha = 1;
-    octx.globalCompositeOperation = 'source-over';
+      // خلفية ناعمة خلف الصورة
+      ctx.fillStyle = '#f8f4f0';
+      ctx.fillRect(0, 0, W, H);
 
-    ctx.drawImage(off, 0, 0);
+      // ===== إعادة تلوين الصورة الحقيقية حسب اللون المختار (تحافظ على الطيات والظلال) =====
+      const off = document.createElement('canvas');
+      off.width = W; off.height = H;
+      const octx = off.getContext('2d');
+      octx.drawImage(baseImg, 0, 0, W, H);
+      octx.globalCompositeOperation = 'source-atop';
+      octx.fillStyle = sashColor;
+      octx.fillRect(0, 0, W, H);
+      octx.globalCompositeOperation = 'soft-light';
+      octx.globalAlpha = 0.55;
+      octx.drawImage(baseImg, 0, 0, W, H);
+      octx.globalAlpha = 1;
+      octx.globalCompositeOperation = 'source-over';
 
-    // ===== نص مطرّز بالمقاس الصحيح داخل حدود كل شريط =====
-    const drawFittedText = (str, xFrac) => {
-      if (!str || !str.trim()) return;
-      const x = W * xFrac;
-      const y = H * TEXT_CENTER_Y;
-      const maxWidth = W * STRAP_MAX_TEXT_W;
-      let fs = Math.min(fontSize, 30);
+      ctx.drawImage(off, 0, 0);
 
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = `bold ${fs}px ${fontStyle}`;
-      while (ctx.measureText(str).width > maxWidth && fs > 10) {
-        fs -= 1;
+      // مهم: لازم ننتظر تحميل الخط فعليًا قبل ما نرسمه على الكانفاس، وإلا
+      // المتصفح يرسم بخط افتراضي بصمت حتى لو الخط المختار محمّل أصلاً بالصفحة
+      // (مشكلة شائعة جدًا مع Canvas + خطوط ويب مخصصة)
+      try {
+        await document.fonts.load(`bold ${Math.min(fontSize, 30)}px ${fontStyle}`);
+        await document.fonts.ready;
+      } catch { /* لو فشل التحميل، يرجع للخط الافتراضي بدل ما يتوقف */ }
+      if (cancelled) return;
+
+      // ===== نص مطرّز بالمقاس الصحيح داخل حدود كل شريط =====
+      const drawFittedText = (str, xFrac) => {
+        if (!str || !str.trim()) return;
+        const x = W * xFrac;
+        const y = H * TEXT_CENTER_Y;
+        const maxWidth = W * STRAP_MAX_TEXT_W;
+        let fs = Math.min(fontSize, 30);
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.font = `bold ${fs}px ${fontStyle}`;
+        while (ctx.measureText(str).width > maxWidth && fs > 10) {
+          fs -= 1;
+          ctx.font = `bold ${fs}px ${fontStyle}`;
+        }
+        ctx.shadowColor = 'rgba(0,0,0,0.55)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fillStyle = threadColor;
+        ctx.globalAlpha = 0.95;
+        ctx.fillText(str, x, y);
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = threadGlow;
+        ctx.globalAlpha = 0.35;
+        ctx.fillText(str, x, y);
+        ctx.restore();
+      };
+
+      drawFittedText(date, STRAP_RIGHT_X);
+      drawFittedText(text, STRAP_LEFT_X);
+
+      // ===== الشعار عند منطقة الرقبة =====
+      if (logoImg) {
+        const lw = W * LOGO_MAX_W;
+        const lh = lw * (logoImg.height / logoImg.width);
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 4;
+        ctx.drawImage(logoImg, W * LOGO_CENTER_X - lw / 2, H * LOGO_CENTER_Y - lh / 2, lw, lh);
+        ctx.restore();
       }
-      ctx.shadowColor = 'rgba(0,0,0,0.55)';
-      ctx.shadowBlur = 3;
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
-      ctx.fillStyle = threadColor;
-      ctx.globalAlpha = 0.95;
-      ctx.fillText(str, x, y);
-      ctx.shadowBlur = 6;
-      ctx.shadowColor = threadGlow;
-      ctx.globalAlpha = 0.35;
-      ctx.fillText(str, x, y);
-      ctx.restore();
-    };
-
-    drawFittedText(text, STRAP_RIGHT_X);
-    drawFittedText(date, STRAP_LEFT_X);
-
-    // ===== الشعار عند منطقة الرقبة =====
-    if (logoImg) {
-      const lw = W * LOGO_MAX_W;
-      const lh = lw * (logoImg.height / logoImg.width);
-      ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.3)';
-      ctx.shadowBlur = 4;
-      ctx.drawImage(logoImg, W * LOGO_CENTER_X - lw / 2, H * LOGO_CENTER_Y - lh / 2, lw, lh);
-      ctx.restore();
     }
+
+    draw();
+    return () => { cancelled = true; };
   }, [baseImg, logoImg, text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize]);
 
   return (

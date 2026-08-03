@@ -58,10 +58,11 @@ const SASH_IMG_SRC = '/images/products/sash/view1.webp';
 const STRAP_LEFT_X = 0.374;   // مركز الشريط الأيسر (كنسبة من عرض الصورة)
 const STRAP_RIGHT_X = 0.639;  // مركز الشريط الأيمن
 const STRAP_MAX_TEXT_W = 0.30; // أقصى عرض نص داخل شريط واحد
-const TEXT_CENTER_Y = 0.60;    // منتصف المنطقة المستقيمة (كنسبة من ارتفاع الصورة)
-const LOGO_CENTER_X = 0.505;   // منتصف منطقة الرقبة (بين الشريطين)
-const LOGO_CENTER_Y = 0.145;
-const LOGO_MAX_W = 0.17;
+const TEXT_CENTER_Y = 0.60;    // منتصف المنطقة المستقيمة (كنسبة من ارتفاع الصورة) — للاسم
+const LOGO_CENTER_X = STRAP_RIGHT_X; // الشعار يوضع أعلى الشريط الأيمن (نفس شريط التاريخ)
+const LOGO_CENTER_Y = 0.40;
+const LOGO_MAX_W = 0.16;
+const DATE_CENTER_Y = 0.66;    // أسفل الشعار على نفس الشريط — أرقام السنة مرصوصة عموديًا
 
 // معاينة الوشاح على الصورة الحقيقية بـ Canvas — إعادة تلوين + نص التطريز
 function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize, logoUrl }) {
@@ -123,11 +124,11 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
       } catch { /* لو فشل التحميل، يرجع للخط الافتراضي بدل ما يتوقف */ }
       if (cancelled) return;
 
-      // ===== نص مطرّز بالمقاس الصحيح داخل حدود كل شريط =====
-      const drawFittedText = (str, xFrac) => {
+      // ===== نص مطرّز بالمقاس الصحيح داخل حدود كل شريط (للاسم) =====
+      const drawFittedText = (str, xFrac, yFrac) => {
         if (!str || !str.trim()) return;
         const x = W * xFrac;
-        const y = H * TEXT_CENTER_Y;
+        const y = H * yFrac;
         const maxWidth = W * STRAP_MAX_TEXT_W;
         let fs = Math.min(fontSize, 30);
 
@@ -153,10 +154,41 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
         ctx.restore();
       };
 
-      drawFittedText(date, STRAP_RIGHT_X);
-      drawFittedText(text, STRAP_LEFT_X);
+      // ===== التاريخ مرصوص عموديًا (رقم فوق رقم) — نفس أسلوب أيال =====
+      const drawStackedDate = (str, xFrac, yFrac) => {
+        if (!str || !str.trim()) return;
+        const chars = str.trim().split('');
+        const x = W * xFrac;
+        const areaH = H * 0.34; // المساحة المتاحة أسفل الشعار على الشريط
+        const lineH = Math.min(areaH / chars.length, W * 0.09);
+        let fs = lineH * 0.85;
+        const startY = H * yFrac - (lineH * (chars.length - 1)) / 2;
 
-      // ===== الشعار عند منطقة الرقبة =====
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `800 ${fs}px ${fontStyle}`;
+        chars.forEach((ch, i) => {
+          const y = startY + i * lineH;
+          ctx.shadowColor = 'rgba(0,0,0,0.55)';
+          ctx.shadowBlur = 3;
+          ctx.shadowOffsetX = 1;
+          ctx.shadowOffsetY = 1;
+          ctx.fillStyle = threadColor;
+          ctx.globalAlpha = 0.95;
+          ctx.fillText(ch, x, y);
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = threadGlow;
+          ctx.globalAlpha = 0.35;
+          ctx.fillText(ch, x, y);
+        });
+        ctx.restore();
+      };
+
+      drawStackedDate(date, STRAP_RIGHT_X, DATE_CENTER_Y);
+      drawFittedText(text, STRAP_LEFT_X, TEXT_CENTER_Y);
+
+      // ===== الشعار أعلى الشريط الأيمن (فوق التاريخ مباشرة) =====
       if (logoImg) {
         const lw = W * LOGO_MAX_W;
         const lh = lw * (logoImg.height / logoImg.width);

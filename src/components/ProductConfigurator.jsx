@@ -4,7 +4,7 @@ import ProductGallery from './ProductGallery';
 import MeasurementGuide from './MeasurementGuide';
 import { useCart } from '@/lib/cartContext';
 import { uploadFile } from '@/api/storage';
-import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, SashCanvas } from './SashSimulatorWidget';
+import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, DATE_DESIGNS, SashCanvas } from './SashSimulatorWidget';
 
 const CAP_TYPES = ['دائري', 'مثلث'];
 
@@ -29,6 +29,7 @@ export default function ProductConfigurator({ product }) {
     name: '',
     font: FONTS[0],
     date: '',
+    dateDesign: null,
     size: product.sizes?.[0] || '',
     capType: 'دائري',
     thread: THREAD_COLORS[0],
@@ -64,6 +65,7 @@ export default function ProductConfigurator({ product }) {
       config.name && `الاسم: ${config.name}`,
       `خط: ${config.font.name}`,
       config.date && `التاريخ: ${config.date}`,
+      config.dateDesign && `تصميم سنة مزخرف: ${config.dateDesign.label}`,
       config.size && `مقاس: ${config.size}`,
       product.has_cap && `كاب: ${config.capType}`,
       `تطريز: ${config.thread.name}`,
@@ -97,6 +99,7 @@ export default function ProductConfigurator({ product }) {
                 threadGlow={config.thread.glow}
                 fontSize={26}
                 logoUrl={config.logoUrl}
+                dateImgUrl={config.dateDesign?.img}
               />
             </div>
             <p className="text-center text-xs text-foreground/50">معاينة حية على صورة المنتج الحقيقية</p>
@@ -155,10 +158,23 @@ export default function ProductConfigurator({ product }) {
 
           {product.has_date && (
             <Section label="إضافة تاريخ" required>
-              <select value={config.date} onChange={e => update('date', e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary">
+              <select value={config.date} onChange={e => { update('date', e.target.value); update('dateDesign', null); }} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary mb-3">
                 <option value="">اختر...</option>
                 {SASH_DATES.map(y => <option key={y} value={y}>{y}</option>)}
               </select>
+              {product.has_sash && (
+                <>
+                  <p className="text-xs text-foreground/50 mb-2">أو اختر تصميم سنة مزخرف جاهز:</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => update('dateDesign', null)} className={`px-3 py-2 rounded-xl border text-xs font-medium transition-all ${!config.dateDesign ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-secondary/40'}`}>كتابة عادية</button>
+                    {DATE_DESIGNS.map(d => (
+                      <button type="button" key={d.id} onClick={() => update('dateDesign', d)} className={`p-1.5 rounded-xl border-2 transition-all ${config.dateDesign?.id === d.id ? 'border-primary scale-105' : 'border-border'}`}>
+                        <img src={d.img} alt={d.label} className="w-10 h-14 object-contain" />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </Section>
           )}
 

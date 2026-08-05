@@ -65,10 +65,19 @@ const LOGO_MAX_W = 0.16;
 const DATE_CENTER_Y = 0.66;    // أسفل الشعار على نفس الشريط — أرقام السنة مرصوصة عموديًا
 
 // معاينة الوشاح على الصورة الحقيقية بـ Canvas — إعادة تلوين + نص التطريز
-function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize, logoUrl }) {
+// تصاميم سنة جاهزة (أرقام مرصوصة بشكل مزخرف + كاب تخرج) — بديل اختياري
+// عن الكتابة العادية للتاريخ، تختار منها بدل ما تكتب رقم عادي
+export const DATE_DESIGNS = [
+  { id: '2026', label: '2026', img: '/images/dates/2026.svg' },
+  { id: '2027', label: '2027', img: '/images/dates/2027.svg' },
+  { id: '2028', label: '2028', img: '/images/dates/2028.svg' },
+];
+
+function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize, logoUrl, dateImgUrl }) {
   const canvasRef = useRef(null);
   const [baseImg, setBaseImg] = useState(null);
   const [logoImg, setLogoImg] = useState(null);
+  const [dateImg, setDateImg] = useState(null);
 
   useEffect(() => {
     const img = new window.Image();
@@ -84,6 +93,14 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
     img.onerror = () => setLogoImg(null);
     img.src = logoUrl;
   }, [logoUrl]);
+
+  useEffect(() => {
+    if (!dateImgUrl) { setDateImg(null); return; }
+    const img = new window.Image();
+    img.onload = () => setDateImg(img);
+    img.onerror = () => setDateImg(null);
+    img.src = dateImgUrl;
+  }, [dateImgUrl]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -185,24 +202,31 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
         ctx.restore();
       };
 
-      drawStackedDate(date, STRAP_RIGHT_X, DATE_CENTER_Y);
+      if (dateImg) {
+        const dh = H * 0.42;
+        const dw = dh * (dateImg.width / dateImg.height);
+        ctx.drawImage(dateImg, W * STRAP_RIGHT_X - dw / 2, H * 0.36, dw, dh);
+      } else {
+        drawStackedDate(date, STRAP_RIGHT_X, DATE_CENTER_Y);
+      }
       drawFittedText(text, STRAP_LEFT_X, TEXT_CENTER_Y);
 
-      // ===== الشعار أعلى الشريط الأيمن (فوق التاريخ مباشرة) =====
+      // ===== الشعار: أعلى الشريط لو ما فيه تصميم سنة، أو بمكان أصغر أعلى لو موجود =====
       if (logoImg) {
-        const lw = W * LOGO_MAX_W;
+        const logoY = dateImg ? 0.20 : LOGO_CENTER_Y;
+        const lw = W * (dateImg ? LOGO_MAX_W * 0.75 : LOGO_MAX_W);
         const lh = lw * (logoImg.height / logoImg.width);
         ctx.save();
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 4;
-        ctx.drawImage(logoImg, W * LOGO_CENTER_X - lw / 2, H * LOGO_CENTER_Y - lh / 2, lw, lh);
+        ctx.drawImage(logoImg, W * LOGO_CENTER_X - lw / 2, H * logoY - lh / 2, lw, lh);
         ctx.restore();
       }
     }
 
     draw();
     return () => { cancelled = true; };
-  }, [baseImg, logoImg, text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize]);
+  }, [baseImg, logoImg, dateImg, text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize]);
 
   return (
     <canvas
@@ -222,6 +246,7 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
   const [thread, setThread] = useState(THREAD_COLORS[0]);
   const [edge, setEdge] = useState(SASH_EDGE_COLORS[0]);
   const [date, setDate] = useState(SASH_DATES[0]);
+  const [dateDesign, setDateDesign] = useState(null);
   const [fontSize, setFontSize] = useState(28);
   const [logoUrl, setLogoUrl] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
@@ -247,12 +272,13 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
     setThread(THREAD_COLORS[0]);
     setEdge(SASH_EDGE_COLORS[0]);
     setDate(SASH_DATES[0]);
+    setDateDesign(null);
     setFontSize(28);
     setLogoUrl('');
   };
 
   const handleAdd = () => {
-    const config = { text: text || 'بدون اسم', date, font: font.name, sashColor: sashColor.name, thread: thread.name, edge: edge.name, logoUrl };
+    const config = { text: text || 'بدون اسم', date, dateDesign: dateDesign?.label || '', font: font.name, sashColor: sashColor.name, thread: thread.name, edge: edge.name, logoUrl };
     addItem({
       id: `sash-${Date.now()}`,
       name: `${productName} — ${config.text}`,
@@ -278,6 +304,7 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
             threadGlow={thread.glow}
             fontSize={fontSize}
             logoUrl={logoUrl}
+            dateImgUrl={dateDesign?.img}
           />
         </div>
         <p className="text-center text-xs text-foreground/50 mt-2 flex items-center justify-center gap-1">
@@ -368,9 +395,18 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
         {/* التاريخ */}
         <div className="card-soft p-4">
           <label className="flex items-center gap-2 text-sm font-bold mb-2"><Type className="w-4 h-4 text-primary" /> التاريخ</label>
-          <select value={date} onChange={e => setDate(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary">
+          <select value={date} onChange={e => { setDate(e.target.value); setDateDesign(null); }} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary mb-3">
             {SASH_DATES.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
+          <p className="text-xs text-foreground/50 mb-2">أو اختر تصميم سنة مزخرف جاهز:</p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setDateDesign(null)} className={`px-3 py-2 rounded-xl border text-xs font-medium transition-all ${!dateDesign ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-secondary/40'}`}>كتابة عادية</button>
+            {DATE_DESIGNS.map(d => (
+              <button key={d.id} onClick={() => setDateDesign(d)} className={`p-1.5 rounded-xl border-2 transition-all ${dateDesign?.id === d.id ? 'border-primary scale-105' : 'border-border'}`}>
+                <img src={d.img} alt={d.label} className="w-10 h-14 object-contain" />
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* الشعار */}

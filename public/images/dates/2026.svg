@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 438">
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F4E1A0"/><stop offset="100%" stop-color="#C89B3C"/></linearGradient></defs>
+<g transform="translate(126,6) rotate(16)"><path d="M0,16 L30,0 L60,16 L30,32 Z" fill="url(#g)" stroke="#7A5C1E" stroke-width="1"/><rect x="27" y="15" width="6" height="18" fill="url(#g)"/><circle cx="30" cy="35" r="3.5" fill="url(#g)"/></g>
+<text x="100" y="78" font-family="Playfair Display, Georgia, serif" font-size="96" font-weight="800" fill="url(#g)" text-anchor="middle" transform="rotate(-3 100 78)" stroke="#7A5C1E" stroke-width="1.2">2</text>
+<text x="100" y="170" font-family="Playfair Display, Georgia, serif" font-size="96" font-weight="800" fill="url(#g)" text-anchor="middle" transform="rotate(3 100 170)" stroke="#7A5C1E" stroke-width="1.2">0</text>
+<text x="100" y="262" font-family="Playfair Display, Georgia, serif" font-size="96" font-weight="800" fill="url(#g)" text-anchor="middle" transform="rotate(-3 100 262)" stroke="#7A5C1E" stroke-width="1.2">2</text>
+<text x="100" y="354" font-family="Playfair Display, Georgia, serif" font-size="96" font-weight="800" fill="url(#g)" text-anchor="middle" transform="rotate(3 100 354)" stroke="#7A5C1E" stroke-width="1.2">6</text>
+</svg>

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/lib/cartContext';
 import { Type, Palette, RotateCcw, ShoppingBag, Check, ZoomIn, Image as ImageIcon, Upload, X, Loader2, GraduationCap, Ruler } from 'lucide-react';
-import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, SashCanvas } from './SashSimulatorWidget';
+import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, DATE_DESIGNS, SashCanvas } from './SashSimulatorWidget';
 import { uploadFile } from '@/api/storage';
 
 // أسماء جامعات شائعة + لون وشاح وشعار مقترح لكل واحدة (شعارات تصميم أصلي بسيط، يقدر الزبون يستبدلها برفع شعاره الخاص)
@@ -23,6 +23,7 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
   const [thread, setThread] = useState(THREAD_COLORS[UNIVERSITIES[0].thread]);
   const [name, setName] = useState('');
   const [year, setYear] = useState(SASH_DATES[0]);
+  const [dateDesign, setDateDesign] = useState(null);
   const [font, setFont] = useState(FONTS[0]);
   const [size, setSize] = useState(SIZES[1]);
   const [logoUrl, setLogoUrl] = useState('');
@@ -104,6 +105,7 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
             threadGlow={thread.glow}
             fontSize={26}
             logoUrl={logoUrl}
+            dateImgUrl={dateDesign?.img}
           />
         </div>
         <p className="text-center text-xs text-foreground/50 flex items-center justify-center gap-1">
@@ -144,9 +146,18 @@ export default function UniversityPackageWidget({ productName = 'صمم وشاح
 
         <div className="card-soft p-4">
           <label className="flex items-center gap-2 text-sm font-bold mb-2">سنة التخرج / التاريخ</label>
-          <select value={year} onChange={e => setYear(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary">
+          <select value={year} onChange={e => { setYear(e.target.value); setDateDesign(null); }} className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:outline-none focus:border-primary mb-3">
             {SASH_DATES.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          <p className="text-xs text-foreground/50 mb-2">أو اختر تصميم سنة مزخرف جاهز:</p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setDateDesign(null)} className={`px-3 py-2 rounded-xl border text-xs font-medium transition-all ${!dateDesign ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-secondary/40'}`}>كتابة عادية</button>
+            {DATE_DESIGNS.map(d => (
+              <button key={d.id} onClick={() => setDateDesign(d)} className={`p-1.5 rounded-xl border-2 transition-all ${dateDesign?.id === d.id ? 'border-primary scale-105' : 'border-border'}`}>
+                <img src={d.img} alt={d.label} className="w-10 h-14 object-contain" />
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="card-soft p-4">

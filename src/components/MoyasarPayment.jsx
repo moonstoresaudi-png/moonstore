@@ -28,6 +28,11 @@ export default function MoyasarPayment({ amount, description, callbackUrl }) {
         publishable_api_key: key,
         callback_url: callbackUrl,
         methods: ['creditcard', 'applepay', 'stcpay'],
+        apple_pay: {
+          country: 'SA',
+          label: 'Moon Store',
+          validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
+        },
       });
     };
 

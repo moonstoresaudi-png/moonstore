@@ -31,6 +31,7 @@ export default function ProductConfigurator({ product }) {
     date: '',
     dateDesign: null,
     size: product.sizes?.[0] || '',
+    height: '',
     capType: 'دائري',
     thread: THREAD_COLORS[0],
     sash: SASH_COLORS[0],
@@ -67,6 +68,7 @@ export default function ProductConfigurator({ product }) {
       config.date && `التاريخ: ${config.date}`,
       config.dateDesign && `تصميم سنة مزخرف: ${config.dateDesign.label}`,
       config.size && `مقاس: ${config.size}`,
+      config.height && `الطول المطلوب: ${config.height} سم`,
       product.has_cap && `كاب: ${config.capType}`,
       `تطريز: ${config.thread.name}`,
       config.logoUrl && 'مع شعار',
@@ -202,6 +204,22 @@ export default function ProductConfigurator({ product }) {
                   <button key={s} onClick={() => update('size', s)} className={`min-w-[48px] px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${config.size === s ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>{s}</button>
                 ))}
               </div>
+            </Section>
+          )}
+
+          {product.sizes?.length > 0 && (
+            <Section label="طولك (سم)">
+              <input
+                type="number"
+                inputMode="numeric"
+                min="100"
+                max="230"
+                placeholder="مثال: 165"
+                value={config.height}
+                onChange={(e) => update('height', e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <p className="text-xs text-foreground/45 mt-1.5">اختياري — يساعدنا نتأكد إن المقاس مناسب لطولك. لو غير متأكد، سيبه فاضي.</p>
             </Section>
           )}
 

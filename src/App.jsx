@@ -15,6 +15,7 @@ import OrderTracking from './pages/OrderTracking';
 import About from './pages/About';
 import Policies from './pages/Policies';
 import SizeGuide from './pages/SizeGuide';
+import JacketSizeGuide from './pages/JacketSizeGuide';
 import Checkout from './pages/Checkout';
 import Account from './pages/Account';
 import SearchResults from './pages/SearchResults';
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/policies" element={<Policies />} />
                 <Route path="/size-guide" element={<SizeGuide />} />
+                <Route path="/jacket-size-guide" element={<JacketSizeGuide />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/account" element={<Account />} />
                 <Route path="/search" element={<SearchResults />} />

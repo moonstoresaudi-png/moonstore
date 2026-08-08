@@ -2,19 +2,24 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
-import { Ruler, Info } from 'lucide-react';
+import { LengthSVG, ChestWidthSVG } from '@/components/MeasurementDiagrams';
+import { Ruler, Info, ArrowLeft } from 'lucide-react';
 
-// جدول مقاسات الجاكيتات — من دليل القياس الرسمي لمتجر مون
-const JACKET_ROWS = [
-  { size: 'XS', length: 25, chest: 22, shoulder: 18, sleeve: 23.5 },
-  { size: 'S', length: 26, chest: 23, shoulder: 18.5, sleeve: 24 },
-  { size: 'M', length: 27, chest: 24, shoulder: 19.5, sleeve: 24.5 },
-  { size: 'L', length: 27.5, chest: 25, shoulder: 20, sleeve: 24.8 },
-  { size: 'XL', length: 28.5, chest: 26, shoulder: 20.5, sleeve: 25.2 },
-  { size: '2XL', length: 29, chest: 27, shoulder: 21, sleeve: 25.5 },
-  { size: '3XL', length: 30, chest: 28, shoulder: 21.5, sleeve: 26 },
-  { size: '4XL', length: 31, chest: 29, shoulder: 22.5, sleeve: 26.7 },
+// محيط الصدر حسب المقاس — من دليل القياس الرسمي لمتجر مون (طريقة القياس)
+const JACKET_CHEST_BY_SIZE = [
+  { size: 'XS', chest: '19in' },
+  { size: 'S', chest: '20in' },
+  { size: 'M', chest: '21in' },
+  { size: 'L', chest: '22in' },
+  { size: 'XL', chest: '23in' },
+  { size: '2XL', chest: '24in' },
+  { size: '3XL', chest: '25in' },
+  { size: '4XL', chest: '25in' },
+  { size: '5XL', chest: '26in' },
 ];
+
+// الأطوال المتاحة بالسنتيمتر (من أعلى الكتف إلى نهاية الجاكيت) — من نفس الدليل الرسمي
+const JACKET_LENGTH_OPTIONS_CM = [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60];
 
 export default function JacketSizeGuide() {
   return (
@@ -29,33 +34,48 @@ export default function JacketSizeGuide() {
           <p className="text-foreground/60 text-sm max-w-lg mx-auto">جدول مقاسات دقيق مبني على قياسات متجرنا الفعلية — لو عندك مقاس مختلف أو غير متأكد، تواصل معنا وبنساعدك تختار الأنسب.</p>
         </div>
 
-        <div className="card-soft overflow-hidden">
+        {/* الرسومات التعليمية */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="card-soft overflow-hidden">
+            <div className="bg-gradient-to-b from-purple-50 to-white p-5 flex items-center justify-center" style={{ minHeight: 220 }}>
+              <LengthSVG endLabel="الجاكيت" />
+            </div>
+            <div className="p-3.5 border-t border-border bg-red-50/50">
+              <p className="font-bold text-sm text-red-600">📏 الطول</p>
+              <p className="text-xs text-foreground/60 mt-1 leading-relaxed">يؤخذ من أعلى الكتف إلى نهاية الجاكيت</p>
+            </div>
+          </div>
+          <div className="card-soft overflow-hidden">
+            <div className="bg-gradient-to-b from-green-50 to-white p-5 flex items-center justify-center" style={{ minHeight: 220 }}>
+              <ChestWidthSVG />
+            </div>
+            <div className="p-3.5 border-t border-border bg-green-50/50">
+              <p className="font-bold text-sm text-green-700">📏 العرض (الصدر)</p>
+              <p className="text-xs text-foreground/60 mt-1 leading-relaxed">يؤخذ من عرض الجاكيت — من الأمام فقط — من الإبط الأيمن إلى الإبط الأيسر</p>
+            </div>
+          </div>
+        </div>
+
+        {/* جدول محيط الصدر حسب المقاس */}
+        <div className="card-soft overflow-hidden mb-6">
           <div className="bg-foreground text-background text-center py-3">
             <p className="font-heading font-extrabold text-base flex items-center justify-center gap-2">
-              <Ruler className="w-4 h-4" /> جدول القياسات
+              <Ruler className="w-4 h-4" /> محيط الصدر حسب المقاس
             </p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-center">
               <thead>
                 <tr className="bg-primary/10 text-primary border-b-2 border-primary/20">
-                  <th className="p-2.5 font-bold">المقاس</th>
-                  <th className="p-2.5 font-bold">الطول</th>
-                  <th className="p-2.5 font-bold">الصدر<br /><span className="font-normal text-foreground/50 text-[10px]">فقط النصف وليس المحيط</span></th>
-                  <th className="p-2.5 font-bold">الكتف</th>
-                  <th className="p-2.5 font-bold">الكم</th>
+                  {JACKET_CHEST_BY_SIZE.map(r => <th key={r.size} className="p-2.5 font-bold">{r.size}</th>)}
                 </tr>
               </thead>
               <tbody>
-                {JACKET_ROWS.map((r, i) => (
-                  <tr key={r.size} className={`border-b border-border/50 ${i % 2 === 0 ? 'bg-card' : 'bg-secondary/20'}`}>
-                    <td className="p-2.5 font-bold text-primary">{r.size}</td>
-                    <td className="p-2.5 text-xs">{r.length}</td>
-                    <td className="p-2.5 text-xs">{r.chest}</td>
-                    <td className="p-2.5 text-xs">{r.shoulder}</td>
-                    <td className="p-2.5 text-xs">{r.sleeve}</td>
-                  </tr>
-                ))}
+                <tr>
+                  {JACKET_CHEST_BY_SIZE.map((r, i) => (
+                    <td key={r.size} className={`p-2.5 text-xs ${i % 2 === 0 ? 'bg-card' : 'bg-secondary/20'}`}>{r.chest}</td>
+                  ))}
+                </tr>
               </tbody>
             </table>
           </div>
@@ -64,12 +84,55 @@ export default function JacketSizeGuide() {
           </div>
         </div>
 
-        <div className="card-soft p-5 mt-6 flex items-start gap-3 bg-accent/20">
-          <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-foreground/70 leading-relaxed">
-            <p className="font-bold mb-1">كيف تقيس نفسك بدقة؟</p>
-            <p>الصدر يُقاس نصف النصف فقط وليس المحيط الكامل. لف شريط القياس تحت الإبط مباشرة وأنت واقف بشكل طبيعي، بدون شد الشريط. لو رقمك بين مقاسين، اختر المقاس الأكبر لراحة أكثر.</p>
+        {/* جدول الأطوال المتاحة */}
+        <div className="card-soft overflow-hidden mb-8">
+          <div className="bg-foreground text-background text-center py-3">
+            <p className="font-heading font-extrabold text-base flex items-center justify-center gap-2">
+              <Ruler className="w-4 h-4" /> الأطوال المتاحة (بالسنتيمتر)
+            </p>
           </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-center">
+              <tbody>
+                <tr className="border-b border-border/50">
+                  {JACKET_LENGTH_OPTIONS_CM.slice(0, 8).map((cm, i) => (
+                    <td key={cm} className={`p-2.5 font-bold ${i % 2 === 0 ? 'bg-card' : 'bg-secondary/20'}`}>{cm}</td>
+                  ))}
+                </tr>
+                <tr>
+                  {JACKET_LENGTH_OPTIONS_CM.slice(8).map((cm, i) => (
+                    <td key={cm} className={`p-2.5 font-bold ${i % 2 === 0 ? 'bg-card' : 'bg-secondary/20'}`}>{cm}</td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="p-3 text-center border-t border-border">
+            <span className="text-xs text-foreground/50">طول الجاكيت (من أعلى الكتف إلى النهاية) — بالسنتيمتر</span>
+          </div>
+        </div>
+
+        <div className="card-soft p-5 flex items-start gap-3 bg-accent/20 mb-8">
+          <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-foreground/70 leading-relaxed space-y-2">
+            <p><span className="font-bold">الطول:</span> يؤخذ من أعلى الكتف إلى نهاية الجاكيت.</p>
+            <p><span className="font-bold">العرض (الصدر):</span> يؤخذ من عرض الجاكيت — من الأمام فقط — من الإبط الأيمن إلى الإبط الأيسر.</p>
+            <p className="text-xs text-foreground/50 pt-1">لو رقمك بين مقاسين، اختر المقاس الأكبر لراحة أكثر. لو غير متأكد من مقاسك، اكتب طولك بالسم عند الطلب وبنساعدك نتأكد إنه مناسب.</p>
+          </div>
+        </div>
+
+        {/* الصورة الرسمية الكاملة لدليل القياس */}
+        <div className="card-soft overflow-hidden mb-8">
+          <div className="bg-secondary/40 text-center py-2.5">
+            <p className="text-xs font-medium text-foreground/60">الدليل الرسمي الكامل — بطاقة القياس</p>
+          </div>
+          <img src="/images/robe-measurement-guide.png" alt="دليل قياس الجاكيتات - متجر مون" className="w-full object-contain" />
+        </div>
+
+        <div className="text-center">
+          <a href="/size-guide" className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+            تدور على دليل مقاسات أرواب التخرج؟ <ArrowLeft className="w-4 h-4" />
+          </a>
         </div>
       </div>
 

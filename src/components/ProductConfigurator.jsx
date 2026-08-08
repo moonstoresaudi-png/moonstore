@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { Star, Plus, Minus, ShoppingBag, Check, Flame, Truck, ShieldCheck, Image as ImageIcon, Upload, X, Loader2 } from 'lucide-react';
 import ProductGallery from './ProductGallery';
 import MeasurementGuide from './MeasurementGuide';
+import RobeBuilder from './RobeBuilder';
+import JacketBuilder from './JacketBuilder';
 import { useCart } from '@/lib/cartContext';
 import { uploadFile } from '@/api/storage';
 import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, DATE_DESIGNS, SashCanvas } from './SashSimulatorWidget';
+import { ROBE_SHAPES, UNIVERSITIES, UNIVERSITY_SASH_LAYOUTS } from '@/lib/robeOptions';
 
 const CAP_TYPES = ['دائري', 'مثلث'];
 
@@ -37,6 +40,27 @@ export default function ProductConfigurator({ product }) {
     sash: SASH_COLORS[0],
     logoUrl: '',
     packaging: false,
+    // خيارات الروب التفصيلية
+    robeShape: ROBE_SHAPES[0].id,
+    sleeveStyle: 'plain',
+    sashShape: 'regular',
+    sashTrim: 'braid',
+    embroideryDirection: 'length',
+    sashBackEmbroidery: false,
+    capEmbroideryDesign: null,
+    // روب الجامعة
+    university: UNIVERSITIES[0].id,
+    universitySashLayout: UNIVERSITY_SASH_LAYOUTS[0].id,
+    universitySashShape: 'regular',
+    universityWritingColor: 'gold',
+    universitySashTrim: 'braid',
+    // الجاكيت
+    sleeveColor: '',
+    frontDesign: null,
+    leftSleeveDesign: null,
+    rightSleeveDesign: null,
+    backDesign: null,
+    referencePhotos: [],
   });
 
   const update = (key, val) => setConfig(c => ({ ...c, [key]: val }));
@@ -56,7 +80,17 @@ export default function ProductConfigurator({ product }) {
   const gallery = product.gallery_images?.length ? product.gallery_images : [product.image_url].filter(Boolean);
   const discount = product.old_price ? Math.round((1 - product.price / product.old_price) * 100) : 0;
 
-  const addonPrice = (config.addSash ? (product.sash_addon || 50) : 0) + (config.packaging ? (product.packaging_addon || 15) : 0);
+  const robeShapeAddon = (() => {
+    if (!product.has_robe_builder) return 0;
+    const shape = ROBE_SHAPES.find(s => s.id === config.robeShape);
+    return shape?.addonKey ? (product[shape.addonKey] || 0) : 0;
+  })();
+  const capEmbroideryAddon = (product.has_robe_builder && product.has_cap && config.capEmbroideryDesign) ? (product.cap_embroidery_addon || 20) : 0;
+  const sashBackEmbroideryAddon = (product.has_robe_builder && config.addSash && config.sashBackEmbroidery) ? (product.sash_back_embroidery_addon || 30) : 0;
+
+  const addonPrice = (config.addSash ? (product.sash_addon || 50) : 0)
+    + (config.packaging ? (product.packaging_addon || 15) : 0)
+    + robeShapeAddon + capEmbroideryAddon + sashBackEmbroideryAddon;
   const unitPrice = product.price + addonPrice;
   const totalPrice = unitPrice * qty;
 
@@ -73,6 +107,22 @@ export default function ProductConfigurator({ product }) {
       `تطريز: ${config.thread.name}`,
       config.logoUrl && 'مع شعار',
       config.packaging && 'تغليف فاخر',
+      // خيارات الروب التفصيلية
+      product.has_university && `الجامعة: ${UNIVERSITIES.find(u => u.id === config.university)?.label}`,
+      product.has_university && `تصميم وشاح الجامعة: ${UNIVERSITY_SASH_LAYOUTS.find(l => l.id === config.universitySashLayout)?.label}`,
+      product.has_university && `لون كتابة الوشاح: ${config.universityWritingColor}`,
+      product.has_robe_builder && `شكل الروب: ${ROBE_SHAPES.find(s => s.id === config.robeShape)?.label}`,
+      product.has_robe_builder && `موديل الكم: ${config.sleeveStyle}`,
+      product.has_robe_builder && config.addSash && `شكل الوشاح: ${config.sashShape} | طرف الوشاح: ${config.sashTrim} | اتجاه التطريز: ${config.embroideryDirection}`,
+      sashBackEmbroideryAddon > 0 && 'تطريز إضافي بخلف الوشاح',
+      capEmbroideryAddon > 0 && `تطريز القبعة: تصميم رقم ${config.capEmbroideryDesign}`,
+      // الجاكيت
+      product.has_jacket_builder && config.sleeveColor && `لون الأكمام: ${config.sleeveColor}`,
+      product.has_jacket_builder && config.frontDesign && `التصميم الأمامي: ${config.frontDesign}`,
+      product.has_jacket_builder && config.leftSleeveDesign && `الكم الأيسر: ${config.leftSleeveDesign}`,
+      product.has_jacket_builder && config.rightSleeveDesign && `الكم الأيمن: ${config.rightSleeveDesign}`,
+      product.has_jacket_builder && config.backDesign && 'تصميم الظهر: مفعّل',
+      product.has_jacket_builder && config.referencePhotos?.length > 0 && `صور مرجعية: ${config.referencePhotos.join(', ')}`,
     ].filter(Boolean).join(' | ');
 
     addItem({ ...product, id: `${product.id}-${Date.now()}`, price: unitPrice, qty, size: config.size, sash_config: summary });
@@ -143,6 +193,10 @@ export default function ProductConfigurator({ product }) {
               </div>
             </Section>
           )}
+
+          {(product.has_robe_builder || product.has_university) && <RobeBuilder product={product} config={config} update={update} />}
+
+          {product.has_jacket_builder && <JacketBuilder config={config} update={update} />}
 
           {product.has_name && (
             <Section label="اكتب اسمك" required>
@@ -305,7 +359,7 @@ export default function ProductConfigurator({ product }) {
             <p className="text-sm text-foreground/55">بناءً على تقييمات العملاء</p>
           </div>
         )}
-        {activeTab === 'size' && <MeasurementGuide />}
+        {activeTab === 'size' && <MeasurementGuide category={product.category || ''} />}
       </div>
     </div>
   );

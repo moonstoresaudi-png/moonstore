@@ -4,7 +4,7 @@ import { uploadFile } from '@/api/storage';
 import { Package, Plus, Trash2, Pencil, X, Upload, Star, Check, ImagePlus, Loader2 } from 'lucide-react';
 import { useStoreSettings } from '@/lib/SettingsContext';
 
-const EMPTY = { name: '', description: '', price: 0, old_price: 0, cost: 0, category: 'أرواب تخرج', image_url: '', gallery_images: [], sizes: [], simulator_enabled: false, featured: false, bestseller: false, in_stock: true, rating: 5, stock_quantity: 0, purchase_count: 0, has_sash: false, has_name: false, has_date: false, has_cap: false, sash_addon: 50, packaging_addon: 15 };
+const EMPTY = { name: '', description: '', price: 0, old_price: 0, cost: 0, category: 'أرواب تخرج', image_url: '', gallery_images: [], sizes: [], simulator_enabled: false, featured: false, bestseller: false, in_stock: true, rating: 5, stock_quantity: 0, purchase_count: 0, has_sash: false, has_name: false, has_date: false, has_cap: false, sash_addon: 50, packaging_addon: 15, has_robe_builder: false, has_university: false, has_jacket_builder: false, cloche_addon: 20, bisht_addon: 30, cap_embroidery_addon: 20, sash_back_embroidery_addon: 30 };
 
 function InlineEdit({ value, onSave, suffix = '' }) {
   const [val, setVal] = useState(value);
@@ -62,6 +62,9 @@ export default function AdminProducts() {
 
   const addSize = () => { if (sizeInput.trim()) { setForm(f => ({ ...f, sizes: [...f.sizes, sizeInput.trim()] })); setSizeInput(''); } };
   const removeSize = (s) => setForm(f => ({ ...f, sizes: f.sizes.filter(x => x !== s) }));
+  const STANDARD_SIZES = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+  const toggleStandardSize = (s) => setForm(f => ({ ...f, sizes: f.sizes.includes(s) ? f.sizes.filter(x => x !== s) : [...f.sizes, s] }));
+  const isJacketCategory = (form.category || '').includes('جاكيت');
   const [galleryUploading, setGalleryUploading] = useState(false);
   const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -108,6 +111,9 @@ export default function AdminProducts() {
     { k: 'has_name', l: 'إضافة اسم' },
     { k: 'has_date', l: 'إضافة تاريخ' },
     { k: 'has_cap', l: 'إضافة كاب' },
+    { k: 'has_robe_builder', l: 'تفاصيل تصميم الروب (شكل/كم/وشاح)' },
+    { k: 'has_university', l: 'روب جامعي (تحديد الجامعة)' },
+    { k: 'has_jacket_builder', l: 'خيارات الجاكيت (تصميم + رفع صور)' },
     { k: 'featured', l: 'مميز' },
     { k: 'bestseller', l: 'الأكثر مبيعًا' },
     { k: 'in_stock', l: 'متوفر' },
@@ -196,6 +202,30 @@ export default function AdminProducts() {
             </div>
           </div>
 
+          {/* تكلفة خيارات الروب التفصيلية — تُستخدم فقط لو فعّلت "تفاصيل تصميم الروب" بالأسفل */}
+          <div>
+            <h5 className="font-bold text-sm mb-3 text-primary">تكلفة خيارات الروب (اختياري)</h5>
+            <p className="text-xs text-foreground/50 mb-3">تُستخدم فقط إذا فعّلت "تفاصيل تصميم الروب" بالأسفل.</p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">إضافة كلوش / نص كلوش ()</label>
+                <input type="number" value={form.cloche_addon} onChange={e => setForm({ ...form, cloche_addon: +e.target.value })} placeholder="20" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">عباية بشت ()</label>
+                <input type="number" value={form.bisht_addon} onChange={e => setForm({ ...form, bisht_addon: +e.target.value })} placeholder="30" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">تطريز القبعة ()</label>
+                <input type="number" value={form.cap_embroidery_addon} onChange={e => setForm({ ...form, cap_embroidery_addon: +e.target.value })} placeholder="20" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">تطريز خلف الوشاح ()</label>
+                <input type="number" value={form.sash_back_embroidery_addon} onChange={e => setForm({ ...form, sash_back_embroidery_addon: +e.target.value })} placeholder="30" className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </div>
+            </div>
+          </div>
+
           {/* الصور */}
           <div>
             <h5 className="font-bold text-sm mb-3 text-primary">الصورة الرئيسية *</h5>
@@ -237,15 +267,33 @@ export default function AdminProducts() {
 
           {/* Sizes */}
           <div>
-            <h5 className="font-bold text-sm mb-1.5 text-primary">المقاسات المتوفرة</h5>
-            <p className="text-xs text-foreground/50 mb-3">اكتب كل مقاس واضغط Enter أو "إضافة" — مثال: S, M, L, XL</p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {form.sizes.map(s => <span key={s} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center gap-1.5">{s}<button type="button" onClick={() => removeSize(s)}><X className="w-3.5 h-3.5" /></button></span>)}
+            <div className="flex items-center justify-between gap-3 mb-1.5">
+              <h5 className="font-bold text-sm text-primary">مقاسات المنتج</h5>
+              <a href={isJacketCategory ? '/jacket-size-guide' : '/size-guide'} target="_blank" rel="noreferrer" className="text-xs font-medium text-primary hover:underline whitespace-nowrap">دليل المقاسات ↗</a>
             </div>
-            <div className="flex gap-2">
-              <input value={sizeInput} onChange={e => setSizeInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSize())} placeholder="مثال: M" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+            <p className="text-xs text-foreground/50 mb-3">فعّل المقاسات القياسية الجاهزة بضغطة وحدة، أو أضف مقاس آخر غير موجود بالقائمة. بمجرد إضافة أي مقاس، بيظهر تلقائيًا للعميل بصفحة المنتج حقل اختيار المقاس + حقل "طوله بالسم" عشان نتأكد إن المقاس مناسب له.</p>
+
+            <label className="text-xs font-medium text-foreground/60 mb-1.5 block">المقاس القياسي (سمول، ميديم...)</label>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {STANDARD_SIZES.map(s => (
+                <button type="button" key={s} onClick={() => toggleStandardSize(s)} className={`px-3.5 py-2 rounded-xl border text-sm font-bold transition-all ${form.sizes.includes(s) ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-secondary/40 hover:border-primary/40'}`}>{s}</button>
+              ))}
+            </div>
+
+            <label className="text-xs font-medium text-foreground/60 mb-1.5 block">مقاس آخر (غير قياسي)</label>
+            <div className="flex gap-2 mb-3">
+              <input value={sizeInput} onChange={e => setSizeInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSize())} placeholder="مثال: Free Size" className="flex-1 px-3.5 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
               <button type="button" onClick={addSize} className="px-4 py-2.5 rounded-xl bg-secondary text-sm font-medium">إضافة</button>
             </div>
+
+            {form.sizes.length > 0 && (
+              <div>
+                <label className="text-xs font-medium text-foreground/60 mb-1.5 block">المقاسات المفعّلة لهذا المنتج ({form.sizes.length})</label>
+                <div className="flex flex-wrap gap-2">
+                  {form.sizes.map(s => <span key={s} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center gap-1.5">{s}<button type="button" onClick={() => removeSize(s)}><X className="w-3.5 h-3.5" /></button></span>)}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* خيارات وحالة المنتج */}

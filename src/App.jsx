@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import { SettingsProvider } from '@/lib/SettingsContext';
@@ -24,7 +24,14 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import WhatsAppFloat from './components/WhatsAppFloat';
 // Add page imports here
+
+function WhatsAppFloatGate() {
+  const location = useLocation();
+  if (location.pathname.startsWith('/admin')) return null;
+  return <WhatsAppFloat />;
+}
 
 function App() {
   return (
@@ -55,6 +62,7 @@ function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="*" element={<PageNotFound />} />
               </Routes>
+              <WhatsAppFloatGate />
             </CartProvider>
           </Router>
           <Toaster />

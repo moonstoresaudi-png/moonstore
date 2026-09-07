@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { LengthSVG, ChestWidthSVG } from './MeasurementDiagrams';
 
-// جدول مقاسات الأرواب — من دليل القياس الرسمي لمتجر مون
-const ROBE_SIZE_DATA = [
+// جدول مقاسات الجاكيت (سينور) — من دليل القياس الرسمي لمتجر مون
+const JACKET_SIZE_DATA = [
   { size: 'XS', length: 25, chest: 22, shoulder: 18, sleeve: 23.5 },
   { size: 'S', length: 26, chest: 23, shoulder: 18.5, sleeve: 24 },
   { size: 'M', length: 27, chest: 24, shoulder: 19.5, sleeve: 24.5 },
@@ -15,8 +15,8 @@ const ROBE_SIZE_DATA = [
   { size: '4XL', length: 31, chest: 29, shoulder: 22.5, sleeve: 26.7 },
 ];
 
-// جدول محيط الصدر للجاكيت — من دليل القياس الرسمي لمتجر مون
-const JACKET_CHEST_BY_SIZE = [
+// جدول محيط الصدر للأرواب حسب المقاس — من دليل القياس الرسمي لمتجر مون
+const ROBE_CHEST_BY_SIZE = [
   { size: 'XS', chest: '19in' }, { size: 'S', chest: '20in' }, { size: 'M', chest: '21in' },
   { size: 'L', chest: '22in' }, { size: 'XL', chest: '23in' }, { size: '2XL', chest: '24in' },
   { size: '3XL', chest: '25in' }, { size: '4XL', chest: '25in' }, { size: '5XL', chest: '26in' },
@@ -72,28 +72,6 @@ export default function MeasurementGuide({ category = '' }) {
       {isJacket ? (
         <div className="card-soft overflow-hidden">
           <div className="p-3 border-b border-border bg-primary/5">
-            <p className="font-bold text-sm text-primary text-center">محيط الصدر حسب المقاس (بالأنش)</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-center text-xs">
-              <thead>
-                <tr className="bg-primary/10">
-                  {JACKET_CHEST_BY_SIZE.map(r => <th key={r.size} className="px-2.5 py-2 font-bold">{r.size}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  {JACKET_CHEST_BY_SIZE.map((r, i) => (
-                    <td key={r.size} className={i % 2 === 0 ? 'bg-white px-2.5 py-2' : 'bg-secondary/30 px-2.5 py-2'}>{r.chest}</td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        <div className="card-soft overflow-hidden">
-          <div className="p-3 border-b border-border bg-primary/5">
             <p className="font-bold text-sm text-primary text-center">جدول القياسات (بالأنش)</p>
           </div>
           <div className="overflow-x-auto">
@@ -108,7 +86,7 @@ export default function MeasurementGuide({ category = '' }) {
                 </tr>
               </thead>
               <tbody>
-                {ROBE_SIZE_DATA.map((r, i) => (
+                {JACKET_SIZE_DATA.map((r, i) => (
                   <tr key={r.size} className={i % 2 === 0 ? 'bg-white' : 'bg-secondary/30'}>
                     <td className="px-3 py-2 font-bold text-primary">{r.size}</td>
                     <td className="px-3 py-2">{r.length}</td>
@@ -117,6 +95,28 @@ export default function MeasurementGuide({ category = '' }) {
                     <td className="px-3 py-2">{r.sleeve}</td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="card-soft overflow-hidden">
+          <div className="p-3 border-b border-border bg-primary/5">
+            <p className="font-bold text-sm text-primary text-center">محيط الصدر حسب المقاس (بالأنش)</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center text-xs">
+              <thead>
+                <tr className="bg-primary/10">
+                  {ROBE_CHEST_BY_SIZE.map(r => <th key={r.size} className="px-2.5 py-2 font-bold">{r.size}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  {ROBE_CHEST_BY_SIZE.map((r, i) => (
+                    <td key={r.size} className={i % 2 === 0 ? 'bg-white px-2.5 py-2' : 'bg-secondary/30 px-2.5 py-2'}>{r.chest}</td>
+                  ))}
+                </tr>
               </tbody>
             </table>
           </div>

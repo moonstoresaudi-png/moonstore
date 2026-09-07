@@ -8,6 +8,7 @@ import { useCart } from '@/lib/cartContext';
 import { uploadFile } from '@/api/storage';
 import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, DATE_DESIGNS, SashCanvas } from './SashSimulatorWidget';
 import { ROBE_SHAPES, UNIVERSITIES, UNIVERSITY_SASH_LAYOUTS } from '@/lib/robeOptions';
+import { JACKET_CUSTOM_DESIGN_FEE } from '@/lib/jacketOptions';
 
 const CAP_TYPES = ['دائري', 'مثلث'];
 
@@ -60,6 +61,9 @@ export default function ProductConfigurator({ product }) {
     leftSleeveDesign: null,
     rightSleeveDesign: null,
     backDesign: null,
+    frontDesignPhoto: '',
+    leftSleeveDesignPhoto: '',
+    rightSleeveDesignPhoto: '',
     referencePhotos: [],
   });
 
@@ -88,16 +92,21 @@ export default function ProductConfigurator({ product }) {
   const capEmbroideryAddon = (product.has_robe_builder && product.has_cap && config.capEmbroideryDesign) ? (product.cap_embroidery_addon || 20) : 0;
   const sashBackEmbroideryAddon = (product.has_robe_builder && config.addSash && config.sashBackEmbroidery) ? (product.sash_back_embroidery_addon || 30) : 0;
 
+  const jacketCustomDesignCount = product.has_jacket_builder
+    ? [config.frontDesign === 2, config.leftSleeveDesign === 5, config.rightSleeveDesign === 8].filter(Boolean).length
+    : 0;
+  const jacketCustomDesignFee = jacketCustomDesignCount * JACKET_CUSTOM_DESIGN_FEE;
+
   const addonPrice = (config.addSash ? (product.sash_addon || 50) : 0)
     + (config.packaging ? (product.packaging_addon || 15) : 0)
-    + robeShapeAddon + capEmbroideryAddon + sashBackEmbroideryAddon;
+    + robeShapeAddon + capEmbroideryAddon + sashBackEmbroideryAddon + jacketCustomDesignFee;
   const unitPrice = product.price + addonPrice;
   const totalPrice = unitPrice * qty;
 
   const handleAdd = () => {
     const summary = [
       config.addSash && `وشاح (${config.sash.name})`,
-      config.name && `الاسم: ${config.name}`,
+      config.name && !product.has_jacket_builder && `الاسم: ${config.name}`,
       `خط: ${config.font.name}`,
       config.date && `التاريخ: ${config.date}`,
       config.dateDesign && `تصميم سنة مزخرف: ${config.dateDesign.label}`,
@@ -116,16 +125,26 @@ export default function ProductConfigurator({ product }) {
       product.has_robe_builder && config.addSash && `شكل الوشاح: ${config.sashShape} | طرف الوشاح: ${config.sashTrim} | اتجاه التطريز: ${config.embroideryDirection}`,
       sashBackEmbroideryAddon > 0 && 'تطريز إضافي بخلف الوشاح',
       capEmbroideryAddon > 0 && `تطريز القبعة: تصميم رقم ${config.capEmbroideryDesign}`,
-      // الجاكيت
-      product.has_jacket_builder && config.sleeveColor && `لون الأكمام: ${config.sleeveColor}`,
-      product.has_jacket_builder && config.frontDesign && `التصميم الأمامي: ${config.frontDesign}`,
-      product.has_jacket_builder && config.leftSleeveDesign && `الكم الأيسر: ${config.leftSleeveDesign}`,
-      product.has_jacket_builder && config.rightSleeveDesign && `الكم الأيمن: ${config.rightSleeveDesign}`,
-      product.has_jacket_builder && config.backDesign && 'تصميم الظهر: مفعّل',
-      product.has_jacket_builder && config.referencePhotos?.length > 0 && `صور مرجعية: ${config.referencePhotos.join(', ')}`,
     ].filter(Boolean).join(' | ');
 
-    addItem({ ...product, id: `${product.id}-${Date.now()}`, price: unitPrice, qty, size: config.size, sash_config: summary });
+    // تفاصيل الجاكيت تُبنى كـ JSON مستقل حتى تظهر الصور المرفقة كصور قابلة للفتح في لوحة تحكم الأدمن
+    const jacketSegment = product.has_jacket_builder ? JSON.stringify({
+      jacketName: config.name || undefined,
+      sleeveColor: config.sleeveColor || undefined,
+      frontDesign: config.frontDesign ? `تصميم ${config.frontDesign}${config.frontDesign === 2 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
+      leftSleeveDesign: config.leftSleeveDesign ? `تصميم ${config.leftSleeveDesign}${config.leftSleeveDesign === 5 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
+      rightSleeveDesign: config.rightSleeveDesign ? `تصميم ${config.rightSleeveDesign}${config.rightSleeveDesign === 8 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
+      backDesign: config.backDesign ? 'مفعّل (مجاني)' : undefined,
+      frontDesignPhoto: config.frontDesignPhoto || undefined,
+      leftSleeveDesignPhoto: config.leftSleeveDesignPhoto || undefined,
+      rightSleeveDesignPhoto: config.rightSleeveDesignPhoto || undefined,
+      referencePhotos: config.referencePhotos?.length ? config.referencePhotos : undefined,
+      customDesignFee: jacketCustomDesignFee > 0 ? `${jacketCustomDesignFee} ريال (${jacketCustomDesignCount} تصميم خاص)` : undefined,
+    }) : null;
+
+    const fullSummary = [summary, jacketSegment].filter(Boolean).join(' | ');
+
+    addItem({ ...product, id: `${product.id}-${Date.now()}`, price: unitPrice, qty, size: config.size, sash_config: fullSummary });
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };

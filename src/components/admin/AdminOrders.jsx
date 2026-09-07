@@ -39,7 +39,23 @@ const FIELD_LABELS = {
   addSash: 'وشاح إضافي',
   fontType: 'نوع الخط',
   packaging: 'تغليف فاخر',
+  jacketName: 'الاسم بالخلف',
+  sleeveColor: 'لون الأكمام',
+  frontDesign: 'التصميم الأمامي',
+  leftSleeveDesign: 'الكم الأيسر',
+  rightSleeveDesign: 'الكم الأيمن',
+  backDesign: 'تصميم الظهر',
+  frontDesignPhoto: 'صورة التصميم الأمامي الخاص',
+  leftSleeveDesignPhoto: 'صورة تصميم الكم الأيسر الخاص',
+  rightSleeveDesignPhoto: 'صورة تصميم الكم الأيمن الخاص',
+  referencePhotos: 'صور مرجعية إضافية',
+  customDesignFee: 'رسوم تصاميم خاصة',
 };
+
+// المفاتيح اللي قيمتها صورة واحدة يجب عرضها كصورة مصغّرة قابلة للفتح
+const IMAGE_KEYS = ['logo_url', 'frontDesignPhoto', 'leftSleeveDesignPhoto', 'rightSleeveDesignPhoto'];
+// المفاتيح اللي قيمتها مصفوفة صور (أكثر من صورة)
+const IMAGE_ARRAY_KEYS = ['referencePhotos'];
 
 // sash_config قد يحتوي على أكثر من عنصر مفصولة بـ " | "، وكل عنصر إما JSON
 // (من محاكيات الوشاح/الكاب/الجاكيت/البكج الجامعي) أو نص ملخّص عادي من المهيّئ القديم
@@ -69,14 +85,28 @@ function ConfigDetails({ sashConfig }) {
             <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5">
               {Object.entries(seg.data).map(([k, v]) => {
                 if (!v) return null;
-                if (k === 'logo_url') {
+                if (IMAGE_KEYS.includes(k)) {
                   return (
                     <div key={k} className="flex items-center gap-2 sm:col-span-2">
                       <span className="text-xs text-foreground/50 min-w-[90px]">{FIELD_LABELS[k] || k}:</span>
                       <a href={v} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:opacity-80">
-                        <img src={v} alt="شعار مرفوع" className="w-10 h-10 rounded-lg object-cover border border-border" />
+                        <img src={v} alt={FIELD_LABELS[k] || k} className="w-10 h-10 rounded-lg object-cover border border-border" />
                         <span className="text-xs text-primary underline">فتح الصورة</span>
                       </a>
+                    </div>
+                  );
+                }
+                if (IMAGE_ARRAY_KEYS.includes(k) && Array.isArray(v)) {
+                  return (
+                    <div key={k} className="flex items-start gap-2 sm:col-span-2">
+                      <span className="text-xs text-foreground/50 min-w-[90px] pt-1">{FIELD_LABELS[k] || k}:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {v.map((url, idx) => (
+                          <a key={url} href={url} target="_blank" rel="noreferrer" className="hover:opacity-80" title="فتح الصورة">
+                            <img src={url} alt={`${FIELD_LABELS[k] || k} ${idx + 1}`} className="w-10 h-10 rounded-lg object-cover border border-border" />
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   );
                 }

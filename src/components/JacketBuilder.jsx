@@ -1,8 +1,9 @@
 import React from 'react';
-import { Upload, X, Loader2, Info } from 'lucide-react';
+import { Upload, X, Loader2, Info, Sparkles } from 'lucide-react';
 import { uploadFile } from '@/api/storage';
 import {
   JACKET_FRONT_DESIGNS, JACKET_LEFT_SLEEVE_DESIGNS, JACKET_RIGHT_SLEEVE_DESIGNS, JACKET_BACK_DESIGN,
+  JACKET_CUSTOM_DESIGN_FEE,
 } from '@/lib/jacketOptions';
 
 function Block({ title, hint, children }) {
@@ -20,17 +21,46 @@ function DesignGrid({ options, value, onChange }) {
     <div className="flex flex-wrap gap-2">
       {options.map(o => (
         <button key={o.id} type="button" onClick={() => onChange(o.id)} className={`px-3.5 py-2 rounded-xl border text-sm transition-all ${value === o.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>
-          {o.label} <span className={`text-[10px] font-bold ${value === o.id ? 'text-primary-foreground/80' : 'text-green-600'}`}>مجاني</span>
+          {o.label} {o.free ? (
+            <span className={`text-[10px] font-bold ${value === o.id ? 'text-primary-foreground/80' : 'text-green-600'}`}>مجاني</span>
+          ) : (
+            <span className={`text-[10px] font-bold ${value === o.id ? 'text-primary-foreground/80' : 'text-amber-600'}`}>تصميم خاص +{JACKET_CUSTOM_DESIGN_FEE} ريال</span>
+          )}
         </button>
       ))}
     </div>
   );
 }
 
+// صندوق رفع صورة مخصّص لتصميم غير مجاني — يظهر مباشرة تحت التصميم المختار
+function CustomDesignUpload({ label, photoUrl, uploading, onUpload, onRemove }) {
+  return (
+    <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+      <div className="flex items-center gap-1.5 mb-2">
+        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+        <p className="text-xs font-bold text-amber-700">{label} — تصميم خاص، يرجى إرفاق صورة توضح الشكل المطلوب</p>
+      </div>
+      {photoUrl ? (
+        <div className="relative w-16 h-16">
+          <img src={photoUrl} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
+          <button type="button" onClick={onRemove} className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
+        </div>
+      ) : (
+        <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-amber-400/50 text-amber-700 text-xs font-medium cursor-pointer hover:bg-amber-100/60 transition-colors">
+          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+          {uploading ? 'جارٍ الرفع...' : 'ارفع صورة التصميم المطلوب'}
+          <input type="file" accept="image/*" onChange={onUpload} disabled={uploading} className="hidden" />
+        </label>
+      )}
+    </div>
+  );
+}
+
 // فورم طلب تخصيص الجاكيت (اسم بالخلف، مقاس، لون الأكمام، تصاميم الأمام/الأكمام/الظهر)
-// + إمكانية رفع صور مرجعية من جهاز العميل مباشرة.
+// + إمكانية رفع صور مرجعية من جهاز العميل مباشرة، مع رسوم إضافية وصورة مطلوبة لأي تصميم خاص (غير مجاني).
 export default function JacketBuilder({ config, update }) {
   const [uploading, setUploading] = React.useState(false);
+  const [slotUploading, setSlotUploading] = React.useState(null);
 
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -50,6 +80,19 @@ export default function JacketBuilder({ config, update }) {
 
   const removePhoto = (url) => update('referencePhotos', (config.referencePhotos || []).filter(u => u !== url));
 
+  // رفع صورة مرتبطة بتصميم خاص محدد (رقم 2 أو 5 أو 8)
+  const handleSlotUpload = (slotKey) => async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSlotUploading(slotKey);
+    try {
+      const { file_url } = await uploadFile({ file });
+      if (file_url) update(slotKey, file_url);
+    } catch { /* اختياري نتجاهل الخطأ بصمت، العميل يقدر يعيد المحاولة */ }
+    setSlotUploading(null);
+    e.target.value = '';
+  };
+
   return (
     <div>
       <Block title="الاسم بالخلف">
@@ -62,14 +105,41 @@ export default function JacketBuilder({ config, update }) {
 
       <Block title="التصميم الأمامي">
         <DesignGrid options={JACKET_FRONT_DESIGNS} value={config.frontDesign} onChange={v => update('frontDesign', v)} />
+        {config.frontDesign === 2 && (
+          <CustomDesignUpload
+            label="التصميم الأمامي 2"
+            photoUrl={config.frontDesignPhoto}
+            uploading={slotUploading === 'frontDesignPhoto'}
+            onUpload={handleSlotUpload('frontDesignPhoto')}
+            onRemove={() => update('frontDesignPhoto', '')}
+          />
+        )}
       </Block>
 
       <Block title="تصميم الكم الأيسر">
         <DesignGrid options={JACKET_LEFT_SLEEVE_DESIGNS} value={config.leftSleeveDesign} onChange={v => update('leftSleeveDesign', v)} />
+        {config.leftSleeveDesign === 5 && (
+          <CustomDesignUpload
+            label="الكم الأيسر — تصميم 5"
+            photoUrl={config.leftSleeveDesignPhoto}
+            uploading={slotUploading === 'leftSleeveDesignPhoto'}
+            onUpload={handleSlotUpload('leftSleeveDesignPhoto')}
+            onRemove={() => update('leftSleeveDesignPhoto', '')}
+          />
+        )}
       </Block>
 
       <Block title="تصميم الكم الأيمن">
         <DesignGrid options={JACKET_RIGHT_SLEEVE_DESIGNS} value={config.rightSleeveDesign} onChange={v => update('rightSleeveDesign', v)} />
+        {config.rightSleeveDesign === 8 && (
+          <CustomDesignUpload
+            label="الكم الأيمن — تصميم 8"
+            photoUrl={config.rightSleeveDesignPhoto}
+            uploading={slotUploading === 'rightSleeveDesignPhoto'}
+            onUpload={handleSlotUpload('rightSleeveDesignPhoto')}
+            onRemove={() => update('rightSleeveDesignPhoto', '')}
+          />
+        )}
       </Block>
 
       <Block title="تصميم الظهر">
@@ -80,7 +150,7 @@ export default function JacketBuilder({ config, update }) {
         </div>
       </Block>
 
-      <Block title="صور مرجعية (اختياري)" hint="ارفع صور من جهازك لأي تصميم أو شعار تحب نطبّقه بالجاكيت">
+      <Block title="صور مرجعية إضافية (اختياري)" hint="ارفع صور من جهازك لأي تصميم أو شعار إضافي تحب نطبّقه بالجاكيت">
         <div className="flex flex-wrap gap-2 mb-2">
           {(config.referencePhotos || []).map(url => (
             <div key={url} className="relative w-16 h-16">
@@ -98,7 +168,7 @@ export default function JacketBuilder({ config, update }) {
 
       <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3.5 flex items-start gap-2 mb-2">
         <Info className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-700 leading-relaxed">لن يتم اعتماد أي تغيير خارج هذا الفورم — يرجى التأكد من جميع التفاصيل قبل تأكيد الطلب. التصميم والألوان مقاربة لصورة الجاكيت بنسبة 85%.</p>
+        <p className="text-xs text-amber-700 leading-relaxed">لن يتم اعتماد أي تغيير خارج هذا الفورم — يرجى التأكد من جميع التفاصيل قبل تأكيد الطلب. التصميم والألوان مقاربة لصورة الجاكيت بنسبة 85%. التصاميم الخاصة (غير المجانية) تُضاف عليها {JACKET_CUSTOM_DESIGN_FEE} ريال لكل تصميم، وتتطلب صورة مرفقة لتنفيذها بدقة.</p>
       </div>
     </div>
   );

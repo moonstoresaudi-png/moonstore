@@ -57,13 +57,11 @@ export default function ProductConfigurator({ product }) {
     universitySashTrim: 'braid',
     // الجاكيت
     sleeveColor: '',
-    frontDesign: null,
+    frontDesigns: [],
     leftSleeveDesign: null,
     rightSleeveDesign: null,
     backDesign: null,
-    frontDesignPhoto: '',
-    leftSleeveDesignPhoto: '',
-    rightSleeveDesignPhoto: '',
+    designPhotos: {},
     referencePhotos: [],
   });
 
@@ -93,7 +91,7 @@ export default function ProductConfigurator({ product }) {
   const sashBackEmbroideryAddon = (product.has_robe_builder && config.addSash && config.sashBackEmbroidery) ? (product.sash_back_embroidery_addon || 30) : 0;
 
   const jacketCustomDesignCount = product.has_jacket_builder
-    ? [config.frontDesign === 2, config.leftSleeveDesign === 5, config.rightSleeveDesign === 8].filter(Boolean).length
+    ? [(config.frontDesigns || []).includes(2), config.leftSleeveDesign === 5, config.rightSleeveDesign === 8].filter(Boolean).length
     : 0;
   const jacketCustomDesignFee = jacketCustomDesignCount * JACKET_CUSTOM_DESIGN_FEE;
 
@@ -131,13 +129,11 @@ export default function ProductConfigurator({ product }) {
     const jacketSegment = product.has_jacket_builder ? JSON.stringify({
       jacketName: config.name || undefined,
       sleeveColor: config.sleeveColor || undefined,
-      frontDesign: config.frontDesign ? `تصميم ${config.frontDesign}${config.frontDesign === 2 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
+      frontDesign: config.frontDesigns?.length ? config.frontDesigns.map(id => `${id}${id === 2 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}`).join(' + ') : undefined,
       leftSleeveDesign: config.leftSleeveDesign ? `تصميم ${config.leftSleeveDesign}${config.leftSleeveDesign === 5 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
       rightSleeveDesign: config.rightSleeveDesign ? `تصميم ${config.rightSleeveDesign}${config.rightSleeveDesign === 8 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
       backDesign: config.backDesign ? 'مفعّل (مجاني)' : undefined,
-      frontDesignPhoto: config.frontDesignPhoto || undefined,
-      leftSleeveDesignPhoto: config.leftSleeveDesignPhoto || undefined,
-      rightSleeveDesignPhoto: config.rightSleeveDesignPhoto || undefined,
+      designPhotos: Object.keys(config.designPhotos || {}).length ? config.designPhotos : undefined,
       referencePhotos: config.referencePhotos?.length ? config.referencePhotos : undefined,
       customDesignFee: jacketCustomDesignFee > 0 ? `${jacketCustomDesignFee} ريال (${jacketCustomDesignCount} تصميم خاص)` : undefined,
     }) : null;

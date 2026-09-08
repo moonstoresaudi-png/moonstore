@@ -1,5 +1,5 @@
 import React from 'react';
-import { Upload, X, Loader2, Info, Sparkles } from 'lucide-react';
+import { X, Loader2, Info, Camera } from 'lucide-react';
 import { uploadFile } from '@/api/storage';
 import {
   JACKET_FRONT_DESIGNS, JACKET_LEFT_SLEEVE_DESIGNS, JACKET_RIGHT_SLEEVE_DESIGNS, JACKET_BACK_DESIGN,
@@ -16,84 +16,105 @@ function Block({ title, hint, children }) {
   );
 }
 
-function DesignGrid({ options, value, onChange }) {
+// مربع تصميم مرقّم — يجمع الاختيار ورفع الصورة الخاصة بنفس الرقم في مكان واحد
+// - غير مُختار: مربع فاتح فيه رقم التصميم وسعره (مجاني / +15 ريال)، الضغط عليه يختاره
+// - مُختار بدون صورة: يفتح رفع صورة مباشرة عند الضغط على المربع
+// - مُختار وفيه صورة: يعرض الصورة نفسها داخل المربع (بالضغط عليها تفتح بحجمها الكامل)، مع رقم التصميم كشارة ثابتة
+function DesignTile({ option, selected, photo, uploading, onToggle, onUpload }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map(o => (
-        <button key={o.id} type="button" onClick={() => onChange(o.id)} className={`px-3.5 py-2 rounded-xl border text-sm transition-all ${value === o.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>
-          {o.label} {o.free ? (
-            <span className={`text-[10px] font-bold ${value === o.id ? 'text-primary-foreground/80' : 'text-green-600'}`}>مجاني</span>
-          ) : (
-            <span className={`text-[10px] font-bold ${value === o.id ? 'text-primary-foreground/80' : 'text-amber-600'}`}>تصميم خاص +{JACKET_CUSTOM_DESIGN_FEE} ريال</span>
-          )}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// صندوق رفع صورة مخصّص لتصميم غير مجاني — يظهر مباشرة تحت التصميم المختار
-function CustomDesignUpload({ label, photoUrl, uploading, onUpload, onRemove, isPaid }) {
-  const theme = isPaid
-    ? { box: 'border-amber-200 bg-amber-50/60', icon: 'text-amber-600', text: 'text-amber-700', dash: 'border-amber-400/50 text-amber-700 hover:bg-amber-100/60' }
-    : { box: 'border-border bg-secondary/30', icon: 'text-primary', text: 'text-foreground/60', dash: 'border-primary/30 text-primary hover:bg-primary/5' };
-  return (
-    <div className={`mt-2.5 rounded-xl border p-3 ${theme.box}`}>
-      <div className="flex items-center gap-1.5 mb-2">
-        <Sparkles className={`w-3.5 h-3.5 ${theme.icon}`} />
-        <p className={`text-xs font-bold ${theme.text}`}>{label} — {isPaid ? 'تصميم خاص، يرجى إرفاق صورة توضح الشكل المطلوب' : 'أرفق صورة توضح الشكل المطلوب (اختياري)'}</p>
-      </div>
-      {photoUrl ? (
-        <div className="relative w-16 h-16">
-          <img src={photoUrl} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
-          <button type="button" onClick={onRemove} className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
-        </div>
-      ) : (
-        <label className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed text-xs font-medium cursor-pointer transition-colors ${theme.dash}`}>
-          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {uploading ? 'جارٍ الرفع...' : 'ارفع صورة التصميم المطلوب'}
-          <input type="file" accept="image/*" onChange={onUpload} disabled={uploading} className="hidden" />
+    <div className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 transition-all ${selected ? 'border-primary' : 'border-border'} ${photo ? 'bg-card' : selected ? 'bg-primary/10' : 'bg-secondary/40 hover:border-primary/40'}`}>
+      {photo ? (
+        <a href={photo} target="_blank" rel="noreferrer" className="absolute inset-0" title="اضغط لمشاهدة الصورة بحجمها الكامل">
+          <img src={photo} alt={`تصميم ${option.id}`} className="w-full h-full object-cover" />
+        </a>
+      ) : selected ? (
+        <label className="absolute inset-0 flex flex-col items-center justify-center gap-1 cursor-pointer">
+          {uploading ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Camera className="w-5 h-5 text-primary" />}
+          <span className="text-[9px] text-primary font-bold">{uploading ? 'جارٍ الرفع' : 'ارفع صورة'}</span>
+          <input type="file" accept="image/*" className="hidden" onChange={onUpload} disabled={uploading} />
         </label>
+      ) : (
+        <button type="button" onClick={onToggle} className="absolute inset-0 flex items-center justify-center">
+          <span className={`text-[10px] font-bold ${option.free ? 'text-green-600' : 'text-amber-600'}`}>{option.free ? 'مجاني' : `+${JACKET_CUSTOM_DESIGN_FEE} ﷼`}</span>
+        </button>
+      )}
+
+      {/* شارة رقم التصميم — دائمًا ظاهرة، والضغط عليها يختار/يلغي الاختيار */}
+      <button
+        type="button"
+        onClick={onToggle}
+        title={selected ? 'إلغاء اختيار هذا التصميم' : 'اختيار هذا التصميم'}
+        className={`absolute top-1 right-1 w-6 h-6 rounded-full text-xs font-extrabold flex items-center justify-center z-10 shadow ${selected ? 'bg-primary text-primary-foreground' : 'bg-foreground text-background'}`}
+      >
+        {option.id}
+      </button>
+
+      {/* زر إزالة الصورة فقط (يبقى التصميم مختارًا) */}
+      {photo && (
+        <button type="button" onClick={() => onUpload(null, true)} title="إزالة الصورة" className="absolute top-1 left-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center z-10">
+          <X className="w-3 h-3" />
+        </button>
+      )}
+
+      {/* شريط السعر أسفل المربع لما فيه صورة، عشان يبقى واضح حتى بعد الرفع */}
+      {photo && (
+        <div className={`absolute bottom-0 inset-x-0 text-[9px] text-center py-0.5 text-white font-bold ${option.free ? 'bg-green-700/70' : 'bg-amber-700/75'}`}>
+          {option.free ? 'مجاني' : `+${JACKET_CUSTOM_DESIGN_FEE} ﷼`}
+        </div>
       )}
     </div>
   );
 }
 
 // فورم طلب تخصيص الجاكيت (اسم بالخلف، مقاس، لون الأكمام، تصاميم الأمام/الأكمام/الظهر)
-// + إمكانية رفع صور مرجعية من جهاز العميل مباشرة، مع رسوم إضافية وصورة مطلوبة لأي تصميم خاص (غير مجاني).
+// التصميم الأمامي يدعم اختيار متعدد (1 و2 مع بعض)، الأكمام والظهر اختيار مفرد.
+// كل رقم تصميم له مربعه الخاص لرفع صورة مرجعية ومعاينتها مباشرة بنفس المربع.
 export default function JacketBuilder({ config, update }) {
-  const [uploading, setUploading] = React.useState(false);
-  const [slotUploading, setSlotUploading] = React.useState(null);
+  const [uploadingId, setUploadingId] = React.useState(null);
 
-  const handlePhotoUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    setUploading(true);
+  const designPhotos = config.designPhotos || {};
+  const frontDesigns = config.frontDesigns || [];
+
+  const setPhoto = (id, url) => update('designPhotos', { ...designPhotos, [id]: url });
+  const clearPhoto = (id) => {
+    const next = { ...designPhotos };
+    delete next[id];
+    update('designPhotos', next);
+  };
+
+  const handleUpload = (id) => async (e, removeOnly) => {
+    if (removeOnly) { clearPhoto(id); return; }
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingId(id);
     try {
-      const uploaded = [];
-      for (const file of files) {
-        const { file_url } = await uploadFile({ file });
-        if (file_url) uploaded.push(file_url);
-      }
-      update('referencePhotos', [...(config.referencePhotos || []), ...uploaded]);
-    } catch { /* لو فشل رفع صورة نتجاهلها بصمت، العميل يقدر يعيد المحاولة */ }
-    setUploading(false);
+      const { file_url } = await uploadFile({ file });
+      if (file_url) setPhoto(id, file_url);
+    } catch { /* اختياري نتجاهل الخطأ بصمت، العميل يقدر يعيد المحاولة */ }
+    setUploadingId(null);
     e.target.value = '';
   };
 
-  const removePhoto = (url) => update('referencePhotos', (config.referencePhotos || []).filter(u => u !== url));
+  // التصميم الأمامي: اختيار متعدد — يقدر العميل يختار 1 و2 مع بعض
+  const toggleFrontDesign = (id) => {
+    const active = frontDesigns.includes(id);
+    if (active) {
+      update('frontDesigns', frontDesigns.filter(x => x !== id));
+      clearPhoto(id);
+    } else {
+      update('frontDesigns', [...frontDesigns, id]);
+    }
+  };
 
-  // رفع صورة مرتبطة بتصميم خاص محدد (رقم 2 أو 5 أو 8)
-  const handleSlotUpload = (slotKey) => async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setSlotUploading(slotKey);
-    try {
-      const { file_url } = await uploadFile({ file });
-      if (file_url) update(slotKey, file_url);
-    } catch { /* اختياري نتجاهل الخطأ بصمت، العميل يقدر يعيد المحاولة */ }
-    setSlotUploading(null);
-    e.target.value = '';
+  // الأكمام: اختيار مفرد — اختيار تصميم جديد يلغي القديم، والضغط على المختار حاليًا يلغيه
+  const toggleSingle = (key) => (id) => {
+    if (config[key] === id) {
+      update(key, null);
+      clearPhoto(id);
+    } else {
+      if (config[key]) clearPhoto(config[key]);
+      update(key, id);
+    }
   };
 
   return (
@@ -106,70 +127,41 @@ export default function JacketBuilder({ config, update }) {
         <input value={config.sleeveColor} onChange={e => update('sleeveColor', e.target.value)} placeholder="مثال: أسود، كحلي..." className="w-full px-4 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
       </Block>
 
-      <Block title="التصميم الأمامي">
-        <DesignGrid options={JACKET_FRONT_DESIGNS} value={config.frontDesign} onChange={v => update('frontDesign', v)} />
-        {config.frontDesign && (
-          <CustomDesignUpload
-            label={`التصميم الأمامي ${config.frontDesign}`}
-            photoUrl={config.frontDesignPhoto}
-            uploading={slotUploading === 'frontDesignPhoto'}
-            onUpload={handleSlotUpload('frontDesignPhoto')}
-            onRemove={() => update('frontDesignPhoto', '')}
-            isPaid={config.frontDesign === 2}
-          />
-        )}
+      <Block title="التصميم الأمامي" hint="تقدر تختار 1 و2 مع بعض — اختيار 2 يضيف رسوم فورًا">
+        <div className="flex flex-wrap gap-2.5">
+          {JACKET_FRONT_DESIGNS.map(o => (
+            <DesignTile key={o.id} option={o} selected={frontDesigns.includes(o.id)} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleFrontDesign(o.id)} onUpload={handleUpload(o.id)} />
+          ))}
+        </div>
       </Block>
 
       <Block title="تصميم الكم الأيسر">
-        <DesignGrid options={JACKET_LEFT_SLEEVE_DESIGNS} value={config.leftSleeveDesign} onChange={v => update('leftSleeveDesign', v)} />
-        {config.leftSleeveDesign && (
-          <CustomDesignUpload
-            label={`الكم الأيسر — تصميم ${config.leftSleeveDesign}`}
-            photoUrl={config.leftSleeveDesignPhoto}
-            uploading={slotUploading === 'leftSleeveDesignPhoto'}
-            onUpload={handleSlotUpload('leftSleeveDesignPhoto')}
-            onRemove={() => update('leftSleeveDesignPhoto', '')}
-            isPaid={config.leftSleeveDesign === 5}
-          />
-        )}
+        <div className="flex flex-wrap gap-2.5">
+          {JACKET_LEFT_SLEEVE_DESIGNS.map(o => (
+            <DesignTile key={o.id} option={o} selected={config.leftSleeveDesign === o.id} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleSingle('leftSleeveDesign')(o.id)} onUpload={handleUpload(o.id)} />
+          ))}
+        </div>
       </Block>
 
       <Block title="تصميم الكم الأيمن">
-        <DesignGrid options={JACKET_RIGHT_SLEEVE_DESIGNS} value={config.rightSleeveDesign} onChange={v => update('rightSleeveDesign', v)} />
-        {config.rightSleeveDesign && (
-          <CustomDesignUpload
-            label={`الكم الأيمن — تصميم ${config.rightSleeveDesign}`}
-            photoUrl={config.rightSleeveDesignPhoto}
-            uploading={slotUploading === 'rightSleeveDesignPhoto'}
-            onUpload={handleSlotUpload('rightSleeveDesignPhoto')}
-            onRemove={() => update('rightSleeveDesignPhoto', '')}
-            isPaid={config.rightSleeveDesign === 8}
-          />
-        )}
+        <div className="flex flex-wrap gap-2.5">
+          {JACKET_RIGHT_SLEEVE_DESIGNS.map(o => (
+            <DesignTile key={o.id} option={o} selected={config.rightSleeveDesign === o.id} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleSingle('rightSleeveDesign')(o.id)} onUpload={handleUpload(o.id)} />
+          ))}
+        </div>
       </Block>
 
       <Block title="تصميم الظهر">
-        <div className="flex gap-2">
-          <button type="button" onClick={() => update('backDesign', JACKET_BACK_DESIGN.id)} className={`px-3.5 py-2 rounded-xl border text-sm transition-all ${config.backDesign === JACKET_BACK_DESIGN.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>
-            {JACKET_BACK_DESIGN.label} <span className={`text-[10px] font-bold ${config.backDesign === JACKET_BACK_DESIGN.id ? 'text-primary-foreground/80' : 'text-green-600'}`}>مجاني</span>
-          </button>
+        <div className="flex flex-wrap gap-2.5">
+          <DesignTile
+            option={JACKET_BACK_DESIGN}
+            selected={config.backDesign === JACKET_BACK_DESIGN.id}
+            photo={designPhotos[JACKET_BACK_DESIGN.id]}
+            uploading={uploadingId === JACKET_BACK_DESIGN.id}
+            onToggle={() => toggleSingle('backDesign')(JACKET_BACK_DESIGN.id)}
+            onUpload={handleUpload(JACKET_BACK_DESIGN.id)}
+          />
         </div>
-      </Block>
-
-      <Block title="صور مرجعية إضافية (اختياري)" hint="ارفع صور من جهازك لأي تصميم أو شعار إضافي تحب نطبّقه بالجاكيت">
-        <div className="flex flex-wrap gap-2 mb-2">
-          {(config.referencePhotos || []).map(url => (
-            <div key={url} className="relative w-16 h-16">
-              <img src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
-              <button type="button" onClick={() => removePhoto(url)} className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
-            </div>
-          ))}
-        </div>
-        <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
-          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {uploading ? 'جارٍ الرفع...' : 'ارفع صورة أو أكثر من جهازك'}
-          <input type="file" accept="image/*" multiple onChange={handlePhotoUpload} disabled={uploading} className="hidden" />
-        </label>
       </Block>
 
       <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3.5 flex items-start gap-2 mb-2">

@@ -45,17 +45,17 @@ const FIELD_LABELS = {
   leftSleeveDesign: 'الكم الأيسر',
   rightSleeveDesign: 'الكم الأيمن',
   backDesign: 'تصميم الظهر',
-  frontDesignPhoto: 'صورة التصميم الأمامي الخاص',
-  leftSleeveDesignPhoto: 'صورة تصميم الكم الأيسر الخاص',
-  rightSleeveDesignPhoto: 'صورة تصميم الكم الأيمن الخاص',
+  designPhotos: 'صور تصاميم الجاكيت',
   referencePhotos: 'صور مرجعية إضافية',
   customDesignFee: 'رسوم تصاميم خاصة',
 };
 
 // المفاتيح اللي قيمتها صورة واحدة يجب عرضها كصورة مصغّرة قابلة للفتح
-const IMAGE_KEYS = ['logo_url', 'frontDesignPhoto', 'leftSleeveDesignPhoto', 'rightSleeveDesignPhoto'];
+const IMAGE_KEYS = ['logo_url'];
 // المفاتيح اللي قيمتها مصفوفة صور (أكثر من صورة)
 const IMAGE_ARRAY_KEYS = ['referencePhotos'];
+// المفاتيح اللي قيمتها خريطة "رقم التصميم -> صورة" (تُعرض كل صورة مع رقمها)
+const IMAGE_MAP_KEYS = ['designPhotos'];
 
 // sash_config قد يحتوي على أكثر من عنصر مفصولة بـ " | "، وكل عنصر إما JSON
 // (من محاكيات الوشاح/الكاب/الجاكيت/البكج الجامعي) أو نص ملخّص عادي من المهيّئ القديم
@@ -104,6 +104,21 @@ function ConfigDetails({ sashConfig }) {
                         {v.map((url, idx) => (
                           <a key={url} href={url} target="_blank" rel="noreferrer" className="hover:opacity-80" title="فتح الصورة">
                             <img src={url} alt={`${FIELD_LABELS[k] || k} ${idx + 1}`} className="w-10 h-10 rounded-lg object-cover border border-border" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                if (IMAGE_MAP_KEYS.includes(k) && v && typeof v === 'object') {
+                  return (
+                    <div key={k} className="flex items-start gap-2 sm:col-span-2">
+                      <span className="text-xs text-foreground/50 min-w-[90px] pt-1">{FIELD_LABELS[k] || k}:</span>
+                      <div className="flex flex-wrap gap-2.5">
+                        {Object.entries(v).map(([designId, url]) => (
+                          <a key={designId} href={url} target="_blank" rel="noreferrer" className="relative hover:opacity-80" title={`فتح صورة تصميم ${designId}`}>
+                            <img src={url} alt={`تصميم ${designId}`} className="w-12 h-12 rounded-lg object-cover border border-border" />
+                            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-foreground text-background text-[10px] font-extrabold flex items-center justify-center">{designId}</span>
                           </a>
                         ))}
                       </div>

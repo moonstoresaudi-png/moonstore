@@ -61,9 +61,9 @@ export default function ProductConfigurator({ product }) {
     leftSleeveDesign: null,
     rightSleeveDesign: null,
     backDesign: null,
-    frontDesignPhoto: '',
-    leftSleeveDesignPhoto: '',
-    rightSleeveDesignPhoto: '',
+    frontDesignPhotos: [],
+    leftSleeveDesignPhotos: [],
+    rightSleeveDesignPhotos: [],
     referencePhotos: [],
   });
 
@@ -135,9 +135,9 @@ export default function ProductConfigurator({ product }) {
       leftSleeveDesign: config.leftSleeveDesign ? `تصميم ${config.leftSleeveDesign}${config.leftSleeveDesign === 5 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
       rightSleeveDesign: config.rightSleeveDesign ? `تصميم ${config.rightSleeveDesign}${config.rightSleeveDesign === 8 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
       backDesign: config.backDesign ? 'مفعّل (مجاني)' : undefined,
-      frontDesignPhoto: config.frontDesignPhoto || undefined,
-      leftSleeveDesignPhoto: config.leftSleeveDesignPhoto || undefined,
-      rightSleeveDesignPhoto: config.rightSleeveDesignPhoto || undefined,
+      frontDesignPhotos: config.frontDesignPhotos?.length ? config.frontDesignPhotos : undefined,
+      leftSleeveDesignPhotos: config.leftSleeveDesignPhotos?.length ? config.leftSleeveDesignPhotos : undefined,
+      rightSleeveDesignPhotos: config.rightSleeveDesignPhotos?.length ? config.rightSleeveDesignPhotos : undefined,
       referencePhotos: config.referencePhotos?.length ? config.referencePhotos : undefined,
       customDesignFee: jacketCustomDesignFee > 0 ? `${jacketCustomDesignFee} ريال (${jacketCustomDesignCount} تصميم خاص)` : undefined,
     }) : null;

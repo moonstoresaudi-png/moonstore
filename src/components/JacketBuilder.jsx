@@ -33,12 +33,15 @@ function DesignGrid({ options, value, onChange }) {
 }
 
 // صندوق رفع صورة مخصّص لتصميم غير مجاني — يظهر مباشرة تحت التصميم المختار
-function CustomDesignUpload({ label, photoUrl, uploading, onUpload, onRemove }) {
+function CustomDesignUpload({ label, photoUrl, uploading, onUpload, onRemove, isPaid }) {
+  const theme = isPaid
+    ? { box: 'border-amber-200 bg-amber-50/60', icon: 'text-amber-600', text: 'text-amber-700', dash: 'border-amber-400/50 text-amber-700 hover:bg-amber-100/60' }
+    : { box: 'border-border bg-secondary/30', icon: 'text-primary', text: 'text-foreground/60', dash: 'border-primary/30 text-primary hover:bg-primary/5' };
   return (
-    <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+    <div className={`mt-2.5 rounded-xl border p-3 ${theme.box}`}>
       <div className="flex items-center gap-1.5 mb-2">
-        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-        <p className="text-xs font-bold text-amber-700">{label} — تصميم خاص، يرجى إرفاق صورة توضح الشكل المطلوب</p>
+        <Sparkles className={`w-3.5 h-3.5 ${theme.icon}`} />
+        <p className={`text-xs font-bold ${theme.text}`}>{label} — {isPaid ? 'تصميم خاص، يرجى إرفاق صورة توضح الشكل المطلوب' : 'أرفق صورة توضح الشكل المطلوب (اختياري)'}</p>
       </div>
       {photoUrl ? (
         <div className="relative w-16 h-16">
@@ -46,7 +49,7 @@ function CustomDesignUpload({ label, photoUrl, uploading, onUpload, onRemove }) 
           <button type="button" onClick={onRemove} className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
         </div>
       ) : (
-        <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-amber-400/50 text-amber-700 text-xs font-medium cursor-pointer hover:bg-amber-100/60 transition-colors">
+        <label className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed text-xs font-medium cursor-pointer transition-colors ${theme.dash}`}>
           {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           {uploading ? 'جارٍ الرفع...' : 'ارفع صورة التصميم المطلوب'}
           <input type="file" accept="image/*" onChange={onUpload} disabled={uploading} className="hidden" />
@@ -105,39 +108,42 @@ export default function JacketBuilder({ config, update }) {
 
       <Block title="التصميم الأمامي">
         <DesignGrid options={JACKET_FRONT_DESIGNS} value={config.frontDesign} onChange={v => update('frontDesign', v)} />
-        {config.frontDesign === 2 && (
+        {config.frontDesign && (
           <CustomDesignUpload
-            label="التصميم الأمامي 2"
+            label={`التصميم الأمامي ${config.frontDesign}`}
             photoUrl={config.frontDesignPhoto}
             uploading={slotUploading === 'frontDesignPhoto'}
             onUpload={handleSlotUpload('frontDesignPhoto')}
             onRemove={() => update('frontDesignPhoto', '')}
+            isPaid={config.frontDesign === 2}
           />
         )}
       </Block>
 
       <Block title="تصميم الكم الأيسر">
         <DesignGrid options={JACKET_LEFT_SLEEVE_DESIGNS} value={config.leftSleeveDesign} onChange={v => update('leftSleeveDesign', v)} />
-        {config.leftSleeveDesign === 5 && (
+        {config.leftSleeveDesign && (
           <CustomDesignUpload
-            label="الكم الأيسر — تصميم 5"
+            label={`الكم الأيسر — تصميم ${config.leftSleeveDesign}`}
             photoUrl={config.leftSleeveDesignPhoto}
             uploading={slotUploading === 'leftSleeveDesignPhoto'}
             onUpload={handleSlotUpload('leftSleeveDesignPhoto')}
             onRemove={() => update('leftSleeveDesignPhoto', '')}
+            isPaid={config.leftSleeveDesign === 5}
           />
         )}
       </Block>
 
       <Block title="تصميم الكم الأيمن">
         <DesignGrid options={JACKET_RIGHT_SLEEVE_DESIGNS} value={config.rightSleeveDesign} onChange={v => update('rightSleeveDesign', v)} />
-        {config.rightSleeveDesign === 8 && (
+        {config.rightSleeveDesign && (
           <CustomDesignUpload
-            label="الكم الأيمن — تصميم 8"
+            label={`الكم الأيمن — تصميم ${config.rightSleeveDesign}`}
             photoUrl={config.rightSleeveDesignPhoto}
             uploading={slotUploading === 'rightSleeveDesignPhoto'}
             onUpload={handleSlotUpload('rightSleeveDesignPhoto')}
             onRemove={() => update('rightSleeveDesignPhoto', '')}
+            isPaid={config.rightSleeveDesign === 8}
           />
         )}
       </Block>

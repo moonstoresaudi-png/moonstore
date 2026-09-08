@@ -32,27 +32,26 @@ function DesignGrid({ options, value, onChange }) {
   );
 }
 
-// صندوق رفع صور مخصّص لتصميم غير مجاني — يظهر مباشرة تحت التصميم المختار، ويدعم أكثر من صورة
-function CustomDesignUpload({ label, photos, uploading, onUpload, onRemove }) {
+// صندوق رفع صورة مخصّص لتصميم غير مجاني — يظهر مباشرة تحت التصميم المختار
+function CustomDesignUpload({ label, photoUrl, uploading, onUpload, onRemove }) {
   return (
     <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
       <div className="flex items-center gap-1.5 mb-2">
         <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-        <p className="text-xs font-bold text-amber-700">{label} — تصميم خاص، يرجى إرفاق صورة أو أكثر توضح الشكل المطلوب</p>
+        <p className="text-xs font-bold text-amber-700">{label} — تصميم خاص، يرجى إرفاق صورة توضح الشكل المطلوب</p>
       </div>
-      <div className="flex flex-wrap gap-2 mb-2">
-        {(photos || []).map(url => (
-          <div key={url} className="relative w-16 h-16">
-            <img src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
-            <button type="button" onClick={() => onRemove(url)} className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
-          </div>
-        ))}
-      </div>
-      <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-amber-400/50 text-amber-700 text-xs font-medium cursor-pointer hover:bg-amber-100/60 transition-colors">
-        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-        {uploading ? 'جارٍ الرفع...' : 'ارفع صورة أو أكثر للتصميم المطلوب'}
-        <input type="file" accept="image/*" multiple onChange={onUpload} disabled={uploading} className="hidden" />
-      </label>
+      {photoUrl ? (
+        <div className="relative w-16 h-16">
+          <img src={photoUrl} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
+          <button type="button" onClick={onRemove} className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center"><X className="w-3 h-3" /></button>
+        </div>
+      ) : (
+        <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-amber-400/50 text-amber-700 text-xs font-medium cursor-pointer hover:bg-amber-100/60 transition-colors">
+          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+          {uploading ? 'جارٍ الرفع...' : 'ارفع صورة التصميم المطلوب'}
+          <input type="file" accept="image/*" onChange={onUpload} disabled={uploading} className="hidden" />
+        </label>
+      )}
     </div>
   );
 }
@@ -81,24 +80,18 @@ export default function JacketBuilder({ config, update }) {
 
   const removePhoto = (url) => update('referencePhotos', (config.referencePhotos || []).filter(u => u !== url));
 
-  // رفع صورة أو أكثر مرتبطة بتصميم خاص محدد (رقم 2 أو 5 أو 8)
+  // رفع صورة مرتبطة بتصميم خاص محدد (رقم 2 أو 5 أو 8)
   const handleSlotUpload = (slotKey) => async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     setSlotUploading(slotKey);
     try {
-      const uploaded = [];
-      for (const file of files) {
-        const { file_url } = await uploadFile({ file });
-        if (file_url) uploaded.push(file_url);
-      }
-      update(slotKey, [...(config[slotKey] || []), ...uploaded]);
+      const { file_url } = await uploadFile({ file });
+      if (file_url) update(slotKey, file_url);
     } catch { /* اختياري نتجاهل الخطأ بصمت، العميل يقدر يعيد المحاولة */ }
     setSlotUploading(null);
     e.target.value = '';
   };
-
-  const removeSlotPhoto = (slotKey) => (url) => update(slotKey, (config[slotKey] || []).filter(u => u !== url));
 
   return (
     <div>
@@ -115,10 +108,10 @@ export default function JacketBuilder({ config, update }) {
         {config.frontDesign === 2 && (
           <CustomDesignUpload
             label="التصميم الأمامي 2"
-            photos={config.frontDesignPhotos}
-            uploading={slotUploading === 'frontDesignPhotos'}
-            onUpload={handleSlotUpload('frontDesignPhotos')}
-            onRemove={removeSlotPhoto('frontDesignPhotos')}
+            photoUrl={config.frontDesignPhoto}
+            uploading={slotUploading === 'frontDesignPhoto'}
+            onUpload={handleSlotUpload('frontDesignPhoto')}
+            onRemove={() => update('frontDesignPhoto', '')}
           />
         )}
       </Block>
@@ -128,10 +121,10 @@ export default function JacketBuilder({ config, update }) {
         {config.leftSleeveDesign === 5 && (
           <CustomDesignUpload
             label="الكم الأيسر — تصميم 5"
-            photos={config.leftSleeveDesignPhotos}
-            uploading={slotUploading === 'leftSleeveDesignPhotos'}
-            onUpload={handleSlotUpload('leftSleeveDesignPhotos')}
-            onRemove={removeSlotPhoto('leftSleeveDesignPhotos')}
+            photoUrl={config.leftSleeveDesignPhoto}
+            uploading={slotUploading === 'leftSleeveDesignPhoto'}
+            onUpload={handleSlotUpload('leftSleeveDesignPhoto')}
+            onRemove={() => update('leftSleeveDesignPhoto', '')}
           />
         )}
       </Block>
@@ -141,10 +134,10 @@ export default function JacketBuilder({ config, update }) {
         {config.rightSleeveDesign === 8 && (
           <CustomDesignUpload
             label="الكم الأيمن — تصميم 8"
-            photos={config.rightSleeveDesignPhotos}
-            uploading={slotUploading === 'rightSleeveDesignPhotos'}
-            onUpload={handleSlotUpload('rightSleeveDesignPhotos')}
-            onRemove={removeSlotPhoto('rightSleeveDesignPhotos')}
+            photoUrl={config.rightSleeveDesignPhoto}
+            uploading={slotUploading === 'rightSleeveDesignPhoto'}
+            onUpload={handleSlotUpload('rightSleeveDesignPhoto')}
+            onRemove={() => update('rightSleeveDesignPhoto', '')}
           />
         )}
       </Block>

@@ -45,17 +45,17 @@ const FIELD_LABELS = {
   leftSleeveDesign: 'الكم الأيسر',
   rightSleeveDesign: 'الكم الأيمن',
   backDesign: 'تصميم الظهر',
-  frontDesignPhotos: 'صور التصميم الأمامي الخاص',
-  leftSleeveDesignPhotos: 'صور تصميم الكم الأيسر الخاص',
-  rightSleeveDesignPhotos: 'صور تصميم الكم الأيمن الخاص',
+  frontDesignPhoto: 'صورة التصميم الأمامي الخاص',
+  leftSleeveDesignPhoto: 'صورة تصميم الكم الأيسر الخاص',
+  rightSleeveDesignPhoto: 'صورة تصميم الكم الأيمن الخاص',
   referencePhotos: 'صور مرجعية إضافية',
   customDesignFee: 'رسوم تصاميم خاصة',
 };
 
 // المفاتيح اللي قيمتها صورة واحدة يجب عرضها كصورة مصغّرة قابلة للفتح
-const IMAGE_KEYS = ['logo_url'];
+const IMAGE_KEYS = ['logo_url', 'frontDesignPhoto', 'leftSleeveDesignPhoto', 'rightSleeveDesignPhoto'];
 // المفاتيح اللي قيمتها مصفوفة صور (أكثر من صورة)
-const IMAGE_ARRAY_KEYS = ['referencePhotos', 'frontDesignPhotos', 'leftSleeveDesignPhotos', 'rightSleeveDesignPhotos'];
+const IMAGE_ARRAY_KEYS = ['referencePhotos'];
 
 // sash_config قد يحتوي على أكثر من عنصر مفصولة بـ " | "، وكل عنصر إما JSON
 // (من محاكيات الوشاح/الكاب/الجاكيت/البكج الجامعي) أو نص ملخّص عادي من المهيّئ القديم

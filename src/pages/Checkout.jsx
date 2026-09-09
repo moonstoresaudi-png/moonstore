@@ -8,7 +8,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useStoreSettings } from '@/lib/SettingsContext';
 import MoyasarPayment from '@/components/MoyasarPayment';
 import LocationPicker from '@/components/LocationPicker';
-import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, ShieldCheck, Tag, X, MapPin } from 'lucide-react';
+import InvoiceDocument from '@/components/InvoiceDocument';
+import { Truck, CreditCard, Banknote, Lock, Check, ShoppingBag, ArrowLeft, ShieldCheck, Tag, X, MapPin, FileText } from 'lucide-react';
 
 const COUNTRIES = ['السعودية', 'الإمارات', 'الكويت', 'البحرين', 'قطر', 'سلطنة عمان'];
 
@@ -32,6 +33,7 @@ export default function Checkout() {
   const [discountError, setDiscountError] = useState('');
   const [checkingDiscount, setCheckingDiscount] = useState(false);
   const [nationalAddressError, setNationalAddressError] = useState('');
+  const [showInvoice, setShowInvoice] = useState(false);
   const isSaudi = form.country === 'السعودية';
 
   const shippingCost = settings.shipping_cost;
@@ -204,12 +206,34 @@ export default function Checkout() {
             <p className="text-xs text-foreground/55 mt-2">طريقة الدفع: {paymentMethod === 'card' ? 'بطاقة' : 'الدفع عند الاستلام'}</p>
             <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} </p>
           </div>
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-3 justify-center flex-wrap">
+            <button onClick={() => setShowInvoice(true)} className="px-6 py-3 rounded-full border border-primary text-primary font-medium hover:bg-primary/5 inline-flex items-center gap-2"><FileText className="w-4 h-4" /> تحميل الفاتورة</button>
             <Link to="/track-order" className="px-6 py-3 btn-primary">تتبع الطلب</Link>
             <Link to="/" className="px-6 py-3 rounded-full border border-border font-medium hover:bg-secondary">الرئيسية</Link>
           </div>
         </main>
         <Footer />
+        {showInvoice && (
+          <InvoiceDocument
+            onClose={() => setShowInvoice(false)}
+            settings={settings}
+            order={{
+              id: orderId,
+              order_number: orderNumber || orderId?.slice(-6),
+              customer_name: form.customer_name,
+              phone: form.phone,
+              address: form.address,
+              city: form.city,
+              product_name: items.map(i => i.name).join(', '),
+              quantity: items.reduce((s, i) => s + i.qty, 0),
+              total: grandTotal,
+              discount_code: discount?.code || null,
+              discount_amount: discountAmount,
+              sash_config: items.map(i => i.sash_config).filter(Boolean).join(' | '),
+              created_at: new Date().toISOString(),
+            }}
+          />
+        )}
       </div>
     );
   }

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { entities } from '@/api/entities';
 import { supabase } from '@/lib/supabaseClient';
-import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download, Printer, RefreshCw, Truck, AlertTriangle } from 'lucide-react';
+import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download, Printer, RefreshCw, Truck, AlertTriangle, FileText } from 'lucide-react';
+import { useStoreSettings } from '@/lib/SettingsContext';
+import InvoiceDocument from '@/components/InvoiceDocument';
 
 const STATUS = {
   pending: { label: 'قيد الانتظار', cls: 'bg-gray-100 text-gray-700' },
@@ -147,10 +149,12 @@ function StatCard({ icon: Icon, label, value, color }) {
 }
 
 export default function AdminOrders() {
+  const { settings } = useStoreSettings();
   const [orders, setOrders] = useState(null);
   const [filter, setFilter] = useState('all');
   const [sortDesc, setSortDesc] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -293,6 +297,7 @@ export default function AdminOrders() {
                               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expandedId === o.id ? 'rotate-180' : ''}`} />
                             </button>
                           )}
+                          <button onClick={() => setInvoiceOrder(o)} title="تحميل الفاتورة" className="p-1.5 rounded-lg text-foreground/50 hover:bg-secondary hover:text-primary"><FileText className="w-4 h-4" /></button>
                           {o.status === 'delivered' ? <button onClick={() => archive(o.id)} title="أرشفة" className="p-1.5 rounded-lg text-foreground/40 hover:bg-secondary"><Archive className="w-4 h-4" /></button>
                             : o.status === 'archived' ? <button onClick={() => unarchive(o.id)} title="استرجاع" className="p-1.5 rounded-lg text-primary hover:bg-secondary"><ArchiveRestore className="w-4 h-4" /></button>
                             : null}
@@ -314,6 +319,7 @@ export default function AdminOrders() {
           </div>
         )}
       </div>
+      {invoiceOrder && <InvoiceDocument order={invoiceOrder} settings={settings} onClose={() => setInvoiceOrder(null)} />}
     </div>
   );
 }

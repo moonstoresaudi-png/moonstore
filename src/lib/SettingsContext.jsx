@@ -13,6 +13,7 @@ const DEFAULTS = {
   email: 'info@moonstore.sa',
   address: 'جدة - السعودية',
   cr_number: '',
+  vat_number: '',
   shipping_cost: 25,
   cod_fee: 10,
   instagram: 'https://www.instagram.com/eman220199?igsh=cjNhZHdzdW9naHZh&utm_source=qr',

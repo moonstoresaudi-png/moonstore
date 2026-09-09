@@ -74,6 +74,8 @@ export default function JacketBuilder({ config, update }) {
 
   const designPhotos = config.designPhotos || {};
   const frontDesigns = config.frontDesigns || [];
+  const leftSleeveDesigns = config.leftSleeveDesigns || [];
+  const rightSleeveDesigns = config.rightSleeveDesigns || [];
 
   const setPhoto = (id, url) => update('designPhotos', { ...designPhotos, [id]: url });
   const clearPhoto = (id) => {
@@ -95,18 +97,19 @@ export default function JacketBuilder({ config, update }) {
     e.target.value = '';
   };
 
-  // التصميم الأمامي: اختيار متعدد — يقدر العميل يختار 1 و2 مع بعض
-  const toggleFrontDesign = (id) => {
-    const active = frontDesigns.includes(id);
+  // اختيار متعدد لأي فئة (أمامي / كم أيسر / كم أيمن) — العميل يقدر يختار أكثر من رقم مع بعض بكل فئة
+  const toggleMulti = (key) => (id) => {
+    const current = config[key] || [];
+    const active = current.includes(id);
     if (active) {
-      update('frontDesigns', frontDesigns.filter(x => x !== id));
+      update(key, current.filter(x => x !== id));
       clearPhoto(id);
     } else {
-      update('frontDesigns', [...frontDesigns, id]);
+      update(key, [...current, id]);
     }
   };
 
-  // الأكمام: اختيار مفرد — اختيار تصميم جديد يلغي القديم، والضغط على المختار حاليًا يلغيه
+  // الظهر: خيار وحيد فقط بالأصل (رقم 9)، فالتبديل هنا بس تفعيل/إلغاء
   const toggleSingle = (key) => (id) => {
     if (config[key] === id) {
       update(key, null);
@@ -127,26 +130,26 @@ export default function JacketBuilder({ config, update }) {
         <input value={config.sleeveColor} onChange={e => update('sleeveColor', e.target.value)} placeholder="مثال: أسود، كحلي..." className="w-full px-4 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
       </Block>
 
-      <Block title="التصميم الأمامي" hint="تقدر تختار 1 و2 مع بعض — اختيار 2 يضيف رسوم فورًا">
+      <Block title="التصميم الأمامي" hint="تقدر تختار أكثر من رقم مع بعض — اختيار 2 يضيف رسوم فورًا">
         <div className="flex flex-wrap gap-2.5">
           {JACKET_FRONT_DESIGNS.map(o => (
-            <DesignTile key={o.id} option={o} selected={frontDesigns.includes(o.id)} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleFrontDesign(o.id)} onUpload={handleUpload(o.id)} />
+            <DesignTile key={o.id} option={o} selected={frontDesigns.includes(o.id)} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleMulti('frontDesigns')(o.id)} onUpload={handleUpload(o.id)} />
           ))}
         </div>
       </Block>
 
-      <Block title="تصميم الكم الأيسر">
+      <Block title="تصميم الكم الأيسر" hint="تقدر تختار أكثر من رقم مع بعض — اختيار 5 يضيف رسوم فورًا">
         <div className="flex flex-wrap gap-2.5">
           {JACKET_LEFT_SLEEVE_DESIGNS.map(o => (
-            <DesignTile key={o.id} option={o} selected={config.leftSleeveDesign === o.id} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleSingle('leftSleeveDesign')(o.id)} onUpload={handleUpload(o.id)} />
+            <DesignTile key={o.id} option={o} selected={leftSleeveDesigns.includes(o.id)} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleMulti('leftSleeveDesigns')(o.id)} onUpload={handleUpload(o.id)} />
           ))}
         </div>
       </Block>
 
-      <Block title="تصميم الكم الأيمن">
+      <Block title="تصميم الكم الأيمن" hint="تقدر تختار أكثر من رقم مع بعض — اختيار 8 يضيف رسوم فورًا">
         <div className="flex flex-wrap gap-2.5">
           {JACKET_RIGHT_SLEEVE_DESIGNS.map(o => (
-            <DesignTile key={o.id} option={o} selected={config.rightSleeveDesign === o.id} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleSingle('rightSleeveDesign')(o.id)} onUpload={handleUpload(o.id)} />
+            <DesignTile key={o.id} option={o} selected={rightSleeveDesigns.includes(o.id)} photo={designPhotos[o.id]} uploading={uploadingId === o.id} onToggle={() => toggleMulti('rightSleeveDesigns')(o.id)} onUpload={handleUpload(o.id)} />
           ))}
         </div>
       </Block>

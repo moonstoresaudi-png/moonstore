@@ -4,11 +4,11 @@ import { uploadFile } from '@/api/storage';
 import { Type, Palette, RotateCcw, ShoppingBag, Check, Ruler, ZoomIn, Image as ImageIcon, Loader2, X } from 'lucide-react';
 
 const FONTS = [
-  { id: 'thuluth-light', name: 'ثلث لايت', cls: 'font-thuluth', style: '"Amiri", serif' },
-  { id: 'thuluth', name: 'الثلث', cls: 'font-thuluth', style: '"Amiri", serif' },
-  { id: 'diwani', name: 'ديواني', cls: 'font-diwani', style: '"Aref Ruqaa", serif' },
-  { id: 'monotype', name: 'Great Vibes (إنجليزي)', cls: 'font-body', style: '"Great Vibes", cursive' },
-  { id: 'calisto', name: 'Playfair (إنجليزي)', cls: 'font-body', style: '"Playfair Display", serif' },
+  { id: 'thuluth-light', name: 'ثلث لايت', cls: 'font-thuluth', style: '"Amiri", serif', weight: 700, scale: 1 },
+  { id: 'thuluth', name: 'الثلث', cls: 'font-thuluth', style: '"Amiri", serif', weight: 900, scale: 1.05 },
+  { id: 'diwani', name: 'ديواني', cls: 'font-diwani', style: '"Aref Ruqaa", serif', weight: 700, scale: 1.1 },
+  { id: 'monotype', name: 'Great Vibes (إنجليزي)', cls: 'font-body', style: '"Great Vibes", cursive', weight: 400, scale: 1.45 },
+  { id: 'calisto', name: 'Playfair (إنجليزي)', cls: 'font-body', style: '"Playfair Display", serif', weight: 700, scale: 1.1 },
 ];
 
 const SASH_COLORS = [
@@ -73,7 +73,7 @@ export const DATE_DESIGNS = [
   { id: '2028', label: '2028', img: '/images/dates/2028.svg' },
 ];
 
-function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize, logoUrl, dateImgUrl }) {
+function SashCanvas({ text, date, fontStyle, fontWeight = 700, sizeScale = 1, sashColor, threadColor, threadGlow, fontSize, logoUrl, dateImgUrl }) {
   const canvasRef = useRef(null);
   const [baseImg, setBaseImg] = useState(null);
   const [logoImg, setLogoImg] = useState(null);
@@ -136,7 +136,7 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
       // المتصفح يرسم بخط افتراضي بصمت حتى لو الخط المختار محمّل أصلاً بالصفحة
       // (مشكلة شائعة جدًا مع Canvas + خطوط ويب مخصصة)
       try {
-        await document.fonts.load(`bold ${Math.min(fontSize, 30)}px ${fontStyle}`);
+        await document.fonts.load(`${fontWeight} ${Math.min(fontSize, 30)}px ${fontStyle}`);
         await document.fonts.ready;
       } catch { /* لو فشل التحميل، يرجع للخط الافتراضي بدل ما يتوقف */ }
       if (cancelled) return;
@@ -147,15 +147,17 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
         const x = W * xFrac;
         const y = H * yFrac;
         const maxWidth = W * STRAP_MAX_TEXT_W;
-        let fs = Math.min(fontSize, 30);
+        // كل خط له معايرة حجم مختلفة (sizeScale) حتى تبدو الخطوط الرفيعة أو المزخرفة
+        // بنفس البروز البصري للخطوط العربية الثقيلة، بدل ما تظهر صغيرة وضايعة بالشريط
+        let fs = Math.min(fontSize, 30) * sizeScale;
 
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = `bold ${fs}px ${fontStyle}`;
+        ctx.font = `${fontWeight} ${fs}px ${fontStyle}`;
         while (ctx.measureText(str).width > maxWidth && fs > 10) {
           fs -= 1;
-          ctx.font = `bold ${fs}px ${fontStyle}`;
+          ctx.font = `${fontWeight} ${fs}px ${fontStyle}`;
         }
         ctx.shadowColor = 'rgba(0,0,0,0.55)';
         ctx.shadowBlur = 3;
@@ -184,7 +186,7 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = `800 ${fs}px ${fontStyle}`;
+        ctx.font = `${fontWeight} ${fs}px ${fontStyle}`;
         chars.forEach((ch, i) => {
           const y = startY + i * lineH;
           ctx.shadowColor = 'rgba(0,0,0,0.55)';
@@ -226,7 +228,7 @@ function SashCanvas({ text, date, fontStyle, sashColor, threadColor, threadGlow,
 
     draw();
     return () => { cancelled = true; };
-  }, [baseImg, logoImg, dateImg, text, date, fontStyle, sashColor, threadColor, threadGlow, fontSize]);
+  }, [baseImg, logoImg, dateImg, text, date, fontStyle, fontWeight, sizeScale, sashColor, threadColor, threadGlow, fontSize]);
 
   return (
     <canvas
@@ -299,6 +301,8 @@ export default function SashSimulatorWidget({ productName = 'وشاح تخرج �
             text={text}
             date={date}
             fontStyle={font.style}
+            fontWeight={font.weight}
+            sizeScale={font.scale}
             sashColor={sashColor.value}
             threadColor={thread.value}
             threadGlow={thread.glow}

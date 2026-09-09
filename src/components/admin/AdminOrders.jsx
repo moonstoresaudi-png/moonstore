@@ -46,12 +46,14 @@ const FIELD_LABELS = {
   rightSleeveDesign: 'الكم الأيمن',
   backDesign: 'تصميم الظهر',
   designPhotos: 'صور تصاميم الجاكيت',
+  capDesign: 'تصميم القبعة',
+  capDesignPhoto: 'صورة تصميم القبعة',
   referencePhotos: 'صور مرجعية إضافية',
   customDesignFee: 'رسوم تصاميم خاصة',
 };
 
 // المفاتيح اللي قيمتها صورة واحدة يجب عرضها كصورة مصغّرة قابلة للفتح
-const IMAGE_KEYS = ['logo_url'];
+const IMAGE_KEYS = ['logo_url', 'capDesignPhoto'];
 // المفاتيح اللي قيمتها مصفوفة صور (أكثر من صورة)
 const IMAGE_ARRAY_KEYS = ['referencePhotos'];
 // المفاتيح اللي قيمتها خريطة "رقم التصميم -> صورة" (تُعرض كل صورة مع رقمها)

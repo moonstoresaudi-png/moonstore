@@ -26,6 +26,7 @@ export default function ProductConfigurator({ product }) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [capUploading, setCapUploading] = useState(false);
   const { addItem } = useCart();
 
   const [config, setConfig] = useState({
@@ -37,6 +38,8 @@ export default function ProductConfigurator({ product }) {
     size: product.sizes?.[0] || '',
     height: '',
     capType: 'دائري',
+    capDesignMode: 'regular',
+    capDesignPhoto: '',
     thread: THREAD_COLORS[0],
     sash: SASH_COLORS[0],
     logoUrl: '',
@@ -58,8 +61,8 @@ export default function ProductConfigurator({ product }) {
     // الجاكيت
     sleeveColor: '',
     frontDesigns: [],
-    leftSleeveDesign: null,
-    rightSleeveDesign: null,
+    leftSleeveDesigns: [],
+    rightSleeveDesigns: [],
     backDesign: null,
     designPhotos: {},
     referencePhotos: [],
@@ -79,6 +82,18 @@ export default function ProductConfigurator({ product }) {
     e.target.value = '';
   };
 
+  const handleCapPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCapUploading(true);
+    try {
+      const { file_url } = await uploadFile({ file });
+      if (file_url) update('capDesignPhoto', file_url);
+    } catch { /* لو فشل الرفع، الصورة تبقى فاضية والعميل يقدر يعيد المحاولة */ }
+    setCapUploading(false);
+    e.target.value = '';
+  };
+
   const gallery = product.gallery_images?.length ? product.gallery_images : [product.image_url].filter(Boolean);
   const discount = product.old_price ? Math.round((1 - product.price / product.old_price) * 100) : 0;
 
@@ -91,7 +106,7 @@ export default function ProductConfigurator({ product }) {
   const sashBackEmbroideryAddon = (product.has_robe_builder && config.addSash && config.sashBackEmbroidery) ? (product.sash_back_embroidery_addon || 30) : 0;
 
   const jacketCustomDesignCount = product.has_jacket_builder
-    ? [(config.frontDesigns || []).includes(2), config.leftSleeveDesign === 5, config.rightSleeveDesign === 8].filter(Boolean).length
+    ? [(config.frontDesigns || []).includes(2), (config.leftSleeveDesigns || []).includes(5), (config.rightSleeveDesigns || []).includes(8)].filter(Boolean).length
     : 0;
   const jacketCustomDesignFee = jacketCustomDesignCount * JACKET_CUSTOM_DESIGN_FEE;
 
@@ -130,15 +145,21 @@ export default function ProductConfigurator({ product }) {
       jacketName: config.name || undefined,
       sleeveColor: config.sleeveColor || undefined,
       frontDesign: config.frontDesigns?.length ? config.frontDesigns.map(id => `${id}${id === 2 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}`).join(' + ') : undefined,
-      leftSleeveDesign: config.leftSleeveDesign ? `تصميم ${config.leftSleeveDesign}${config.leftSleeveDesign === 5 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
-      rightSleeveDesign: config.rightSleeveDesign ? `تصميم ${config.rightSleeveDesign}${config.rightSleeveDesign === 8 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}` : undefined,
+      leftSleeveDesign: config.leftSleeveDesigns?.length ? config.leftSleeveDesigns.map(id => `${id}${id === 5 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}`).join(' + ') : undefined,
+      rightSleeveDesign: config.rightSleeveDesigns?.length ? config.rightSleeveDesigns.map(id => `${id}${id === 8 ? ' (خاص +' + JACKET_CUSTOM_DESIGN_FEE + ' ريال)' : ' (مجاني)'}`).join(' + ') : undefined,
       backDesign: config.backDesign ? 'مفعّل (مجاني)' : undefined,
       designPhotos: Object.keys(config.designPhotos || {}).length ? config.designPhotos : undefined,
       referencePhotos: config.referencePhotos?.length ? config.referencePhotos : undefined,
       customDesignFee: jacketCustomDesignFee > 0 ? `${jacketCustomDesignFee} ريال (${jacketCustomDesignCount} تصميم خاص)` : undefined,
     }) : null;
 
-    const fullSummary = [summary, jacketSegment].filter(Boolean).join(' | ');
+    // تفاصيل تصميم القبعة (لو مخصص) — نفس أسلوب الجاكيت حتى تظهر الصورة كصورة قابلة للفتح
+    const capSegment = (product.has_cap && config.capDesignMode === 'custom') ? JSON.stringify({
+      capDesign: 'مخصص (صورة من العميل)',
+      capDesignPhoto: config.capDesignPhoto || undefined,
+    }) : null;
+
+    const fullSummary = [summary, jacketSegment, capSegment].filter(Boolean).join(' | ');
 
     addItem({ ...product, id: `${product.id}-${Date.now()}`, price: unitPrice, qty, size: config.size, sash_config: fullSummary });
     setAdded(true);
@@ -161,6 +182,8 @@ export default function ProductConfigurator({ product }) {
                 text={config.name}
                 date={config.date}
                 fontStyle={config.font.style}
+                fontWeight={config.font.weight}
+                sizeScale={config.font.scale}
                 sashColor={config.sash.value}
                 threadColor={config.thread.value}
                 threadGlow={config.thread.glow}
@@ -299,6 +322,38 @@ export default function ProductConfigurator({ product }) {
                   <button key={c} onClick={() => update('capType', c)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capType === c ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>{c}</button>
                 ))}
               </div>
+            </Section>
+          )}
+
+          {product.has_cap && (
+            <Section label="تصميم القبعة">
+              <div className="flex gap-2 mb-3">
+                <button onClick={() => { update('capDesignMode', 'regular'); update('capDesignPhoto', ''); }} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capDesignMode !== 'custom' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>عادي</button>
+                <button onClick={() => update('capDesignMode', 'custom')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capDesignMode === 'custom' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>اختيار تصميم</button>
+              </div>
+
+              {config.capDesignMode === 'custom' && (
+                <div className="rounded-xl border border-border bg-secondary/30 p-3">
+                  {config.capDesignPhoto ? (
+                    <div>
+                      <p className="text-xs font-bold text-green-600 flex items-center gap-1.5 mb-2"><Check className="w-3.5 h-3.5" /> تم رفع صورتك بنجاح — هذي هي الصورة اللي بنعتمدها:</p>
+                      <div className="flex items-center gap-3">
+                        <a href={config.capDesignPhoto} target="_blank" rel="noreferrer">
+                          <img src={config.capDesignPhoto} alt="صورة تصميم القبعة" className="w-20 h-20 rounded-lg object-cover border-2 border-primary" />
+                        </a>
+                        <button type="button" onClick={() => update('capDesignPhoto', '')} className="text-xs text-red-500 font-medium inline-flex items-center gap-1 hover:underline"><X className="w-3.5 h-3.5" /> إزالة الصورة ورفع صورة أخرى</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
+                      {capUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                      {capUploading ? 'جارٍ رفع صورتك...' : 'ارفع صورة التصميم اللي تبيه على القبعة'}
+                      <input type="file" accept="image/*" onChange={handleCapPhotoUpload} disabled={capUploading} className="hidden" />
+                    </label>
+                  )}
+                  <p className="text-xs text-foreground/45 mt-2">لازم ترفق صورة توضح الشكل المطلوب حتى نقدر ننفذه بدقة.</p>
+                </div>
+              )}
             </Section>
           )}
 

@@ -6,7 +6,7 @@ import RobeBuilder from './RobeBuilder';
 import JacketBuilder from './JacketBuilder';
 import { useCart } from '@/lib/cartContext';
 import { uploadFile } from '@/api/storage';
-import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, DATE_DESIGNS, SashCanvas } from './SashSimulatorWidget';
+import { FONTS, THREAD_COLORS, SASH_COLORS, SASH_DATES, DATE_DESIGNS } from './SashSimulatorWidget';
 import { ROBE_SHAPES, UNIVERSITIES, UNIVERSITY_SASH_LAYOUTS } from '@/lib/robeOptions';
 import { JACKET_CUSTOM_DESIGN_FEE } from '@/lib/jacketOptions';
 
@@ -26,7 +26,7 @@ export default function ProductConfigurator({ product }) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
-  const [capUploading, setCapUploading] = useState(false);
+  const [sashLayoutUploading, setSashLayoutUploading] = useState(false);
   const { addItem } = useCart();
 
   const [config, setConfig] = useState({
@@ -38,12 +38,18 @@ export default function ProductConfigurator({ product }) {
     size: product.sizes?.[0] || '',
     height: '',
     capType: 'دائري',
-    capDesignMode: 'regular',
-    capDesignPhoto: '',
+    capText: '',
+    capTasselColor: 'gold',
     thread: THREAD_COLORS[0],
     sash: SASH_COLORS[0],
     logoUrl: '',
     packaging: false,
+    // الوشاح (منتج مستقل)
+    leftText: '',
+    lineStyle: 'decorative',
+    lineColor: 'gold',
+    addPlainCap: false,
+    sashLayoutPhoto: '',
     // خيارات الروب التفصيلية
     robeShape: ROBE_SHAPES[0].id,
     sleeveStyle: 'plain',
@@ -82,15 +88,15 @@ export default function ProductConfigurator({ product }) {
     e.target.value = '';
   };
 
-  const handleCapPhotoUpload = async (e) => {
+  const handleSashLayoutUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setCapUploading(true);
+    setSashLayoutUploading(true);
     try {
       const { file_url } = await uploadFile({ file });
-      if (file_url) update('capDesignPhoto', file_url);
+      if (file_url) update('sashLayoutPhoto', file_url);
     } catch { /* لو فشل الرفع، الصورة تبقى فاضية والعميل يقدر يعيد المحاولة */ }
-    setCapUploading(false);
+    setSashLayoutUploading(false);
     e.target.value = '';
   };
 
@@ -103,7 +109,8 @@ export default function ProductConfigurator({ product }) {
     return shape?.addonKey ? (product[shape.addonKey] || 0) : 0;
   })();
   const capEmbroideryAddon = (product.has_robe_builder && product.has_cap && config.capEmbroideryDesign) ? (product.cap_embroidery_addon || 20) : 0;
-  const sashBackEmbroideryAddon = (product.has_robe_builder && config.addSash && config.sashBackEmbroidery) ? (product.sash_back_embroidery_addon || 30) : 0;
+  const sashBackEmbroideryAddon = ((product.has_robe_builder && config.addSash) || product.has_sash) && config.sashBackEmbroidery ? (product.sash_back_embroidery_addon || 20) : 0;
+  const plainCapAddon = (product.has_sash && config.addPlainCap) ? (product.plain_cap_addon || 30) : 0;
 
   const jacketCustomDesignCount = product.has_jacket_builder
     ? [(config.frontDesigns || []).includes(2), (config.leftSleeveDesigns || []).includes(5), (config.rightSleeveDesigns || []).includes(8)].filter(Boolean).length
@@ -112,23 +119,27 @@ export default function ProductConfigurator({ product }) {
 
   const addonPrice = (config.addSash ? (product.sash_addon || 50) : 0)
     + (config.packaging ? (product.packaging_addon || 15) : 0)
-    + robeShapeAddon + capEmbroideryAddon + sashBackEmbroideryAddon + jacketCustomDesignFee;
+    + robeShapeAddon + capEmbroideryAddon + sashBackEmbroideryAddon + jacketCustomDesignFee + plainCapAddon;
   const unitPrice = product.price + addonPrice;
   const totalPrice = unitPrice * qty;
 
   const handleAdd = () => {
     const summary = [
       config.addSash && `وشاح (${config.sash.name})`,
-      config.name && !product.has_jacket_builder && `الاسم: ${config.name}`,
-      `خط: ${config.font.name}`,
+      config.name && !product.has_jacket_builder && !product.has_sash && `الاسم: ${config.name}`,
+      product.has_sash && config.name && `الجهة اليمين: ${config.name}`,
+      product.has_sash && config.leftText && `الجهة اليسار: ${config.leftText}`,
+      product.has_sash && `نوع الخط: ${config.lineStyle === 'decorative' ? 'مزخرف' : 'بدون زخرفة'}`,
+      product.has_sash && `لون الخط: ${config.lineColor === 'gold' ? 'ذهبي' : 'فضي'}`,
       config.date && `التاريخ: ${config.date}`,
       config.dateDesign && `تصميم سنة مزخرف: ${config.dateDesign.label}`,
       config.size && `مقاس: ${config.size}`,
       config.height && `الطول المطلوب: ${config.height} سم`,
-      product.has_cap && `كاب: ${config.capType}`,
-      `تطريز: ${config.thread.name}`,
+      product.has_cap && config.capText && `النص: ${config.capText}`,
+      product.has_cap && `شكل القبعة: ${config.capType} | لون الهدب: ${config.capTasselColor === 'gold' ? 'ذهبي' : 'فضي'}`,
       config.logoUrl && 'مع شعار',
       config.packaging && 'تغليف فاخر',
+      plainCapAddon > 0 && `إضافة قبعة سادة (+${plainCapAddon} ريال)`,
       // خيارات الروب التفصيلية
       product.has_university && `الجامعة: ${UNIVERSITIES.find(u => u.id === config.university)?.label}`,
       product.has_university && `تصميم وشاح الجامعة: ${UNIVERSITY_SASH_LAYOUTS.find(l => l.id === config.universitySashLayout)?.label}`,
@@ -136,7 +147,7 @@ export default function ProductConfigurator({ product }) {
       product.has_robe_builder && `شكل الروب: ${ROBE_SHAPES.find(s => s.id === config.robeShape)?.label}`,
       product.has_robe_builder && `موديل الكم: ${config.sleeveStyle}`,
       product.has_robe_builder && config.addSash && `شكل الوشاح: ${config.sashShape} | طرف الوشاح: ${config.sashTrim} | اتجاه التطريز: ${config.embroideryDirection}`,
-      sashBackEmbroideryAddon > 0 && 'تطريز إضافي بخلف الوشاح',
+      sashBackEmbroideryAddon > 0 && `تطريز إضافي بخلف الوشاح (+${sashBackEmbroideryAddon} ريال)`,
       capEmbroideryAddon > 0 && `تطريز القبعة: تصميم رقم ${config.capEmbroideryDesign}`,
     ].filter(Boolean).join(' | ');
 
@@ -153,15 +164,14 @@ export default function ProductConfigurator({ product }) {
       customDesignFee: jacketCustomDesignFee > 0 ? `${jacketCustomDesignFee} ريال (${jacketCustomDesignCount} تصميم خاص)` : undefined,
     }) : null;
 
-    // تفاصيل تصميم القبعة (لو مخصص) — نفس أسلوب الجاكيت حتى تظهر الصورة كصورة قابلة للفتح
-    const capSegment = (product.has_cap && config.capDesignMode === 'custom') ? JSON.stringify({
-      capDesign: 'مخصص (صورة من العميل)',
-      capDesignPhoto: config.capDesignPhoto || undefined,
+    // صورة توضيح ترتيب الكلام على الوشاح (لو رفعها العميل) — JSON مستقل حتى تظهر كصورة قابلة للفتح
+    const sashSegment = (product.has_sash && config.sashLayoutPhoto) ? JSON.stringify({
+      sashLayoutPhoto: config.sashLayoutPhoto,
     }) : null;
 
-    const fullSummary = [summary, jacketSegment, capSegment].filter(Boolean).join(' | ');
+    const fullSummary = [summary, jacketSegment, sashSegment].filter(Boolean).join(' | ');
 
-    addItem({ ...product, id: `${product.id}-${Date.now()}`, price: unitPrice, qty, size: config.size, sash_config: fullSummary });
+    addItem({ ...product, product_id: product.id, id: `${product.id}-${Date.now()}`, price: unitPrice, qty, size: config.size, sash_config: fullSummary });
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };
@@ -175,28 +185,7 @@ export default function ProductConfigurator({ product }) {
   return (
     <div>
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-        {product.has_sash ? (
-          <div className="space-y-3 lg:sticky lg:top-24">
-            <div className="card-soft overflow-hidden bg-gradient-to-b from-secondary/20 to-card p-2 sm:p-4">
-              <SashCanvas
-                text={config.name}
-                date={config.date}
-                fontStyle={config.font.style}
-                fontWeight={config.font.weight}
-                sizeScale={config.font.scale}
-                sashColor={config.sash.value}
-                threadColor={config.thread.value}
-                threadGlow={config.thread.glow}
-                fontSize={26}
-                logoUrl={config.logoUrl}
-                dateImgUrl={config.dateDesign?.img}
-              />
-            </div>
-            <p className="text-center text-xs text-foreground/50">معاينة حية على صورة المنتج الحقيقية</p>
-          </div>
-        ) : (
-          <ProductGallery images={gallery} name={product.name} discount={discount} product={product} previewConfig={config} />
-        )}
+        <ProductGallery images={gallery} name={product.name} discount={discount} product={product} previewConfig={config} />
 
         <div>
           <div className="flex items-center gap-1 mb-2">
@@ -242,13 +231,6 @@ export default function ProductConfigurator({ product }) {
             </Section>
           )}
 
-          <Section label="نوع الخط" required>
-            <div className="flex flex-wrap gap-2">
-              {FONTS.map(f => (
-                <button key={f.id} onClick={() => update('font', f)} style={{ fontFamily: f.style }} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.font.id === f.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>{f.name}</button>
-              ))}
-            </div>
-          </Section>
 
           {product.has_date && (
             <Section label="إضافة تاريخ" required>
@@ -273,20 +255,58 @@ export default function ProductConfigurator({ product }) {
           )}
 
           {product.has_sash && (
-            <Section label="شعار (اختياري)">
-              {config.logoUrl ? (
-                <div className="flex items-center gap-3">
-                  <img src={config.logoUrl} alt="" className="w-12 h-12 rounded-lg object-contain border border-border bg-secondary/30" />
-                  <button type="button" onClick={() => update('logoUrl', '')} className="p-2 rounded-lg text-red-500 hover:bg-red-50"><X className="w-4 h-4" /></button>
+            <>
+              <Section label="الجهة اليمين ( يُفضل كتابة إسمك فقط )" required>
+                <input value={config.name} onChange={e => update('name', e.target.value)} placeholder="مثال: فاطمه عبدالله" className="w-full px-4 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </Section>
+
+              <Section label="الجهة اليسار ( ممكن تكتب عام التخرج وتخصصك وسوف يتم ترتيبها بالطريقة المناسبة )" required>
+                <input value={config.leftText} onChange={e => update('leftText', e.target.value)} placeholder="مثال: ادارة أعمال جامعة الملك فيصل 2025" className="w-full px-4 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
+              </Section>
+
+              <Section label="نوع الخط" required>
+                <div className="flex gap-2">
+                  <button onClick={() => update('lineStyle', 'decorative')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.lineStyle === 'decorative' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>مزخرف</button>
+                  <button onClick={() => update('lineStyle', 'plain')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.lineStyle === 'plain' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>بدون زخرفة</button>
                 </div>
-              ) : (
-                <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
-                  {logoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {logoUploading ? 'جارٍ الرفع...' : 'ارفع شعار جامعتك'}
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} disabled={logoUploading} className="hidden" />
-                </label>
-              )}
-            </Section>
+              </Section>
+
+              <Section label="لون الخط" required>
+                <div className="flex gap-2">
+                  <button onClick={() => update('lineColor', 'gold')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.lineColor === 'gold' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>ذهبي</button>
+                  <button onClick={() => update('lineColor', 'silver')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.lineColor === 'silver' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>فضي</button>
+                </div>
+              </Section>
+
+              <Section label="الاضافات" required>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => update('addPlainCap', true)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.addPlainCap ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>اضافة قبعة سادة (+{product.plain_cap_addon || 30} )</button>
+                  <button onClick={() => update('addPlainCap', false)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${!config.addPlainCap ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>فقط وشاح تخرج</button>
+                </div>
+              </Section>
+
+              <Section label="اضافة تطريز على الظهر ( خلفي )" required>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => update('sashBackEmbroidery', false)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${!config.sashBackEmbroidery ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>بدون تطريز خلفي</button>
+                  <button onClick={() => update('sashBackEmbroidery', true)} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.sashBackEmbroidery ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>مع تطريز خلفي (+{product.sash_back_embroidery_addon || 20} )</button>
+                </div>
+              </Section>
+
+              <Section label="ارفع صورة توضح لنا ترتيب الكلام على الوشاح (اختياري)">
+                {config.sashLayoutPhoto ? (
+                  <div className="flex items-center gap-3">
+                    <img src={config.sashLayoutPhoto} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
+                    <button type="button" onClick={() => update('sashLayoutPhoto', '')} className="p-2 rounded-lg text-red-500 hover:bg-red-50"><X className="w-4 h-4" /></button>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
+                    {sashLayoutUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {sashLayoutUploading ? 'جارٍ الرفع...' : 'ارفع صورة'}
+                    <input type="file" accept="image/*" onChange={handleSashLayoutUpload} disabled={sashLayoutUploading} className="hidden" />
+                  </label>
+                )}
+              </Section>
+            </>
           )}
 
           {product.sizes?.length > 0 && (
@@ -326,44 +346,19 @@ export default function ProductConfigurator({ product }) {
           )}
 
           {product.has_cap && (
-            <Section label="تصميم القبعة">
-              <div className="flex gap-2 mb-3">
-                <button onClick={() => { update('capDesignMode', 'regular'); update('capDesignPhoto', ''); }} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capDesignMode !== 'custom' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>عادي</button>
-                <button onClick={() => update('capDesignMode', 'custom')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capDesignMode === 'custom' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>اختيار تصميم</button>
-              </div>
-
-              {config.capDesignMode === 'custom' && (
-                <div className="rounded-xl border border-border bg-secondary/30 p-3">
-                  {config.capDesignPhoto ? (
-                    <div>
-                      <p className="text-xs font-bold text-green-600 flex items-center gap-1.5 mb-2"><Check className="w-3.5 h-3.5" /> تم رفع صورتك بنجاح — هذي هي الصورة اللي بنعتمدها:</p>
-                      <div className="flex items-center gap-3">
-                        <a href={config.capDesignPhoto} target="_blank" rel="noreferrer">
-                          <img src={config.capDesignPhoto} alt="صورة تصميم القبعة" className="w-20 h-20 rounded-lg object-cover border-2 border-primary" />
-                        </a>
-                        <button type="button" onClick={() => update('capDesignPhoto', '')} className="text-xs text-red-500 font-medium inline-flex items-center gap-1 hover:underline"><X className="w-3.5 h-3.5" /> إزالة الصورة ورفع صورة أخرى</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <label className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-primary/30 text-primary text-xs font-medium cursor-pointer hover:bg-primary/5 transition-colors">
-                      {capUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                      {capUploading ? 'جارٍ رفع صورتك...' : 'ارفع صورة التصميم اللي تبيه على القبعة'}
-                      <input type="file" accept="image/*" onChange={handleCapPhotoUpload} disabled={capUploading} className="hidden" />
-                    </label>
-                  )}
-                  <p className="text-xs text-foreground/45 mt-2">لازم ترفق صورة توضح الشكل المطلوب حتى نقدر ننفذه بدقة.</p>
-                </div>
-              )}
+            <Section label="الإسم + العبارة المطلوبة + عام التخرج" required>
+              <input value={config.capText} onChange={e => update('capText', e.target.value)} placeholder="مثال: سارة أحمد - إدارة أعمال - 2025" className="w-full px-4 py-2.5 rounded-xl border border-border bg-secondary/40 text-sm focus:border-primary focus:outline-none" />
             </Section>
           )}
 
-          <Section label="لون التطريز">
-            <div className="flex gap-2">
-              {THREAD_COLORS.map(c => (
-                <button key={c.value} onClick={() => update('thread', c)} className={`w-9 h-9 rounded-full border-2 transition-all ${config.thread.value === c.value ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-border'}`} style={{ background: c.value }} title={c.name} />
-              ))}
-            </div>
-          </Section>
+          {product.has_cap && (
+            <Section label="لون هدب القبعة ( خيط القبعة )" required>
+              <div className="flex gap-2">
+                <button onClick={() => update('capTasselColor', 'gold')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capTasselColor === 'gold' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>ذهبي</button>
+                <button onClick={() => update('capTasselColor', 'silver')} className={`px-4 py-2.5 rounded-xl border text-sm transition-all ${config.capTasselColor === 'silver' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40'}`}>فضي</button>
+              </div>
+            </Section>
+          )}
 
           {config.addSash && (
             <Section label="لون الوشاح">

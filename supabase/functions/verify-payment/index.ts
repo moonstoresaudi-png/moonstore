@@ -55,7 +55,7 @@ serve(async (req) => {
     // 1) اجلب الطلب الحقيقي من قاعدة البيانات (المبلغ والحالة) — لا نثق بأي شيء يجي من المتصفح
     const { data: order, error: orderErr } = await supabase
       .from('orders')
-      .select('id, total, status, payment_method')
+      .select('id, total, status, payment_method, discount_code')
       .eq('id', order_id)
       .single();
 
@@ -112,6 +112,15 @@ serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // 4.5) استهلاك كود الخصم فعليًا الآن (بعد تأكد الدفع 100%)، حتى لا يُهدر الاستخدام على طلبات
+    // ما اكتمل دفعها. لو فشل الاستهلاك (مثلاً انتهت الكمية بالضبط بنفس اللحظة)، لا نوقف تأكيد
+    // الدفع — العميل دفع فعليًا ولا يصح نرفض طلبه لخلل بسيط بعدّاد الكود.
+    if (order.discount_code) {
+      try {
+        await supabase.rpc('redeem_discount_code', { p_code: order.discount_code });
+      } catch { /* لا نوقف تأكيد الدفع بسبب هذا */ }
     }
 
     // 5) إصدار بوليصة الشحن تلقائيًا عند Tryoto لهذا الطلب المدفوع — ننتظرها فعليًا

@@ -14,17 +14,18 @@ const STAGES = [
 ];
 
 export default function OrderTracking() {
-  const [query, setQuery] = useState('');
+  const [orderNumber, setOrderNumber] = useState('');
+  const [phone, setPhone] = useState('');
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!orderNumber.trim() || !phone.trim()) return;
     setLoading(true); setSearched(true);
     try {
-      const results = await trackOrder(query.trim());
+      const results = await trackOrder(orderNumber.trim(), phone.trim());
       setOrder(results.length > 0 ? results[0] : null);
     } catch { setOrder(null); }
     setLoading(false);
@@ -39,13 +40,16 @@ export default function OrderTracking() {
         <div className="text-center mb-8">
           <span className="chip bg-accent/40 text-primary mb-3">تتبع شحنتك</span>
           <h1 className="font-heading text-3xl sm:text-4xl font-extrabold">تتبع <span className="text-grad-violet">طلبك</span></h1>
-          <p className="text-foreground/60 text-sm mt-2">أدخل رقم الطلب أو رقم جوالك لمعرفة حالة الشحنة</p>
+          <p className="text-foreground/60 text-sm mt-2">أدخل رقم الطلب ورقم الجوال المسجّل به الطلب لمعرفة حالة الشحنة</p>
         </div>
 
-        <form onSubmit={handleSearch} className="flex gap-2.5 mb-8">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2.5 mb-8">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
-            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="رقم الطلب أو رقم الجوال" className="w-full pr-11 pl-4 py-3.5 rounded-full border border-border bg-card focus:border-primary focus:outline-none" />
+            <input value={orderNumber} onChange={e => setOrderNumber(e.target.value)} placeholder="رقم الطلب (مثال: MS-260101120000)" className="w-full pr-11 pl-4 py-3.5 rounded-full border border-border bg-card focus:border-primary focus:outline-none" />
+          </div>
+          <div className="relative flex-1">
+            <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="رقم الجوال المسجّل بالطلب" dir="ltr" className="w-full px-4 py-3.5 rounded-full border border-border bg-card focus:border-primary focus:outline-none text-right" />
           </div>
           <button type="submit" disabled={loading} className="px-6 py-3.5 btn-primary disabled:opacity-50">تتبع</button>
         </form>

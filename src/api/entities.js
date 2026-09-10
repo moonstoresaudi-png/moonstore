@@ -99,9 +99,9 @@ export const entities = {
   CartLead: createEntity('cart_leads'),
 };
 
-// تتبّع طلب بأمان (زائر بدون تسجيل دخول) عبر رقم الطلب أو الجوال
-export async function trackOrder(query) {
-  const { data, error } = await supabase.rpc('track_order', { p_query: query });
+// تتبّع طلب بأمان (زائر بدون تسجيل دخول) — لازم رقم الطلب ورقم الجوال معًا لمنع كشف طلبات عملاء آخرين
+export async function trackOrder(orderNumber, phone) {
+  const { data, error } = await supabase.rpc('track_order', { p_order_number: orderNumber, p_phone: phone });
   if (error) throw error;
   return withCreatedDateList(data);
 }
@@ -109,6 +109,14 @@ export async function trackOrder(query) {
 // التحقق من صلاحية كود خصم قبل تطبيقه على الطلب
 export async function validateDiscountCode(code) {
   const { data, error } = await supabase.rpc('validate_discount_code', { p_code: code });
+  if (error) throw error;
+  return data && data.length ? data[0] : null;
+}
+
+// استهلاك كود الخصم فعليًا (يزيد uses_count بشكل ذرّي) — يُستدعى فقط عند تأكيد الطلب نهائيًا،
+// لا عند مجرد "تطبيق الكود"، حتى لا يُهدر الاستخدام على طلبات لم تكتمل
+export async function redeemDiscountCode(code) {
+  const { data, error } = await supabase.rpc('redeem_discount_code', { p_code: code });
   if (error) throw error;
   return data && data.length ? data[0] : null;
 }

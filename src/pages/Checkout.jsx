@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/lib/cartContext';
-import { entities, validateDiscountCode } from '@/api/entities';
+import { entities, validateDiscountCode, redeemDiscountCode } from '@/api/entities';
 import { useAuth } from '@/lib/AuthContext';
 import { useStoreSettings } from '@/lib/SettingsContext';
 import MoyasarPayment from '@/components/MoyasarPayment';
@@ -69,6 +69,7 @@ export default function Checkout() {
   const createOrder = (status = 'new') => {
     const orderNum = orderNumber || generateOrderNum();
     if (!orderNumber) setOrderNumber(orderNum);
+    const distinctProductIds = [...new Set(items.map(i => i.product_id).filter(Boolean))];
     return entities.Order.create({
       user_id: user?.id || null,
       order_number: orderNum,
@@ -82,6 +83,7 @@ export default function Checkout() {
       lng: form.lng,
       country: form.country,
       product_name: items.map(i => i.name).join(', '),
+      product_id: distinctProductIds.length === 1 ? distinctProductIds[0] : null,
       quantity: items.reduce((s, i) => s + i.qty, 0),
       total: grandTotal,
       cost: items.reduce((s, i) => s + (i.cost || 0) * i.qty, 0),
@@ -99,6 +101,18 @@ export default function Checkout() {
     e.preventDefault();
     setSubmitting(true);
     try {
+      // نستهلك كود الخصم فقط الآن (لحظة تأكيد الطلب فعليًا) — لو صار سباق بين طلبين وانتهت الكمية
+      // بينهما، نلغي الخصم بدل ما نأكد سعر غلط
+      if (discount) {
+        const redeemed = await redeemDiscountCode(discount.code).catch(() => null);
+        if (!redeemed) {
+          setDiscount(null);
+          setSubmitting(false);
+          setStep(1);
+          setDiscountError('عذرًا، كود الخصم انتهت صلاحيته أو استُهلك بالكامل الآن — تم إلغاؤه، يرجى مراجعة الإجمالي والمتابعة.');
+          return;
+        }
+      }
       const order = await createOrder('new');
       setOrderId(order.id);
       setStep(3);

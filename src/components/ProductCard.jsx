@@ -53,7 +53,7 @@ export default function ProductCard({ product }) {
         </div>
 
         <button
-          onClick={e => { e.preventDefault(); addItem(product); }}
+          onClick={e => { e.preventDefault(); addItem({ ...product, product_id: product.id }); }}
           className="mt-3 w-full py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-4 h-4" /> أضف للسلة

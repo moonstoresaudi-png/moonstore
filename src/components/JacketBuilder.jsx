@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Loader2, Info, Camera } from 'lucide-react';
+import { Loader2, Info, Camera, Check } from 'lucide-react';
 import { uploadFile } from '@/api/storage';
 import {
   JACKET_FRONT_DESIGNS, JACKET_LEFT_SLEEVE_DESIGNS, JACKET_RIGHT_SLEEVE_DESIGNS, JACKET_BACK_DESIGN,
@@ -24,9 +24,17 @@ function DesignTile({ option, selected, photo, uploading, onToggle, onUpload }) 
   return (
     <div className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 transition-all ${selected ? 'border-primary' : 'border-border'} ${photo ? 'bg-card' : selected ? 'bg-primary/10' : 'bg-secondary/40 hover:border-primary/40'}`}>
       {photo ? (
-        <a href={photo} target="_blank" rel="noreferrer" className="absolute inset-0" title="اضغط لمشاهدة الصورة بحجمها الكامل">
+        <label className="absolute inset-0 cursor-pointer group" title="اضغط لتغيير الصورة">
           <img src={photo} alt={`تصميم ${option.id}`} className="w-full h-full object-cover" />
-        </a>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+            {uploading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-white" />
+            ) : (
+              <span className="opacity-0 group-hover:opacity-100 text-[9px] text-white font-bold transition-opacity">تغيير الصورة</span>
+            )}
+          </div>
+          <input type="file" accept="image/*" className="hidden" onChange={onUpload} disabled={uploading} />
+        </label>
       ) : selected ? (
         <label className="absolute inset-0 flex flex-col items-center justify-center gap-1 cursor-pointer">
           {uploading ? <Loader2 className="w-5 h-5 animate-spin text-primary" /> : <Camera className="w-5 h-5 text-primary" />}
@@ -49,11 +57,11 @@ function DesignTile({ option, selected, photo, uploading, onToggle, onUpload }) 
         {option.id}
       </button>
 
-      {/* زر إزالة الصورة فقط (يبقى التصميم مختارًا) */}
-      {photo && (
-        <button type="button" onClick={() => onUpload(null, true)} title="إزالة الصورة" className="absolute top-1 left-1 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center z-10">
-          <X className="w-3 h-3" />
-        </button>
+      {/* علامة صح تؤكد إن الصورة رُفعت بنجاح */}
+      {photo && !uploading && (
+        <div title="تم رفع الصورة" className="absolute top-1 left-1 w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center z-10 shadow">
+          <Check className="w-3 h-3" />
+        </div>
       )}
 
       {/* شريط السعر أسفل المربع لما فيه صورة، عشان يبقى واضح حتى بعد الرفع */}

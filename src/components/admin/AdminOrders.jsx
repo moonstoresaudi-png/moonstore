@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { entities } from '@/api/entities';
 import { supabase } from '@/lib/supabaseClient';
-import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download, Printer, RefreshCw, Truck, AlertTriangle, FileText } from 'lucide-react';
+import { Inbox, DollarSign, Clock, CheckCircle2, Archive, ArrowDownUp, ArchiveRestore, ChevronDown, Sparkles, Download, Printer, RefreshCw, Truck, AlertTriangle, FileText, ClipboardList } from 'lucide-react';
 import { useStoreSettings } from '@/lib/SettingsContext';
 import InvoiceDocument from '@/components/InvoiceDocument';
+import OrderWorksheetDocument from '@/components/OrderWorksheetDocument';
 
 const STATUS = {
   pending: { label: 'قيد الانتظار', cls: 'bg-gray-100 text-gray-700' },
@@ -154,6 +155,7 @@ export default function AdminOrders() {
   const [sortDesc, setSortDesc] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [invoiceOrder, setInvoiceOrder] = useState(null);
+  const [worksheetOrder, setWorksheetOrder] = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -297,6 +299,7 @@ export default function AdminOrders() {
                             </button>
                           )}
                           <button onClick={() => setInvoiceOrder(o)} title="تحميل الفاتورة" className="p-1.5 rounded-lg text-foreground/50 hover:bg-secondary hover:text-primary"><FileText className="w-4 h-4" /></button>
+                          <button onClick={() => setWorksheetOrder(o)} title="تحميل ورقة تجهيز الطلب" className="p-1.5 rounded-lg text-foreground/50 hover:bg-secondary hover:text-primary"><ClipboardList className="w-4 h-4" /></button>
                           {o.status === 'delivered' ? <button onClick={() => archive(o.id)} title="أرشفة" className="p-1.5 rounded-lg text-foreground/40 hover:bg-secondary"><Archive className="w-4 h-4" /></button>
                             : o.status === 'archived' ? <button onClick={() => unarchive(o.id)} title="استرجاع" className="p-1.5 rounded-lg text-primary hover:bg-secondary"><ArchiveRestore className="w-4 h-4" /></button>
                             : null}
@@ -319,6 +322,7 @@ export default function AdminOrders() {
         )}
       </div>
       {invoiceOrder && <InvoiceDocument order={invoiceOrder} settings={settings} onClose={() => setInvoiceOrder(null)} />}
+      {worksheetOrder && <OrderWorksheetDocument order={worksheetOrder} onClose={() => setWorksheetOrder(null)} />}
     </div>
   );
 }

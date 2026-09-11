@@ -319,7 +319,7 @@ export default function ProductConfigurator({ product }) {
             </Section>
           )}
 
-          {product.sizes?.length > 0 && (
+          {product.sizes?.length > 0 && !product.has_jacket_builder && (
             <Section label="طولك (سم)">
               <input
                 type="number"

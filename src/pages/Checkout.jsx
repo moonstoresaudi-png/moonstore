@@ -28,6 +28,7 @@ export default function Checkout() {
   const [orderId, setOrderId] = useState(null);
   const [orderNumber, setOrderNumber] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [discountInput, setDiscountInput] = useState('');
   const [discount, setDiscount] = useState(null); // { code, discount_percent }
   const [discountError, setDiscountError] = useState('');
@@ -100,6 +101,7 @@ export default function Checkout() {
   const handleCodSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError('');
     try {
       // نستهلك كود الخصم فقط الآن (لحظة تأكيد الطلب فعليًا) — لو صار سباق بين طلبين وانتهت الكمية
       // بينهما، نلغي الخصم بدل ما نأكد سعر غلط
@@ -117,7 +119,9 @@ export default function Checkout() {
       setOrderId(order.id);
       setStep(3);
       setIsOpen(false);
-    } catch {}
+    } catch (err) {
+      setSubmitError(err?.message || 'تعذّر إنشاء الطلب، حاول مرة ثانية أو تواصل معنا عبر واتساب.');
+    }
     setSubmitting(false);
   };
 
@@ -154,11 +158,17 @@ export default function Checkout() {
       setCheckingAddress(false);
     }
     setNationalAddressError('');
+    setSubmitError('');
     setStep(2);
     // نحفظه كـ "pending" مؤقتًا لتتبع السلات المتروكة إن لم يكمل الدفع
     createOrder('pending').then(order => {
       localStorage.setItem('ms_pending_order', JSON.stringify({ id: order.id, order_number: order.order_number }));
-    }).catch(() => {});
+    }).catch(err => {
+      // مهم: لو فشل إنشاء الطلب هنا، الدفع لن يكتمل أبدًا لاحقًا لأن ما فيه طلب مرتبط به —
+      // نرجّع العميل لنفس الخطوة ونوضح له السبب بدل ما يدفع بدون أي طلب فعلي بالخلف
+      setStep(1);
+      setSubmitError(err?.message || 'تعذّر إنشاء الطلب قبل الدفع — تأكد من البيانات وحاول مرة ثانية.');
+    });
   };
 
   // التحقق من نتيجة الدفع عند رجوع الزائر من صفحة مويسر
@@ -295,6 +305,11 @@ export default function Checkout() {
             {/* Step 1: Shipping */}
             {step === 1 && (
               <form onSubmit={handleFormSubmit} className="card-soft p-5 sm:p-6 space-y-4">
+                {submitError && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                    {submitError}
+                  </div>
+                )}
                 <h2 className="font-heading font-bold text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-primary" /> بيانات الشحن</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div><label className="text-xs font-medium text-foreground/60 mb-1 block">الاسم الكامل *</label><input required value={form.customer_name} onChange={e => setForm({ ...form, customer_name: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:outline-none" /></div>
@@ -357,6 +372,11 @@ export default function Checkout() {
             {/* Step 2: Payment */}
             {step === 2 && (
               <div className="space-y-5">
+                {submitError && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
+                    {submitError}
+                  </div>
+                )}
                 <div className="card-soft p-5 sm:p-6">
                   <h2 className="font-heading font-bold text-lg mb-4">طريقة الدفع</h2>
                   <div className="grid grid-cols-2 gap-3 mb-5">

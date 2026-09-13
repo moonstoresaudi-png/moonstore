@@ -41,33 +41,55 @@ function applyFilters(query, filters = {}) {
   return q;
 }
 
+// بعض المتصفحات تكون بطيئة شوي باستعادة جلسة الدخول عند فتح الصفحة، فيصير أول طلب بيانات
+// (خصوصًا بلوحة الأدمين اللي فيها عدة مكونات تجيب بيانات بنفس اللحظة) يوصل قبل ما ترتبط
+// الجلسة فعليًا، ويرجع 401 لحظي بدون أي سبب حقيقي. هذي الدالة تعيد المحاولة مرة وحدة بعد
+// فاصل بسيط بدل ما تفشل مباشرة.
+async function withAuthRetry(run) {
+  try {
+    return await run();
+  } catch (err) {
+    const status = err?.status || err?.code;
+    const looksLikeAuthGlitch = status === 401 || status === '401' || /jwt|401/i.test(err?.message || '');
+    if (!looksLikeAuthGlitch) throw err;
+    await new Promise(r => setTimeout(r, 500));
+    return run();
+  }
+}
+
 function createEntity(table) {
   return {
     async list(sort = '-created_date', limit = 50) {
-      let q = supabase.from(table).select('*');
-      const s = parseSort(sort);
-      if (s) q = q.order(s.column, { ascending: s.ascending });
-      if (limit) q = q.limit(limit);
-      const { data, error } = await q;
-      if (error) throw error;
-      return withCreatedDateList(data);
+      return withAuthRetry(async () => {
+        let q = supabase.from(table).select('*');
+        const s = parseSort(sort);
+        if (s) q = q.order(s.column, { ascending: s.ascending });
+        if (limit) q = q.limit(limit);
+        const { data, error } = await q;
+        if (error) throw error;
+        return withCreatedDateList(data);
+      });
     },
 
     async filter(filters = {}, sort = '-created_date', limit = 50) {
-      let q = supabase.from(table).select('*');
-      q = applyFilters(q, filters);
-      const s = parseSort(sort);
-      if (s) q = q.order(s.column, { ascending: s.ascending });
-      if (limit) q = q.limit(limit);
-      const { data, error } = await q;
-      if (error) throw error;
-      return withCreatedDateList(data);
+      return withAuthRetry(async () => {
+        let q = supabase.from(table).select('*');
+        q = applyFilters(q, filters);
+        const s = parseSort(sort);
+        if (s) q = q.order(s.column, { ascending: s.ascending });
+        if (limit) q = q.limit(limit);
+        const { data, error } = await q;
+        if (error) throw error;
+        return withCreatedDateList(data);
+      });
     },
 
     async get(id) {
-      const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
-      if (error) throw error;
-      return withCreatedDate(data);
+      return withAuthRetry(async () => {
+        const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
+        if (error) throw error;
+        return withCreatedDate(data);
+      });
     },
 
     async create(payload) {

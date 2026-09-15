@@ -42,7 +42,7 @@ export default function Checkout() {
   const discountAmount = discount ? Math.round((total * discount.discount_percent) / 100) : 0;
   const grandTotal = Math.max(0, total - discountAmount) + shippingCost + codFee;
 
-  const generateOrderNum = () => `MS-${Date.now().toString().slice(-8)}`;
+  const generateOrderNum = () => `MS-${Date.now().toString().slice(-8)}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
 
   const applyDiscount = async () => {
     if (!discountInput.trim()) return;
@@ -153,6 +153,8 @@ export default function Checkout() {
       setStep(3);
       setIsOpen(false);
     } catch (err) {
+      // نمسح رقم الطلب المولّد عشان أي إعادة محاولة تاخذ رقم جديد بدل ما تتعارض مع نفس الرقم
+      setOrderNumber(null);
       setSubmitError(err?.message || 'تعذّر إنشاء الطلب، حاول مرة ثانية أو تواصل معنا عبر واتساب.');
     }
     setSubmitting(false);
@@ -199,6 +201,7 @@ export default function Checkout() {
     }).catch(err => {
       // مهم: لو فشل إنشاء الطلب هنا، الدفع لن يكتمل أبدًا لاحقًا لأن ما فيه طلب مرتبط به —
       // نرجّع العميل لنفس الخطوة ونوضح له السبب بدل ما يدفع بدون أي طلب فعلي بالخلف
+      setOrderNumber(null);
       setStep(1);
       setSubmitError(err?.message || 'تعذّر إنشاء الطلب قبل الدفع — تأكد من البيانات وحاول مرة ثانية.');
     });

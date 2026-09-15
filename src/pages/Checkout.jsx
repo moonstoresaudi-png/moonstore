@@ -98,6 +98,39 @@ export default function Checkout() {
     });
   };
 
+  const handleTabbyPay = async () => {
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      // الطلب المعلّق (pending) أُنشئ بالفعل عند الانتقال لخطوة الدفع
+      const pendingRaw = localStorage.getItem('ms_pending_order');
+      if (!pendingRaw) {
+        setSubmitError('تعذّر إيجاد الطلب — ارجع لخطوة الشحن وحاول مرة ثانية.');
+        setSubmitting(false);
+        setStep(1);
+        return;
+      }
+      const pending = JSON.parse(pendingRaw);
+
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-tabby-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+        body: JSON.stringify({ order_id: pending.id, origin: window.location.origin }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.web_url) {
+        setSubmitError(data?.error || 'تعذّر بدء الدفع عبر تابي — جرّب طريقة دفع ثانية.');
+        setSubmitting(false);
+        return;
+      }
+      window.location.href = data.web_url;
+    } catch (err) {
+      setSubmitError(err?.message || 'تعذّر الاتصال بتابي، حاول مرة ثانية.');
+      setSubmitting(false);
+    }
+  };
+
   const handleCodSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -176,6 +209,41 @@ export default function Checkout() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get('status');
     const paymentId = params.get('id');
+    const tabbyStatus = params.get('tabby');
+    const tabbyOrderId = params.get('order_id');
+
+    if (tabbyStatus && tabbyOrderId) {
+      if (tabbyStatus === 'success') {
+        // مهم: نفس فلسفة مويسر — لا نثق بالرابط وحده، نتحقق سيرفر-لسيرفر مع تابي فعليًا
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-tabby-payment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+          body: JSON.stringify({ order_id: tabbyOrderId }),
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result.ok) {
+              const pendingRaw = localStorage.getItem('ms_pending_order');
+              const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+              setOrderId(tabbyOrderId);
+              setOrderNumber(pending?.order_number || null);
+              setStep(3);
+              setIsOpen(false);
+              localStorage.removeItem('ms_pending_order');
+            } else {
+              setSubmitError('لم يكتمل الدفع عبر تابي — حاول مرة ثانية.');
+              setStep(2);
+            }
+          })
+          .catch(() => { setSubmitError('تعذّر التحقق من الدفع عبر تابي.'); setStep(2); });
+      } else {
+        setSubmitError(tabbyStatus === 'cancel' ? 'تم إلغاء الدفع عبر تابي.' : 'تعذّر إتمام الدفع عبر تابي.');
+        setStep(2);
+      }
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
     if (!status || !paymentId) return;
 
     const pendingRaw = localStorage.getItem('ms_pending_order');
@@ -227,7 +295,7 @@ export default function Checkout() {
           <div className="card-soft p-5 mb-6 inline-block">
             <p className="text-xs text-foreground/55">رقم الطلب</p>
             <p className="font-display font-bold text-xl text-primary">#{orderNumber || orderId?.slice(-6) || '---'}</p>
-            <p className="text-xs text-foreground/55 mt-2">طريقة الدفع: {paymentMethod === 'card' ? 'بطاقة' : 'الدفع عند الاستلام'}</p>
+            <p className="text-xs text-foreground/55 mt-2">طريقة الدفع: {paymentMethod === 'card' ? 'بطاقة' : paymentMethod === 'tabby' ? 'تابي (4 دفعات)' : 'الدفع عند الاستلام'}</p>
             <p className="text-sm font-bold text-primary mt-1">الإجمالي: {grandTotal} </p>
           </div>
           <div className="flex gap-3 justify-center flex-wrap">
@@ -379,11 +447,16 @@ export default function Checkout() {
                 )}
                 <div className="card-soft p-5 sm:p-6">
                   <h2 className="font-heading font-bold text-lg mb-4">طريقة الدفع</h2>
-                  <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="grid grid-cols-3 gap-3 mb-5">
                     <button onClick={() => setPaymentMethod('card')} className={`p-4 rounded-xl border-2 text-center transition-all ${paymentMethod === 'card' ? 'border-primary bg-primary/5' : 'border-border'}`}>
                       <CreditCard className={`w-7 h-7 mx-auto mb-1.5 ${paymentMethod === 'card' ? 'text-primary' : 'text-foreground/50'}`} />
                       <p className="text-sm font-bold">بطاقة ائتمان</p>
                       <p className="text-xs text-foreground/50">فيزا • مدى • آبل باي</p>
+                    </button>
+                    <button onClick={() => setPaymentMethod('tabby')} className={`p-4 rounded-xl border-2 text-center transition-all ${paymentMethod === 'tabby' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                      <span className={`block h-7 leading-7 mb-1.5 font-extrabold text-base ${paymentMethod === 'tabby' ? 'text-[#3BC6A8]' : 'text-foreground/50'}`}>tabby</span>
+                      <p className="text-sm font-bold">قسّمها على 4</p>
+                      <p className="text-xs text-foreground/50">بدون فوائد</p>
                     </button>
                     <button onClick={() => setPaymentMethod('cod')} className={`p-4 rounded-xl border-2 text-center transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-border'}`}>
                       <Banknote className={`w-7 h-7 mx-auto mb-1.5 ${paymentMethod === 'cod' ? 'text-primary' : 'text-foreground/50'}`} />
@@ -392,13 +465,24 @@ export default function Checkout() {
                     </button>
                   </div>
 
-                  {paymentMethod === 'card' ? (
+                  {paymentMethod === 'card' && (
                     <MoyasarPayment
                       amount={grandTotal}
                       description={`طلب ${orderNumber || ''} — Moon Store`}
                       callbackUrl={window.location.origin + '/checkout'}
                     />
-                  ) : (
+                  )}
+                  {paymentMethod === 'tabby' && (
+                    <div>
+                      <div className="p-4 rounded-xl bg-secondary/40 border border-border mb-4">
+                        <p className="text-sm text-foreground/70">بنحوّلك لتابي تكمل الدفع بأمان، وترجع هنا تلقائيًا بعد التأكيد. المبلغ يتقسّم على 4 دفعات بدون فوائد.</p>
+                      </div>
+                      <button type="button" onClick={handleTabbyPay} disabled={submitting} className="w-full py-3.5 btn-primary disabled:opacity-50">
+                        {submitting ? 'جارٍ التحويل لتابي...' : `الدفع بتابي — ${grandTotal} `}
+                      </button>
+                    </div>
+                  )}
+                  {paymentMethod === 'cod' && (
                     <form onSubmit={handleCodSubmit}>
                       <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 mb-4">
                         <p className="text-sm text-amber-800">سيتم تحصيل مبلغ <span className="font-bold">{grandTotal} </span> عند استلام الطلب، بما يشمل رسوم الدفع عند الاستلام ({settings.cod_fee} ).</p>
